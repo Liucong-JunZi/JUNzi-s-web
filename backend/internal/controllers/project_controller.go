@@ -19,30 +19,30 @@ type CreateProjectRequest struct {
 	Title       string `json:"title" binding:"required"`
 	Description string `json:"description"`
 	Content     string `json:"content"`
-	CoverImage  string `json:"imageUrl,cover_image"`
-	DemoURL     string `json:"demoUrl,demo_url"`
-	GithubURL   string `json:"githubUrl,github_url"`
-	TechStack   string `json:"techStack,tech_stack"`
+	CoverImage  string `json:"cover_image"`
+	DemoURL     string `json:"demo_url"`
+	GithubURL   string `json:"github_url"`
+	TechStack   string `json:"tech_stack"`
 	Status      string `json:"status"`
-	SortOrder   int    `json:"sortOrder,sort_order"`
+	SortOrder   int    `json:"sort_order"`
 }
 
 type UpdateProjectRequest struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Content     string `json:"content"`
-	CoverImage  string `json:"imageUrl,cover_image"`
-	DemoURL     string `json:"demoUrl,demo_url"`
-	GithubURL   string `json:"githubUrl,github_url"`
-	TechStack   string `json:"techStack,tech_stack"`
+	CoverImage  string `json:"cover_image"`
+	DemoURL     string `json:"demo_url"`
+	GithubURL   string `json:"github_url"`
+	TechStack   string `json:"tech_stack"`
 	Status      string `json:"status"`
-	SortOrder   int    `json:"sortOrder,sort_order"`
+	SortOrder   int    `json:"sort_order"`
 }
 
 // ListProjects lists all projects
 func (pc *ProjectController) ListProjects(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", c.DefaultQuery("limit", "10")))
 	status := c.Query("status")
 
 	offset := (page - 1) * pageSize

@@ -17,8 +17,8 @@ func NewCommentController() *CommentController {
 
 type CreateCommentRequest struct {
 	Content  string `json:"content" binding:"required"`
-	PostID   uint   `json:"postId,post_id" binding:"required"`
-	ParentID *uint  `json:"parentId,parent_id"`
+	PostID   uint   `json:"post_id" binding:"required"`
+	ParentID *uint  `json:"parent_id"`
 }
 
 type UpdateCommentStatusRequest struct {

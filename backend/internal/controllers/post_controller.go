@@ -21,9 +21,9 @@ type CreatePostRequest struct {
 	Slug       string `json:"slug" binding:"required"`
 	Content    string `json:"content" binding:"required"`
 	Summary    string `json:"summary"`
-	CoverImage string `json:"coverImage,cover_image"`
+	CoverImage string `json:"cover_image"`
 	Status     string `json:"status"`
-	CategoryID uint   `json:"categoryId,category_id"`
+	CategoryID uint   `json:"category_id"`
 	Tags       []uint `json:"tags"`
 }
 
@@ -32,9 +32,9 @@ type UpdatePostRequest struct {
 	Slug       string `json:"slug"`
 	Content    string `json:"content"`
 	Summary    string `json:"summary"`
-	CoverImage string `json:"coverImage,cover_image"`
+	CoverImage string `json:"cover_image"`
 	Status     string `json:"status"`
-	CategoryID uint   `json:"categoryId,category_id"`
+	CategoryID uint   `json:"category_id"`
 	Tags       []uint `json:"tags"`
 }
 
