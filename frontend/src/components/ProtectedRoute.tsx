@@ -44,3 +44,47 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   return <>{children}</>;
 }
+
+// AdminRoute protects admin-only routes - requires both authentication AND admin role
+interface AdminRouteProps {
+  children: React.ReactNode;
+}
+
+export function AdminRoute({ children }: AdminRouteProps) {
+  const { isAuthenticated, isLoading, user, setUser, setLoading, logout } = useAuthStore();
+  const location = useLocation();
+
+  useEffect(() => {
+    const restoreSession = async () => {
+      if (!isAuthenticated) {
+        try {
+          const me = await authAPI.me();
+          setUser(me);
+        } catch {
+          logout();
+        }
+      }
+      setLoading(false);
+    };
+
+    restoreSession();
+  }, [isAuthenticated, setUser, setLoading, logout]);
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-12">
+        <div className="text-center">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  if (user?.role !== 'admin') {
+    return <Navigate to="/" replace />;
+  }
+
+  return <>{children}</>;
+}

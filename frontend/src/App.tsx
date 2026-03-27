@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Layout } from './components/Layout';
-import { ProtectedRoute } from './components/ProtectedRoute';
+import { AdminRoute } from './components/ProtectedRoute';
 import { Home } from './views/Home';
 import { Blog } from './views/Blog';
 import { BlogPost } from './views/BlogPost';
@@ -40,73 +40,73 @@ function App() {
           <Route
             path="admin"
             element={
-              <ProtectedRoute>
+              <AdminRoute>
                 <AdminDashboard />
-              </ProtectedRoute>
+              </AdminRoute>
             }
           />
           <Route
             path="admin/posts"
             element={
-              <ProtectedRoute>
+              <AdminRoute>
                 <AdminPosts />
-              </ProtectedRoute>
+              </AdminRoute>
             }
           />
           <Route
             path="admin/posts/new"
             element={
-              <ProtectedRoute>
+              <AdminRoute>
                 <PostEditor />
-              </ProtectedRoute>
+              </AdminRoute>
             }
           />
           <Route
             path="admin/posts/:id"
             element={
-              <ProtectedRoute>
+              <AdminRoute>
                 <PostEditor />
-              </ProtectedRoute>
+              </AdminRoute>
             }
           />
           <Route
             path="admin/projects"
             element={
-              <ProtectedRoute>
+              <AdminRoute>
                 <AdminProjects />
-              </ProtectedRoute>
+              </AdminRoute>
             }
           />
           <Route
             path="admin/projects/new"
             element={
-              <ProtectedRoute>
+              <AdminRoute>
                 <ProjectEditor />
-              </ProtectedRoute>
+              </AdminRoute>
             }
           />
           <Route
             path="admin/projects/:id"
             element={
-              <ProtectedRoute>
+              <AdminRoute>
                 <ProjectEditor />
-              </ProtectedRoute>
+              </AdminRoute>
             }
           />
           <Route
             path="admin/comments"
             element={
-              <ProtectedRoute>
+              <AdminRoute>
                 <AdminComments />
-              </ProtectedRoute>
+              </AdminRoute>
             }
           />
           <Route
             path="admin/resume"
             element={
-              <ProtectedRoute>
+              <AdminRoute>
                 <AdminResume />
-              </ProtectedRoute>
+              </AdminRoute>
             }
           />
 
