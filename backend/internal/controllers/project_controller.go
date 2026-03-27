@@ -43,17 +43,11 @@ type UpdateProjectRequest struct {
 func (pc *ProjectController) ListProjects(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", c.DefaultQuery("limit", "10")))
-	status := c.Query("status")
-
 	offset := (page - 1) * pageSize
 
 	query := database.DB.Model(&models.Project{})
 
-	if status != "" {
-		query = query.Where("status = ?", status)
-	} else {
-		query = query.Where("status = ?", "active")
-	}
+	query = query.Where("status = ?", "active")
 
 	var total int64
 	query.Count(&total)
@@ -109,7 +103,7 @@ func (pc *ProjectController) GetProject(c *gin.Context) {
 	id := c.Param("id")
 
 	var project models.Project
-	if err := database.DB.First(&project, id).Error; err != nil {
+	if err := database.DB.Where("id = ? AND status = ?", id, "active").First(&project).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Project not found"})
 		return
 	}

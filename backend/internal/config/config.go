@@ -41,6 +41,7 @@ type MinIOConfig struct {
 	SecretKey string
 	Bucket    string
 	UseSSL    bool
+	PublicURL string
 }
 
 type GitHubConfig struct {
@@ -81,6 +82,7 @@ func Load() (*Config, error) {
 			SecretKey: getEnv("MINIO_SECRET_KEY", "minioadmin"),
 			Bucket:    getEnv("MINIO_BUCKET", "uploads"),
 			UseSSL:    getEnv("MINIO_USE_SSL", "false") == "true",
+			PublicURL: getEnv("MINIO_PUBLIC_URL", ""),
 		},
 		GitHub: GitHubConfig{
 			ClientID:     getEnv("GITHUB_CLIENT_ID", ""),
