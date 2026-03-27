@@ -14,7 +14,7 @@ func CORS() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Get allowed origin from environment variable
 		// Format: comma-separated list of origins (e.g., "https://example.com,https://app.example.com")
-		allowedOrigins := getEnvOrDefault("CORS_ALLOWED_ORIGINS", "http://localhost")
+		allowedOrigins := getEnvOrDefault("CORS_ALLOWED_ORIGINS", "http://localhost:5173")
 		origin := c.Request.Header.Get("Origin")
 
 		// Check if the request origin is in the allowed list
@@ -106,7 +106,14 @@ func AuthRequired(cfg *config.Config) gin.HandlerFunc {
 		}
 
 		// Store user info in context
-		c.Set("userID", claims["sub"])
+		// Convert userID from float64 to uint (JWT parses numbers as float64)
+		userIDFloat, ok := claims["sub"].(float64)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID in token"})
+			c.Abort()
+			return
+		}
+		c.Set("userID", uint(userIDFloat))
 		c.Set("userRole", claims["role"])
 		c.Next()
 	}
