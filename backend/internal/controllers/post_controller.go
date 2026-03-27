@@ -21,9 +21,9 @@ type CreatePostRequest struct {
 	Slug       string `json:"slug" binding:"required"`
 	Content    string `json:"content" binding:"required"`
 	Summary    string `json:"summary"`
-	CoverImage string `json:"cover_image"`
+	CoverImage string `json:"coverImage,cover_image"`
 	Status     string `json:"status"`
-	CategoryID uint   `json:"category_id"`
+	CategoryID uint   `json:"categoryId,category_id"`
 	Tags       []uint `json:"tags"`
 }
 
@@ -32,19 +32,21 @@ type UpdatePostRequest struct {
 	Slug       string `json:"slug"`
 	Content    string `json:"content"`
 	Summary    string `json:"summary"`
-	CoverImage string `json:"cover_image"`
+	CoverImage string `json:"coverImage,cover_image"`
 	Status     string `json:"status"`
-	CategoryID uint   `json:"category_id"`
+	CategoryID uint   `json:"categoryId,category_id"`
 	Tags       []uint `json:"tags"`
 }
 
 // ListPosts lists all posts with pagination
 func (pc *PostController) ListPosts(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", c.DefaultQuery("limit", "10")))
 	status := c.Query("status")
 	categoryID := c.Query("category_id")
 	tagID := c.Query("tag_id")
+	tag := c.Query("tag")
+	search := c.Query("search")
 
 	offset := (page - 1) * pageSize
 
@@ -61,8 +63,16 @@ func (pc *PostController) ListPosts(c *gin.Context) {
 		query = query.Where("category_id = ?", categoryID)
 	}
 
+	// Support both tag_id and tag query params
 	if tagID != "" {
 		query = query.Joins("JOIN post_tags ON post_tags.post_id = posts.id AND post_tags.tag_id = ?", tagID)
+	} else if tag != "" {
+		query = query.Joins("JOIN post_tags ON post_tags.post_id = posts.id").Joins("JOIN tags ON tags.id = post_tags.tag_id AND tags.slug = ?", tag)
+	}
+
+	// Search on title and content
+	if search != "" {
+		query = query.Where("title LIKE ? OR content LIKE ?", "%"+search+"%", "%"+search+"%")
 	}
 
 	var total int64
@@ -99,6 +109,20 @@ func (pc *PostController) GetPostBySlug(c *gin.Context) {
 
 	// Update the post struct to reflect the new view count
 	post.ViewCount++
+
+	c.JSON(http.StatusOK, gin.H{"post": post})
+}
+
+// GetPostByID gets a single post by ID (admin only)
+func (pc *PostController) GetPostByID(c *gin.Context) {
+	id := c.Param("id")
+
+	var post models.Post
+	if err := database.DB.Preload("Author").Preload("Category").Preload("Tags").
+		First(&post, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{"post": post})
 }

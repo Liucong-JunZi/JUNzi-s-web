@@ -17,12 +17,16 @@ func NewCommentController() *CommentController {
 
 type CreateCommentRequest struct {
 	Content  string `json:"content" binding:"required"`
-	PostID   uint   `json:"post_id" binding:"required"`
-	ParentID *uint  `json:"parent_id"`
+	PostID   uint   `json:"postId,post_id" binding:"required"`
+	ParentID *uint  `json:"parentId,parent_id"`
 }
 
 type UpdateCommentStatusRequest struct {
 	Status string `json:"status" binding:"required"`
+}
+
+type UpdateCommentRequest struct {
+	Content string `json:"content" binding:"required"`
 }
 
 // ListComments lists comments for a post (public)
@@ -157,6 +161,32 @@ func (cc *CommentController) UpdateCommentStatus(c *gin.Context) {
 
 	if err := database.DB.Model(&comment).Update("status", req.Status).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update comment status"})
+		return
+	}
+
+	database.DB.Preload("User").First(&comment, comment.ID)
+
+	c.JSON(http.StatusOK, gin.H{"comment": comment})
+}
+
+// UpdateComment updates comment content (admin only)
+func (cc *CommentController) UpdateComment(c *gin.Context) {
+	id := c.Param("id")
+
+	var comment models.Comment
+	if err := database.DB.First(&comment, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Comment not found"})
+		return
+	}
+
+	var req UpdateCommentRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := database.DB.Model(&comment).Update("content", req.Content).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update comment"})
 		return
 	}
 

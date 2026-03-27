@@ -25,17 +25,17 @@ type Post struct {
 	Slug        string         `json:"slug" gorm:"uniqueIndex"`
 	Content     string         `json:"content" gorm:"type:text"`
 	Summary     string         `json:"summary" gorm:"size:500"`
-	CoverImage  string         `json:"cover_image"`
+	CoverImage  string         `json:"coverImage,cover_image"`
 	Status      string         `json:"status" gorm:"default:draft"` // draft, published
-	ViewCount   int            `json:"view_count" gorm:"default:0"`
-	LikeCount   int            `json:"like_count" gorm:"default:0"`
-	AuthorID    uint           `json:"author_id"`
+	ViewCount   int            `json:"viewCount,view_count" gorm:"default:0"`
+	LikeCount   int            `json:"likeCount,like_count" gorm:"default:0"`
+	AuthorID    uint           `json:"authorId,author_id"`
 	Author      User           `json:"author" gorm:"foreignKey:AuthorID"`
-	CategoryID  uint           `json:"category_id"`
+	CategoryID  uint           `json:"categoryId,category_id"`
 	Category    Category       `json:"category" gorm:"foreignKey:CategoryID"`
 	Tags        []Tag          `json:"tags" gorm:"many2many:post_tags;"`
-	CreatedAt   time.Time      `json:"created_at"`
-	UpdatedAt   time.Time      `json:"updated_at"`
+	CreatedAt   time.Time      `json:"createdAt,created_at"`
+	UpdatedAt   time.Time      `json:"updatedAt,updated_at"`
 	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index"`
 }
 
@@ -64,14 +64,14 @@ type Project struct {
 	Title       string         `json:"title" gorm:"size:200"`
 	Description string         `json:"description" gorm:"type:text"`
 	Content     string         `json:"content" gorm:"type:text"`
-	CoverImage  string         `json:"cover_image"`
-	DemoURL     string         `json:"demo_url"`
-	GithubURL   string         `json:"github_url"`
-	TechStack   string         `json:"tech_stack"` // JSON array
+	CoverImage  string         `json:"imageUrl,cover_image"`
+	DemoURL     string         `json:"demoUrl,demo_url"`
+	GithubURL   string         `json:"githubUrl,github_url"`
+	TechStack   string         `json:"techStack,tech_stack"` // JSON array or comma-separated
 	Status      string         `json:"status" gorm:"default:active"` // active, archived
-	SortOrder   int            `json:"sort_order" gorm:"default:0"`
-	CreatedAt   time.Time      `json:"created_at"`
-	UpdatedAt   time.Time      `json:"updated_at"`
+	SortOrder   int            `json:"sortOrder,sort_order" gorm:"default:0"`
+	CreatedAt   time.Time      `json:"createdAt,created_at"`
+	UpdatedAt   time.Time      `json:"updatedAt,updated_at"`
 	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index"`
 }
 
@@ -80,28 +80,28 @@ type Resume struct {
 	Title        string         `json:"title"`
 	Company      string         `json:"company"`
 	Location     string         `json:"location"`
-	StartDate    time.Time      `json:"start_date"`
-	EndDate      *time.Time     `json:"end_date"`
+	StartDate    time.Time      `json:"startDate,start_date"`
+	EndDate      *time.Time     `json:"endDate,end_date"`
 	Description  string         `json:"description" gorm:"type:text"`
 	Type         string         `json:"type"` // work, education, project
-	SortOrder    int            `json:"sort_order" gorm:"default:0"`
-	CreatedAt    time.Time      `json:"created_at"`
-	UpdatedAt    time.Time      `json:"updated_at"`
+	SortOrder    int            `json:"sortOrder,sort_order" gorm:"default:0"`
+	CreatedAt    time.Time      `json:"createdAt,created_at"`
+	UpdatedAt    time.Time      `json:"updatedAt,updated_at"`
 	DeletedAt    gorm.DeletedAt `json:"-" gorm:"index"`
 }
 
 type Comment struct {
 	ID        uint           `json:"id" gorm:"primaryKey"`
 	Content   string         `json:"content" gorm:"type:text"`
-	PostID    *uint          `json:"post_id"`
+	PostID    *uint          `json:"postId,post_id"`
 	Post      *Post          `json:"post" gorm:"foreignKey:PostID"`
-	UserID    uint           `json:"user_id"`
+	UserID    uint           `json:"userId,user_id"`
 	User      User           `json:"user" gorm:"foreignKey:UserID"`
-	ParentID  *uint          `json:"parent_id"`
+	ParentID  *uint          `json:"parentId,parent_id"`
 	Replies   []Comment      `json:"replies" gorm:"foreignKey:ParentID"`
 	Status    string         `json:"status" gorm:"default:pending"` // pending, approved, rejected
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
+	CreatedAt time.Time      `json:"createdAt,created_at"`
+	UpdatedAt time.Time      `json:"updatedAt,updated_at"`
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
 }
 

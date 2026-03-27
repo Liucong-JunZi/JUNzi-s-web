@@ -92,6 +92,7 @@ func Setup(cfg *config.Config) *gin.Engine {
 			admin.Use(middleware.AdminRequired())
 			{
 				// Posts management
+				admin.GET("/posts/:id", postController.GetPostByID)
 				admin.POST("/posts", postController.CreatePost)
 				admin.PUT("/posts/:id", postController.UpdatePost)
 				admin.DELETE("/posts/:id", postController.DeletePost)
@@ -108,6 +109,7 @@ func Setup(cfg *config.Config) *gin.Engine {
 
 				// Comments management
 				admin.GET("/comments", commentController.ListAllComments)
+				admin.PUT("/comments/:id", commentController.UpdateComment)
 				admin.PUT("/comments/:id/status", commentController.UpdateCommentStatus)
 				admin.DELETE("/comments/:id", commentController.DeleteComment)
 

@@ -19,24 +19,24 @@ type CreateProjectRequest struct {
 	Title       string `json:"title" binding:"required"`
 	Description string `json:"description"`
 	Content     string `json:"content"`
-	CoverImage  string `json:"cover_image"`
-	DemoURL     string `json:"demo_url"`
-	GithubURL   string `json:"github_url"`
-	TechStack   string `json:"tech_stack"`
+	CoverImage  string `json:"imageUrl,cover_image"`
+	DemoURL     string `json:"demoUrl,demo_url"`
+	GithubURL   string `json:"githubUrl,github_url"`
+	TechStack   string `json:"techStack,tech_stack"`
 	Status      string `json:"status"`
-	SortOrder   int    `json:"sort_order"`
+	SortOrder   int    `json:"sortOrder,sort_order"`
 }
 
 type UpdateProjectRequest struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Content     string `json:"content"`
-	CoverImage  string `json:"cover_image"`
-	DemoURL     string `json:"demo_url"`
-	GithubURL   string `json:"github_url"`
-	TechStack   string `json:"tech_stack"`
+	CoverImage  string `json:"imageUrl,cover_image"`
+	DemoURL     string `json:"demoUrl,demo_url"`
+	GithubURL   string `json:"githubUrl,github_url"`
+	TechStack   string `json:"techStack,tech_stack"`
 	Status      string `json:"status"`
-	SortOrder   int    `json:"sort_order"`
+	SortOrder   int    `json:"sortOrder,sort_order"`
 }
 
 // ListProjects lists all projects

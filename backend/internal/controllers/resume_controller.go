@@ -19,22 +19,22 @@ type CreateResumeRequest struct {
 	Title       string     `json:"title" binding:"required"`
 	Company     string      `json:"company"`
 	Location    string      `json:"location"`
-	StartDate   string      `json:"start_date" binding:"required"`
-	EndDate     *string     `json:"end_date"`
+	StartDate   string      `json:"startDate,start_date" binding:"required"`
+	EndDate     *string     `json:"endDate,end_date"`
 	Description string      `json:"description"`
 	Type        string      `json:"type" binding:"required"`
-	SortOrder   int         `json:"sort_order"`
+	SortOrder   int         `json:"sortOrder,sort_order"`
 }
 
 type UpdateResumeRequest struct {
 	Title       string  `json:"title"`
 	Company     string  `json:"company"`
 	Location    string  `json:"location"`
-	StartDate   string  `json:"start_date"`
-	EndDate     *string `json:"end_date"`
+	StartDate   string  `json:"startDate,start_date"`
+	EndDate     *string `json:"endDate,end_date"`
 	Description string  `json:"description"`
 	Type        string  `json:"type"`
-	SortOrder   int     `json:"sort_order"`
+	SortOrder   int     `json:"sortOrder,sort_order"`
 }
 
 // ListResume lists all resume items
