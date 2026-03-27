@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { User } from '../types';
+import { authAPI } from '../api';
 
 interface AuthStore {
   user: User | null;
@@ -8,7 +9,7 @@ interface AuthStore {
   isLoading: boolean;
   setUser: (user: User | null) => void;
   login: (user: User) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   setLoading: (loading: boolean) => void;
 }
 
@@ -32,7 +33,12 @@ export const useAuthStore = create<AuthStore>()(
       login: (user) => {
         set({ user, isAuthenticated: true });
       },
-      logout: () => {
+      logout: async () => {
+        try {
+          await authAPI.logout();
+        } catch {
+          // Still clear local state even if backend call fails
+        }
         set({ user: null, isAuthenticated: false });
       },
       setLoading: (loading) => set({ isLoading: loading }),
