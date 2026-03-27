@@ -98,9 +98,9 @@ func AuthRequired(cfg *config.Config) gin.HandlerFunc {
 			return
 		}
 
-		// Verify it's an access token (not refresh token)
+		// Verify it's an access token (type claim must exist and equal "access")
 		tokenType, ok := claims["type"].(string)
-		if ok && tokenType != "access" {
+		if !ok || tokenType != "access" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token type"})
 			c.Abort()
 			return

@@ -55,9 +55,11 @@ type GitHubUser struct {
 	Bio       string `json:"bio"`
 }
 
-// isSecureCookie returns true when running in production
+// isSecureCookie returns true when running in production.
+// Checks both APP_ENV and GIN_MODE to ensure Secure flag is set
+// even if APP_ENV is accidentally omitted.
 func isSecureCookie() bool {
-	return os.Getenv("APP_ENV") == "production"
+	return os.Getenv("APP_ENV") == "production" || os.Getenv("GIN_MODE") == "release"
 }
 
 // setCookie sets a cookie with SameSite=Lax using http.SetCookie.

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -152,7 +153,11 @@ func (pc *PostController) GetPostBySlug(c *gin.Context) {
 
 	// Increment view count atomically to avoid race condition
 	if err := database.DB.Model(&models.Post{}).Where("id = ?", post.ID).
-		UpdateColumn("view_count", database.DB.Raw("view_count + 1")).Error; err == nil {
+		UpdateColumn("view_count", database.DB.Raw("view_count + 1")).Error; err != nil {
+		// Log but don't fail the request — post content is still valid.
+		// The returned view_count reflects the actual DB value.
+		log.Printf("WARN: failed to increment view_count for post %d: %v", post.ID, err)
+	} else {
 		post.ViewCount++
 	}
 
