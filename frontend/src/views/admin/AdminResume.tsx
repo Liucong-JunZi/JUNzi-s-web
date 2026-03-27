@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { resumeAPI } from '../../api';
+import type { Resume } from '../../types';
 import { Button } from '../../components/ui/button';
 import { Textarea } from '../../components/ui/textarea';
 import { Input } from '../../components/ui/input';
@@ -11,6 +12,7 @@ import { useToast } from '../../hooks/use-toast';
 export function AdminResume() {
   const [title, setTitle] = useState('My Resume');
   const [content, setContent] = useState('');
+  const [resumeId, setResumeId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
@@ -22,7 +24,8 @@ export function AdminResume() {
   const fetchResume = async () => {
     setLoading(true);
     try {
-      const resume = await resumeAPI.get();
+      const resume: Resume = await resumeAPI.get();
+      setResumeId(resume.id);
       setTitle(resume.title);
       setContent(resume.content);
     } catch (error) {
@@ -89,7 +92,9 @@ Experienced software developer with a passion for building scalable web applicat
   const handleSave = async () => {
     setSaving(true);
     try {
-      await resumeAPI.update({ title, content });
+      if (resumeId) {
+        await resumeAPI.update(resumeId, { title, content });
+      }
       toast({
         title: 'Success',
         description: 'Resume updated successfully',

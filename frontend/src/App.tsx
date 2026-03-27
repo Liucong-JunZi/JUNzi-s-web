@@ -8,12 +8,15 @@ import { Portfolio } from './views/Portfolio';
 import { PortfolioDetail } from './views/PortfolioDetail';
 import { Resume } from './views/Resume';
 import { Login } from './views/Login';
+import { AuthCallback } from './views/AuthCallback';
 import { NotFound } from './views/NotFound';
 import { AdminDashboard } from './views/admin/Dashboard';
 import { AdminPosts } from './views/admin/AdminPosts';
 import { PostEditor } from './views/admin/PostEditor';
 import { AdminProjects } from './views/admin/AdminProjects';
+import { ProjectEditor } from './views/admin/ProjectEditor';
 import { AdminResume } from './views/admin/AdminResume';
+import { AdminComments } from './views/admin/AdminComments';
 import { Toaster } from './components/ui/toaster';
 
 function App() {
@@ -29,6 +32,9 @@ function App() {
           <Route path="portfolio/:slug" element={<PortfolioDetail />} />
           <Route path="resume" element={<Resume />} />
           <Route path="login" element={<Login />} />
+
+          {/* Auth Callback Route */}
+          <Route path="auth/callback" element={<AuthCallback />} />
 
           {/* Admin Routes */}
           <Route
@@ -68,6 +74,30 @@ function App() {
             element={
               <ProtectedRoute>
                 <AdminProjects />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="admin/projects/new"
+            element={
+              <ProtectedRoute>
+                <ProjectEditor />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="admin/projects/:id"
+            element={
+              <ProtectedRoute>
+                <ProjectEditor />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="admin/comments"
+            element={
+              <ProtectedRoute>
+                <AdminComments />
               </ProtectedRoute>
             }
           />
