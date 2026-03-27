@@ -16,7 +16,6 @@ const getToken = () => sessionStorage.getItem('token');
 
 // 401 Error Handling: Debounce mechanism to prevent multiple redirects
 let isRedirecting = false;
-let redirectTimer: ReturnType<typeof setTimeout> | null = null;
 
 const handle401Error = () => {
   // Debounce: Skip if already redirecting
@@ -36,7 +35,7 @@ const handle401Error = () => {
   }
 
   // Redirect to login with a small delay to allow any pending operations to complete
-  redirectTimer = setTimeout(() => {
+  setTimeout(() => {
     window.location.href = '/login';
     isRedirecting = false;
   }, 100);
@@ -84,7 +83,7 @@ export const authAPI = {
 
   me: async (): Promise<User> => {
     const response = await api.get('/auth/me');
-    return response.data;
+    return response.data.user || response.data;
   },
 
   // Helper to redirect after login
@@ -111,21 +110,21 @@ export const postsAPI = {
 
   getBySlug: async (slug: string): Promise<Post> => {
     const response = await api.get(`/posts/${slug}`);
-    return response.data;
+    return response.data.post || response.data;
   },
 
   create: async (data: Partial<Post>): Promise<Post> => {
-    const response = await api.post('/posts', data);
-    return response.data;
+    const response = await api.post('/admin/posts', data);
+    return response.data.post || response.data;
   },
 
   update: async (id: number, data: Partial<Post>): Promise<Post> => {
-    const response = await api.put(`/posts/${id}`, data);
-    return response.data;
+    const response = await api.put(`/admin/posts/${id}`, data);
+    return response.data.post || response.data;
   },
 
   delete: async (id: number): Promise<void> => {
-    await api.delete(`/posts/${id}`);
+    await api.delete(`/admin/posts/${id}`);
   },
 
   like: async (id: number): Promise<{ likeCount: number }> => {
@@ -136,19 +135,30 @@ export const postsAPI = {
 
 // Comments API
 export const commentsAPI = {
-  getByPostId: async (postId: number): Promise<Comment[]> => {
-    const response = await api.get(`/posts/${postId}/comments`);
+  getByPostSlug: async (slug: string): Promise<Comment[]> => {
+    const response = await api.get(`/posts/${slug}/comments`);
+    return response.data.comments || response.data;
+  },
+
+  // Keep old method name for backwards compatibility but mark as deprecated
+  getByPostId: async (slug: string): Promise<Comment[]> => {
+    const response = await api.get(`/posts/${slug}/comments`);
+    return response.data.comments || response.data;
+  },
+
+  getAll: async (): Promise<{ comments: Comment[] }> => {
+    const response = await api.get('/admin/comments');
     return response.data;
   },
 
-  create: async (postId: number, data: { content: string; parentId?: number }): Promise<Comment> => {
-    const response = await api.post(`/posts/${postId}/comments`, data);
-    return response.data;
+  create: async (data: { content: string; postId?: number; parentId?: number; authorName?: string; authorEmail?: string }): Promise<Comment> => {
+    const response = await api.post('/comments', data);
+    return response.data.comment || response.data;
   },
 
   update: async (id: number, content: string): Promise<Comment> => {
     const response = await api.put(`/comments/${id}`, { content });
-    return response.data;
+    return response.data.comment || response.data;
   },
 
   delete: async (id: number): Promise<void> => {
@@ -169,21 +179,21 @@ export const projectsAPI = {
 
   getBySlug: async (slug: string): Promise<Project> => {
     const response = await api.get(`/projects/${slug}`);
-    return response.data;
+    return response.data.project || response.data;
   },
 
   create: async (data: Partial<Project>): Promise<Project> => {
-    const response = await api.post('/projects', data);
-    return response.data;
+    const response = await api.post('/admin/projects', data);
+    return response.data.project || response.data;
   },
 
   update: async (id: number, data: Partial<Project>): Promise<Project> => {
-    const response = await api.put(`/projects/${id}`, data);
-    return response.data;
+    const response = await api.put(`/admin/projects/${id}`, data);
+    return response.data.project || response.data;
   },
 
   delete: async (id: number): Promise<void> => {
-    await api.delete(`/projects/${id}`);
+    await api.delete(`/admin/projects/${id}`);
   },
 };
 
@@ -191,12 +201,12 @@ export const projectsAPI = {
 export const resumeAPI = {
   get: async (): Promise<Resume> => {
     const response = await api.get('/resume');
-    return response.data;
+    return response.data.resume || response.data;
   },
 
-  update: async (data: { title: string; content: string }): Promise<Resume> => {
-    const response = await api.put('/resume', data);
-    return response.data;
+  update: async (id: number, data: { title: string; content: string }): Promise<Resume> => {
+    const response = await api.put(`/admin/resume/${id}`, data);
+    return response.data.resume || response.data;
   },
 };
 
@@ -204,7 +214,7 @@ export const resumeAPI = {
 export const tagsAPI = {
   getAll: async (): Promise<Tag[]> => {
     const response = await api.get('/tags');
-    return response.data;
+    return response.data.tags || response.data;
   },
 };
 
@@ -213,7 +223,7 @@ export const uploadAPI = {
   uploadImage: async (file: File): Promise<{ url: string }> => {
     const formData = new FormData();
     formData.append('file', file);
-    const response = await api.post('/upload/image', formData, {
+    const response = await api.post('/admin/upload/image', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

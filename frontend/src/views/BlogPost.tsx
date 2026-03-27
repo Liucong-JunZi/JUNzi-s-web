@@ -41,7 +41,7 @@ export function BlogPost() {
 
   const fetchComments = async () => {
     try {
-      const data = await commentsAPI.getByPostId(Number(slug));
+      const data = await commentsAPI.getByPostSlug(slug!);
       setComments(data);
     } catch (error) {
       console.error('Failed to fetch comments:', error);
@@ -71,7 +71,7 @@ export function BlogPost() {
     if (!post || !commentText.trim()) return;
 
     try {
-      await commentsAPI.create(post.id, { content: commentText });
+      await commentsAPI.create({ content: commentText, postId: post.id });
       setCommentText('');
       fetchComments();
       toast({
@@ -242,10 +242,17 @@ function CommentItem({ comment }: { comment: CommentType }) {
     });
   };
 
+  const getAuthorName = () => {
+    if (comment.author) {
+      return comment.author.username;
+    }
+    return comment.authorName || 'Anonymous';
+  };
+
   return (
     <div className="border rounded-lg p-4">
       <div className="flex items-center gap-3 mb-2">
-        <div className="font-semibold">{comment.author.username}</div>
+        <div className="font-semibold">{getAuthorName()}</div>
         <div className="text-sm text-muted-foreground">{formatDate(comment.createdAt)}</div>
       </div>
       <p className="text-sm">{comment.content}</p>

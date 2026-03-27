@@ -32,8 +32,11 @@ export interface Tag {
 export interface Comment {
   id: number;
   content: string;
-  author: User;
+  author?: User;
+  authorName?: string;
+  authorEmail?: string;
   postId: number;
+  postSlug?: string;
   parentId?: number;
   replies?: Comment[];
   createdAt: string;

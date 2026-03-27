@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { authAPI } from '../api';
 import { useAuthStore } from '../store/authStore';
@@ -18,20 +18,11 @@ export function Login() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { login, isAuthenticated } = useAuthStore();
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/');
-      return;
-    }
-
-    const code = searchParams.get('code');
-    if (code) {
-      handleCallback(code);
-    }
-  }, [searchParams, isAuthenticated]);
-
+  // Define handleCallback before it's used in useEffect
   const handleCallback = async (code: string) => {
+    setIsProcessing(true);
     try {
       const { user, token } = await authAPI.callback(code);
       login(user, token);
@@ -41,8 +32,22 @@ export function Login() {
     } catch (error) {
       console.error('Login failed:', error);
       navigate('/login');
+    } finally {
+      setIsProcessing(false);
     }
   };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/');
+      return;
+    }
+
+    const code = searchParams.get('code');
+    if (code && !isProcessing) {
+      handleCallback(code);
+    }
+  }, [searchParams, isAuthenticated, isProcessing, navigate]);
 
   const handleGitHubLogin = () => {
     authAPI.login();
