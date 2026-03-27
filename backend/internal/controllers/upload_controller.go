@@ -46,10 +46,14 @@ func (uc *UploadController) UploadFile(c *gin.Context) {
 
 // UploadImage handles image upload
 func (uc *UploadController) UploadImage(c *gin.Context) {
-	file, err := c.FormFile("image")
+	// Support both "file" and "image" field names for backward compatibility
+	file, err := c.FormFile("file")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Image is required"})
-		return
+		file, err = c.FormFile("image")
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Image is required (use 'file' or 'image' field)"})
+			return
+		}
 	}
 
 	// Validate file size (max 5MB)

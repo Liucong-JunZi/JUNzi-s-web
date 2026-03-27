@@ -49,6 +49,7 @@ func Setup(cfg *config.Config) *gin.Engine {
 		// Posts
 		api.GET("/posts", postController.ListPosts)
 		api.GET("/posts/:slug", postController.GetPostBySlug)
+		api.POST("/posts/:id/like", postController.LikePost)
 
 		// Projects
 		api.GET("/projects", projectController.ListProjects)

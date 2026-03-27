@@ -28,6 +28,7 @@ type Post struct {
 	CoverImage  string         `json:"cover_image"`
 	Status      string         `json:"status" gorm:"default:draft"` // draft, published
 	ViewCount   int            `json:"view_count" gorm:"default:0"`
+	LikeCount   int            `json:"like_count" gorm:"default:0"`
 	AuthorID    uint           `json:"author_id"`
 	Author      User           `json:"author" gorm:"foreignKey:AuthorID"`
 	CategoryID  uint           `json:"category_id"`

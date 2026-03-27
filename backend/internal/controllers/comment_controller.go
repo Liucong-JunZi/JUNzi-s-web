@@ -17,7 +17,7 @@ func NewCommentController() *CommentController {
 
 type CreateCommentRequest struct {
 	Content  string `json:"content" binding:"required"`
-	PostSlug string `json:"post_slug" binding:"required"`
+	PostID   uint   `json:"post_id" binding:"required"`
 	ParentID *uint  `json:"parent_id"`
 }
 
@@ -72,16 +72,16 @@ func (cc *CommentController) CreateComment(c *gin.Context) {
 
 	userID, _ := c.Get("userID")
 
-	// Get post ID from slug
+	// Verify post exists by ID
 	var post models.Post
-	if err := database.DB.Where("slug = ?", req.PostSlug).First(&post).Error; err != nil {
+	if err := database.DB.First(&post, req.PostID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
 		return
 	}
 
 	comment := models.Comment{
 		Content: req.Content,
-		PostID:  &post.ID,
+		PostID:  &req.PostID,
 		UserID:  userID.(uint),
 		Status:  "pending", // Comments need approval
 	}
