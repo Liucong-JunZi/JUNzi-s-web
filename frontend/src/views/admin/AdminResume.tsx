@@ -19,6 +19,7 @@ interface FormData {
   endDate: string;
   description: string;
   type: ResumeItemType;
+  sort_order: number;
 }
 
 const emptyForm: FormData = {
@@ -29,6 +30,7 @@ const emptyForm: FormData = {
   endDate: '',
   description: '',
   type: 'work',
+  sort_order: 0,
 };
 
 export function AdminResume() {
@@ -75,6 +77,7 @@ export function AdminResume() {
       endDate: item.end_date ? item.end_date.split('T')[0] : '',
       description: item.description || '',
       type: item.type,
+      sort_order: item.sort_order ?? 0,
     });
   };
 
@@ -92,6 +95,7 @@ export function AdminResume() {
         end_date: formData.endDate || undefined,
         description: formData.description || undefined,
         type: formData.type,
+        sort_order: formData.sort_order,
       };
 
       if (editingId) {
