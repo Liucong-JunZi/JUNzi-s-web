@@ -49,7 +49,7 @@ func RateLimiter(client *redis.Client, limit int, window time.Duration) gin.Hand
 			return
 		}
 
-		if result > limit {
+		if result >= limit {
 			c.JSON(http.StatusTooManyRequests, gin.H{
 				"error": "Rate limit exceeded. Please try again later.",
 			})
