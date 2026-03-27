@@ -3,6 +3,7 @@ package routes
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/liucong/personal-website/internal/config"
+	"github.com/liucong/personal-website/internal/controllers"
 	"github.com/liucong/personal-website/internal/middleware"
 )
 
@@ -19,6 +20,17 @@ func Setup(cfg *config.Config) *gin.Engine {
 	// Static files
 	router.Static("/uploads", "./uploads")
 
+	// Initialize controllers
+	authController := controllers.NewAuthController(cfg)
+	postController := controllers.NewPostController()
+	projectController := controllers.NewProjectController()
+	resumeController := controllers.NewResumeController()
+	commentController := controllers.NewCommentController()
+	settingController := controllers.NewSettingController()
+	uploadController := controllers.NewUploadController(cfg)
+	categoryController := controllers.NewCategoryController()
+	tagController := controllers.NewTagController()
+
 	// API routes
 	api := router.Group("/api")
 	{
@@ -29,66 +41,87 @@ func Setup(cfg *config.Config) *gin.Engine {
 
 		// Public routes
 		// Posts
-		api.GET("/posts", nil)           // List posts
-		api.GET("/posts/:slug", nil)      // Get post by slug
+		api.GET("/posts", postController.ListPosts)
+		api.GET("/posts/:slug", postController.GetPostBySlug)
 
 		// Projects
-		api.GET("/projects", nil)         // List projects
-		api.GET("/projects/:id", nil)     // Get project
+		api.GET("/projects", projectController.ListProjects)
+		api.GET("/projects/:id", projectController.GetProject)
 
 		// Resume
-		api.GET("/resume", nil)           // Get resume items
+		api.GET("/resume", resumeController.ListResume)
 
 		// Comments
-		api.GET("/posts/:slug/comments", nil) // List comments
+		api.GET("/posts/:slug/comments", commentController.ListComments)
+
+		// Categories & Tags
+		api.GET("/categories", categoryController.ListCategories)
+		api.GET("/categories/:id", categoryController.GetCategory)
+		api.GET("/tags", tagController.ListTags)
+		api.GET("/tags/:id", tagController.GetTag)
+
+		// Public settings
+		api.GET("/settings/public", settingController.GetPublicSettings)
 
 		// Auth routes
 		auth := api.Group("/auth")
 		{
-			auth.GET("/github", nil)                      // GitHub OAuth redirect
-			auth.GET("/github/callback", nil)             // GitHub OAuth callback
-			auth.POST("/logout", nil)                     // Logout
-			auth.GET("/me", nil)                          // Get current user
+			auth.GET("/github", authController.GitHubRedirect)
+			auth.GET("/github/callback", authController.GitHubCallback)
+			auth.POST("/logout", authController.Logout)
+			auth.GET("/me", middleware.AuthRequired(cfg), authController.GetCurrentUser)
 		}
 
 		// Protected routes (require authentication)
 		protected := api.Group("")
 		protected.Use(middleware.AuthRequired(cfg))
 		{
+			// User routes (authenticated users)
+			protected.POST("/comments", commentController.CreateComment)
+
 			// Admin routes
 			admin := protected.Group("/admin")
 			admin.Use(middleware.AdminRequired())
 			{
 				// Posts management
-				admin.POST("/posts", nil)
-				admin.PUT("/posts/:id", nil)
-				admin.DELETE("/posts/:id", nil)
+				admin.POST("/posts", postController.CreatePost)
+				admin.PUT("/posts/:id", postController.UpdatePost)
+				admin.DELETE("/posts/:id", postController.DeletePost)
 
 				// Projects management
-				admin.POST("/projects", nil)
-				admin.PUT("/projects/:id", nil)
-				admin.DELETE("/projects/:id", nil)
+				admin.POST("/projects", projectController.CreateProject)
+				admin.PUT("/projects/:id", projectController.UpdateProject)
+				admin.DELETE("/projects/:id", projectController.DeleteProject)
 
 				// Resume management
-				admin.POST("/resume", nil)
-				admin.PUT("/resume/:id", nil)
-				admin.DELETE("/resume/:id", nil)
+				admin.POST("/resume", resumeController.CreateResume)
+				admin.PUT("/resume/:id", resumeController.UpdateResume)
+				admin.DELETE("/resume/:id", resumeController.DeleteResume)
 
 				// Comments management
-				admin.GET("/comments", nil)
-				admin.PUT("/comments/:id/status", nil)
-				admin.DELETE("/comments/:id", nil)
+				admin.GET("/comments", commentController.ListAllComments)
+				admin.PUT("/comments/:id/status", commentController.UpdateCommentStatus)
+				admin.DELETE("/comments/:id", commentController.DeleteComment)
+
+				// Categories management
+				admin.POST("/categories", categoryController.CreateCategory)
+				admin.PUT("/categories/:id", categoryController.UpdateCategory)
+				admin.DELETE("/categories/:id", categoryController.DeleteCategory)
+
+				// Tags management
+				admin.POST("/tags", tagController.CreateTag)
+				admin.PUT("/tags/:id", tagController.UpdateTag)
+				admin.DELETE("/tags/:id", tagController.DeleteTag)
 
 				// Settings
-				admin.GET("/settings", nil)
-				admin.PUT("/settings", nil)
+				admin.GET("/settings", settingController.GetSettings)
+				admin.PUT("/settings", settingController.UpdateSettings)
+				admin.PUT("/settings/:key", settingController.UpdateSetting)
 
 				// Upload
-				admin.POST("/upload", nil)
+				admin.POST("/upload", uploadController.UploadFile)
+				admin.POST("/upload/image", uploadController.UploadImage)
 			}
-
-			// User routes (authenticated users)
-			protected.POST("/comments", nil) // Create comment
 		}
 	}
 
