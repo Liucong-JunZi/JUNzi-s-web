@@ -1,0 +1,40 @@
+# Version control
+.git
+.gitignore
+
+# Environment files (contain secrets)
+.env
+.env.*
+!.env.example
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Parallel development artifacts
+.parallel-dev/
+.parallel-dev-path
+.worktrees/
+
+# Claude Code
+.claude/
+
+# Backend (not needed for frontend build)
+backend/
+
+# Docker files (avoid recursive context)
+docker/
+
+# Documentation
+*.md
+!frontend/**/*.md
+
+# Misc
+*.zip
+node_modules/
