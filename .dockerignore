@@ -28,8 +28,9 @@ Thumbs.db
 # Backend (not needed for frontend build)
 backend/
 
-# Docker files (avoid recursive context)
-docker/
+# Docker files — keep nginx config needed by frontend build
+docker/backend/
+docker/mysql/
 
 # Documentation
 *.md
