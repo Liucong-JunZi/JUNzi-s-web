@@ -313,5 +313,8 @@ func (pc *PostController) LikePost(c *gin.Context) {
 	database.DB.Model(&models.Post{}).Where("id = ?", post.ID).
 		UpdateColumn("like_count", database.DB.Raw("COALESCE(like_count, 0) + 1"))
 
-	c.JSON(http.StatusOK, gin.H{"message": "Post liked successfully"})
+	// Reload to get updated like_count
+	database.DB.First(&post, post.ID)
+
+	c.JSON(http.StatusOK, gin.H{"message": "Post liked successfully", "like_count": post.LikeCount})
 }

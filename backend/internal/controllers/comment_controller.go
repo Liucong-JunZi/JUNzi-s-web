@@ -108,7 +108,7 @@ func (cc *CommentController) CreateComment(c *gin.Context) {
 // ListAllComments lists all comments (admin only)
 func (cc *CommentController) ListAllComments(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", c.DefaultQuery("limit", "100")))
 	status := c.Query("status")
 
 	offset := (page - 1) * pageSize
