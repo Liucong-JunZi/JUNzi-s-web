@@ -48,6 +48,10 @@ type UploadResult struct {
 }
 
 func UploadFile(ctx context.Context, cfg *config.MinIOConfig, file *multipart.FileHeader) (*UploadResult, error) {
+	if MinioClient == nil {
+		return nil, fmt.Errorf("storage service is unavailable")
+	}
+
 	src, err := file.Open()
 	if err != nil {
 		return nil, err
@@ -87,5 +91,8 @@ func UploadFile(ctx context.Context, cfg *config.MinIOConfig, file *multipart.Fi
 }
 
 func DeleteFile(ctx context.Context, cfg *config.MinIOConfig, objectName string) error {
+	if MinioClient == nil {
+		return fmt.Errorf("storage service is unavailable")
+	}
 	return MinioClient.RemoveObject(ctx, cfg.Bucket, objectName, minio.RemoveObjectOptions{})
 }

@@ -32,10 +32,9 @@ func main() {
 
 	// Connect to MinIO
 	if err := storage.Connect(&cfg.MinIO); err != nil {
-		log.Printf("Warning: Failed to connect minio: %v (file uploads may not work)", err)
-	} else {
-		log.Println("MinIO connected successfully")
+		log.Fatalf("Failed to connect MinIO: %v", err)
 	}
+	log.Println("MinIO connected successfully")
 
 	// Initialize router
 	router := routes.Setup(cfg)

@@ -137,9 +137,20 @@ func (ac *AuthController) GitHubCallback(c *gin.Context) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user info from GitHub"})
+		return
+	}
+
 	var ghUser GitHubUser
 	if err := json.NewDecoder(resp.Body).Decode(&ghUser); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse user info"})
+		return
+	}
+
+	// Validate required fields from GitHub response
+	if ghUser.ID == 0 || ghUser.Login == "" {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user info received from GitHub"})
 		return
 	}
 

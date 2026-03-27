@@ -53,9 +53,11 @@ services:
     environment:
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:?MINIO_ACCESS_KEY must be set in .env file}
       MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:?MINIO_SECRET_KEY must be set in .env file}
-    ports:
-      - "${MINIO_API_PORT:-9000}:9000"
-      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    # ports:
+    #   - "${MINIO_API_PORT:-9000}:9000"
+    #   - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    # Security: MinIO ports not exposed by default. Uncomment for debugging only.
+    # Access console via: kubectl port-forward or ssh tunnel if needed.
     volumes:
       - minio_data:/data
     networks:
