@@ -187,15 +187,25 @@ export const postsAPI = {
 
 // Comments API
 export const commentsAPI = {
-  getByPostSlug: async (slug: string): Promise<Comment[]> => {
-    const response = await api.get(`/posts/${slug}/comments`);
-    return response.data.comments || response.data;
+  getByPostSlug: async (slug: string, params?: { page?: number; page_size?: number }): Promise<{ comments: Comment[]; total: number; page: number; page_size: number }> => {
+    const response = await api.get(`/posts/${slug}/comments`, { params });
+    const data = response.data;
+    if (data.comments !== undefined) {
+      return data;
+    }
+    // legacy flat array fallback
+    return { comments: data, total: data.length, page: 1, page_size: data.length };
   },
 
   // Keep old method name for backwards compatibility but mark as deprecated
-  getByPostId: async (slug: string): Promise<Comment[]> => {
-    const response = await api.get(`/posts/${slug}/comments`);
-    return response.data.comments || response.data;
+  getByPostId: async (slug: string, params?: { page?: number; page_size?: number }): Promise<{ comments: Comment[]; total: number; page: number; page_size: number }> => {
+    const response = await api.get(`/posts/${slug}/comments`, { params });
+    const data = response.data;
+    if (data.comments !== undefined) {
+      return data;
+    }
+    // legacy flat array fallback
+    return { comments: data, total: data.length, page: 1, page_size: data.length };
   },
 
   getAll: async (params?: { page?: number; page_size?: number }): Promise<{ comments: Comment[]; total: number; page: number; page_size: number }> => {
