@@ -20,7 +20,7 @@ export function AdminProjects() {
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const response = await projectsAPI.getAll({ limit: 100 });
+      const response = await projectsAPI.adminListProjects({ limit: 100 });
       setProjects(response.projects);
     } catch (error) {
       console.error('Failed to fetch projects:', error);

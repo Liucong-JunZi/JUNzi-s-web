@@ -29,8 +29,8 @@ export function AdminDashboard() {
     setLoading(true);
     try {
       const [postsRes, projectsRes] = await Promise.all([
-        postsAPI.getAll({ limit: 1 }),
-        projectsAPI.getAll({ limit: 1 }),
+        postsAPI.adminListPosts({ limit: 1 }),
+        projectsAPI.adminListProjects({ limit: 1 }),
       ]);
 
       setStats({
