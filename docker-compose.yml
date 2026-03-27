@@ -117,8 +117,8 @@ services:
   # Frontend (React + Nginx)
   frontend:
     build:
-      context: ./frontend
-      dockerfile: ../docker/frontend/Dockerfile
+      context: .
+      dockerfile: docker/frontend/Dockerfile
       args:
         - VITE_API_URL=${VITE_API_URL:-}
     container_name: junzi-frontend
