@@ -23,7 +23,7 @@ export function ProjectEditor() {
     techStack: '',
     status: 'planning' as ProjectStatus,
     sortOrder: 0,
-    imageUrl: '',
+    coverImage: '',
     demoUrl: '',
     githubUrl: '',
   });
@@ -40,15 +40,17 @@ export function ProjectEditor() {
     setLoading(true);
     try {
       const project = await projectsAPI.getById(Number(id));
+      // Handle both snake_case (backend) and camelCase field names
+      const techStack = project.tech_stack || (project as any).techStack || '';
       setFormData({
         title: project.title,
         description: project.description || '',
-        techStack: project.techStack?.join(', ') || '',
+        techStack: Array.isArray(techStack) ? techStack.join(', ') : techStack,
         status: project.status || 'planning',
-        sortOrder: project.sortOrder || 0,
-        imageUrl: project.imageUrl || '',
-        demoUrl: project.demoUrl || '',
-        githubUrl: project.githubUrl || '',
+        sortOrder: project.sort_order || (project as any).sortOrder || 0,
+        coverImage: project.cover_image || (project as any).imageUrl || '',
+        demoUrl: project.demo_url || (project as any).demoUrl || '',
+        githubUrl: project.github_url || (project as any).githubUrl || '',
       });
     } catch (error) {
       console.error('Failed to fetch project:', error);
@@ -76,7 +78,7 @@ export function ProjectEditor() {
 
     try {
       const result = await uploadAPI.uploadImage(file);
-      setFormData((prev) => ({ ...prev, imageUrl: result.url }));
+      setFormData((prev) => ({ ...prev, coverImage: result.url }));
       toast({
         title: 'Success',
         description: 'Image uploaded successfully',
@@ -98,12 +100,12 @@ export function ProjectEditor() {
       const projectData = {
         title: formData.title,
         description: formData.description,
-        techStack: formData.techStack.split(',').map(t => t.trim()).filter(Boolean),
+        tech_stack: formData.techStack.split(',').map(t => t.trim()).filter(Boolean).join(','),
         status: formData.status,
-        sortOrder: formData.sortOrder,
-        imageUrl: formData.imageUrl,
-        demoUrl: formData.demoUrl,
-        githubUrl: formData.githubUrl,
+        sort_order: formData.sortOrder,
+        cover_image: formData.coverImage,
+        demo_url: formData.demoUrl,
+        github_url: formData.githubUrl,
       };
 
       if (isEdit) {
@@ -267,9 +269,9 @@ export function ProjectEditor() {
             <Card>
               <CardContent className="pt-6 space-y-4">
                 <Label>Cover Image</Label>
-                {formData.imageUrl && (
+                {formData.coverImage && (
                   <img
-                    src={formData.imageUrl}
+                    src={formData.coverImage}
                     alt="Cover"
                     className="w-full h-40 object-cover rounded-lg"
                   />

@@ -56,6 +56,17 @@ export function Portfolio() {
     return statusMap[status] || status;
   };
 
+  // Helper to get field from project (handles both camelCase and snake_case)
+  const getCoverImage = (project: Project) => project.cover_image || (project as any).imageUrl;
+  const getGithubUrl = (project: Project) => project.github_url || (project as any).githubUrl;
+  const getDemoUrl = (project: Project) => project.demo_url || (project as any).demoUrl;
+  const getTechStack = (project: Project): string[] => {
+    const tech = project.tech_stack || (project as any).techStack;
+    if (Array.isArray(tech)) return tech;
+    if (typeof tech === 'string' && tech) return tech.split(',').map((t: string) => t.trim()).filter(Boolean);
+    return [];
+  };
+
   return (
     <div className="container mx-auto px-4 py-12">
       {/* Header */}
@@ -77,9 +88,9 @@ export function Portfolio() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project) => (
             <Card key={project.id} className="flex flex-col hover:shadow-lg transition-shadow">
-              {project.imageUrl && (
+              {getCoverImage(project) && (
                 <img
-                  src={project.imageUrl}
+                  src={getCoverImage(project)!}
                   alt={project.title}
                   className="w-full h-48 object-cover rounded-t-lg"
                 />
@@ -94,9 +105,9 @@ export function Portfolio() {
                 <CardDescription className="line-clamp-2">{project.description}</CardDescription>
               </CardHeader>
               <CardContent className="flex-1 flex flex-col">
-                {project.techStack && project.techStack.length > 0 && (
+                {getTechStack(project).length > 0 && (
                   <div className="flex flex-wrap gap-2 mb-4">
-                    {project.techStack.slice(0, 4).map((tech, index) => (
+                    {getTechStack(project).slice(0, 4).map((tech: string, index: number) => (
                       <Badge key={index} variant="outline">
                         {tech}
                       </Badge>
@@ -104,17 +115,17 @@ export function Portfolio() {
                   </div>
                 )}
                 <div className="mt-auto flex gap-2">
-                  {project.githubUrl && (
+                  {getGithubUrl(project) && (
                     <Button variant="outline" size="sm" asChild>
-                      <a href={project.githubUrl} target="_blank" rel="noopener noreferrer">
+                      <a href={getGithubUrl(project)!} target="_blank" rel="noopener noreferrer">
                         <GithubIcon className="mr-2 h-4 w-4" />
                         Code
                       </a>
                     </Button>
                   )}
-                  {project.demoUrl && (
+                  {getDemoUrl(project) && (
                     <Button size="sm" asChild>
-                      <a href={project.demoUrl} target="_blank" rel="noopener noreferrer">
+                      <a href={getDemoUrl(project)!} target="_blank" rel="noopener noreferrer">
                         <ExternalLink className="mr-2 h-4 w-4" />
                         Demo
                       </a>

@@ -4,7 +4,7 @@ import type { ResumeItem } from '../types';
 import { SafeMarkdown } from '../components/SafeMarkdown';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
-import { Download, Briefcase, GraduationCap, FolderKanban, Calendar, MapPin } from 'lucide-react';
+import { Download, Briefcase, GraduationCap, FolderKanban, MapPin } from 'lucide-react';
 
 export function Resume() {
   const [resumeItems, setResumeItems] = useState<ResumeItem[]>([]);
@@ -27,11 +27,16 @@ export function Resume() {
   };
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
     });
   };
+
+  // Helper to get date field from item (handles both camelCase and snake_case)
+  const getStartDate = (item: ResumeItem) => (item as any).start_date || item.startDate;
+  const getEndDate = (item: ResumeItem) => (item as any).end_date || item.endDate;
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -71,7 +76,7 @@ export function Resume() {
         const header = `## ${item.title}${item.company ? ` at ${item.company}` : ''}`;
         const meta = [
           item.location ? `**Location:** ${item.location}` : '',
-          `**Period:** ${formatDate(item.startDate)}${item.endDate ? ` - ${formatDate(item.endDate)}` : ' - Present'}`,
+          `**Period:** ${formatDate(getStartDate(item))}${getEndDate(item) ? ` - ${formatDate(getEndDate(item))}` : ' - Present'}`,
         ]
           .filter(Boolean)
           .join('\n');
@@ -141,7 +146,7 @@ export function Resume() {
 
               <div className="space-y-6">
                 {items
-                  .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
+                  .sort((a, b) => new Date(getStartDate(b)).getTime() - new Date(getStartDate(a)).getTime())
                   .map((item) => (
                     <div
                       key={item.id}
@@ -155,8 +160,8 @@ export function Resume() {
                           )}
                         </div>
                         <Badge variant="outline">
-                          {formatDate(item.startDate)}
-                          {item.endDate ? ` - ${formatDate(item.endDate)}` : ' - Present'}
+                          {formatDate(getStartDate(item))}
+                          {getEndDate(item) ? ` - ${formatDate(getEndDate(item))}` : ' - Present'}
                         </Badge>
                       </div>
 
