@@ -244,7 +244,7 @@ func (ac *AuthController) GitHubCallback(c *gin.Context) {
 	setCookie(c, "csrf_token", csrfToken, 3600, false) // not HttpOnly so JS can read it
 
 	// Redirect to frontend
-	frontendURL := fmt.Sprintf("%s/auth/callback?csrf_token=%s", ac.frontendURL, csrfToken)
+	frontendURL := fmt.Sprintf("%s/auth/callback", ac.frontendURL)
 	c.Redirect(http.StatusTemporaryRedirect, frontendURL)
 }
 
