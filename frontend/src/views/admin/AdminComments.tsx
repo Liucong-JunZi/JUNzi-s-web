@@ -46,7 +46,12 @@ export function AdminComments() {
 
     try {
       await commentsAPI.delete(id);
-      setComments(comments.filter((c) => c.id !== id));
+      const remaining = comments.filter((c) => c.id !== id);
+      setComments(remaining);
+      setTotal((t) => t - 1);
+      if (remaining.length === 0 && page > 1) {
+        setPage((p) => p - 1); // triggers refetch via useEffect
+      }
       toast({
         title: 'Success',
         description: 'Comment deleted successfully',
