@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"mime/multipart"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/liucong/personal-website/internal/config"
@@ -67,10 +68,19 @@ func UploadFile(ctx context.Context, cfg *config.MinIOConfig, file *multipart.Fi
 	}
 
 	// Generate URL
-	url := fmt.Sprintf("%s/%s/%s", cfg.Endpoint, cfg.Bucket, objectName)
+	var fileURL string
+	if cfg.PublicURL != "" {
+		fileURL = fmt.Sprintf("%s/%s/%s", strings.TrimRight(cfg.PublicURL, "/"), cfg.Bucket, objectName)
+	} else {
+		scheme := "http"
+		if cfg.UseSSL {
+			scheme = "https"
+		}
+		fileURL = fmt.Sprintf("%s://%s/%s/%s", scheme, cfg.Endpoint, cfg.Bucket, objectName)
+	}
 
 	return &UploadResult{
-		URL:      url,
+		URL:      fileURL,
 		Filename: filename,
 		Size:     info.Size,
 	}, nil

@@ -37,9 +37,9 @@ func (cc *CommentController) ListComments(c *gin.Context) {
 
 	offset := (page - 1) * pageSize
 
-	// Get post ID from slug
+	// Get post ID from slug — only allow published posts
 	var post models.Post
-	if err := database.DB.Where("slug = ?", slug).First(&post).Error; err != nil {
+	if err := database.DB.Where("slug = ? AND status = ?", slug, "published").First(&post).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
 		return
 	}
@@ -76,9 +76,9 @@ func (cc *CommentController) CreateComment(c *gin.Context) {
 
 	userID, _ := c.Get("userID")
 
-	// Verify post exists by ID
+	// Verify post exists and is published
 	var post models.Post
-	if err := database.DB.First(&post, req.PostID).Error; err != nil {
+	if err := database.DB.Where("id = ? AND status = ?", req.PostID, "published").First(&post).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
 		return
 	}

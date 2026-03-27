@@ -84,6 +84,8 @@ func (ac *AuthController) GitHubRedirect(c *gin.Context) {
 		return
 	}
 
+	c.SetCookie("oauth_state", state, 600, "/", "", isSecureCookie(), true)
+
 	url := ac.oauthConf.AuthCodeURL(state, oauth2.AccessTypeOffline)
 	c.Redirect(http.StatusTemporaryRedirect, url)
 }
@@ -102,6 +104,13 @@ func (ac *AuthController) GitHubCallback(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "State not provided"})
 		return
 	}
+
+	cookieState, err := c.Cookie("oauth_state")
+	if err != nil || cookieState != state {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid state"})
+		return
+	}
+	c.SetCookie("oauth_state", "", -1, "/", "", isSecureCookie(), true)
 
 	ctx := context.Background()
 	stateKey := "oauth_state:" + state
