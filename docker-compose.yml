@@ -7,19 +7,20 @@ services:
     container_name: junzi-mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root123456}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set in .env file}
       MYSQL_DATABASE: ${DB_NAME:-personal_website}
       MYSQL_USER: ${DB_USER:-junzi}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-root123456}
-    ports:
-      - "${MYSQL_PORT:-3306}:3306"
+      MYSQL_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set in .env file}
+    # ports:
+    #   - "${MYSQL_PORT:-3306}:3306"
+    # Security: MySQL port not exposed by default. Uncomment above for debugging only.
     volumes:
       - mysql_data:/var/lib/mysql
       - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
       - junzi-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-root123456}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:?DB_PASSWORD must be set}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -29,15 +30,16 @@ services:
     image: redis:7-alpine
     container_name: junzi-redis
     restart: unless-stopped
-    command: redis-server --appendonly yes ${REDIS_PASSWORD:+--requirepass ${REDIS_PASSWORD}}
-    ports:
-      - "${REDIS_PORT:-6379}:6379"
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:?REDIS_PASSWORD must be set in .env file}
+    # ports:
+    #   - "${REDIS_PORT:-6379}:6379"
+    # Security: Redis port not exposed by default. Uncomment above for debugging only.
     volumes:
       - redis_data:/data
     networks:
       - junzi-network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -49,8 +51,8 @@ services:
     restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
-      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin123}
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:?MINIO_ACCESS_KEY must be set in .env file}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:?MINIO_SECRET_KEY must be set in .env file}
     ports:
       - "${MINIO_API_PORT:-9000}:9000"
       - "${MINIO_CONSOLE_PORT:-9001}:9001"
@@ -79,20 +81,21 @@ services:
       - DB_HOST=mysql
       - DB_PORT=3306
       - DB_USER=${DB_USER:-junzi}
-      - DB_PASSWORD=${DB_PASSWORD:-root123456}
+      - DB_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env file}
       - DB_NAME=${DB_NAME:-personal_website}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:?REDIS_PASSWORD must be set in .env file}
       - MINIO_ENDPOINT=minio:9000
-      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-minioadmin}
-      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-minioadmin123}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:?MINIO_ACCESS_KEY must be set in .env file}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:?MINIO_SECRET_KEY must be set in .env file}
       - MINIO_BUCKET=${MINIO_BUCKET:-uploads}
       - MINIO_USE_SSL=false
       - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID:-}
       - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET:-}
       - GITHUB_CALLBACK_URL=${GITHUB_CALLBACK_URL:-http://localhost:8080/api/auth/github/callback}
-      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set in .env file}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost}
     depends_on:
       mysql:
         condition: service_healthy

@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -11,7 +12,16 @@ import (
 
 func CORS() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		// Get allowed origin from environment variable
+		// Format: comma-separated list of origins (e.g., "https://example.com,https://app.example.com")
+		allowedOrigins := getEnvOrDefault("CORS_ALLOWED_ORIGINS", "http://localhost")
+		origin := c.Request.Header.Get("Origin")
+
+		// Check if the request origin is in the allowed list
+		if isOriginAllowed(origin, allowedOrigins) {
+			c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
+		}
+
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
@@ -23,6 +33,26 @@ func CORS() gin.HandlerFunc {
 
 		c.Next()
 	}
+}
+
+func isOriginAllowed(origin string, allowedOrigins string) bool {
+	if origin == "" {
+		return false
+	}
+	origins := strings.Split(allowedOrigins, ",")
+	for _, allowed := range origins {
+		if strings.TrimSpace(allowed) == origin {
+			return true
+		}
+	}
+	return false
+}
+
+func getEnvOrDefault(key, defaultValue string) string {
+	if value := strings.TrimSpace(os.Getenv(key)); value != "" {
+		return value
+	}
+	return defaultValue
 }
 
 func AuthRequired(cfg *config.Config) gin.HandlerFunc {
