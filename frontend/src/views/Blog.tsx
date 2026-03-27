@@ -107,9 +107,9 @@ export function Blog() {
           {posts.map((post) => (
             <Link key={post.id} to={`/blog/${post.slug}`}>
               <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
-                {post.coverImage && (
+                {post.cover_image && (
                   <img
-                    src={post.coverImage}
+                    src={post.cover_image}
                     alt={post.title}
                     className="w-full h-48 object-cover rounded-t-lg"
                   />
@@ -131,11 +131,11 @@ export function Blog() {
                   <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Calendar className="h-4 w-4" />
-                      <span>{formatDate(post.createdAt)}</span>
+                      <span>{formatDate(post.created_at)}</span>
                     </div>
                     <div className="flex items-center gap-4">
-                      <span>{post.viewCount} views</span>
-                      <span>{post.likeCount} likes</span>
+                      <span>{post.view_count} views</span>
+                      <span>{post.like_count} likes</span>
                     </div>
                   </div>
                 </CardContent>

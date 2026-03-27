@@ -102,9 +102,9 @@ export function AdminPosts() {
                       )}
                     </div>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span>{formatDate(post.createdAt)}</span>
-                      <span>{post.viewCount} views</span>
-                      <span>{post.likeCount} likes</span>
+                      <span>{formatDate(post.created_at)}</span>
+                      <span>{post.view_count} views</span>
+                      <span>{post.like_count} likes</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">

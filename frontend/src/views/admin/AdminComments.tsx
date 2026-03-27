@@ -69,14 +69,14 @@ export function AdminComments() {
     if (comment.author) {
       return comment.author.username;
     }
-    return comment.authorName || 'Anonymous';
+    return comment.author_name || 'Anonymous';
   };
 
   const getAuthorEmail = (comment: Comment) => {
     if (comment.author) {
       return comment.author.email;
     }
-    return comment.authorEmail || '';
+    return comment.author_email || '';
   };
 
   return (
@@ -113,7 +113,7 @@ export function AdminComments() {
                       )}
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      {formatDate(comment.createdAt)}
+                      {formatDate(comment.created_at)}
                     </div>
                   </div>
                   <Button
@@ -127,10 +127,10 @@ export function AdminComments() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm">{comment.content}</p>
-                {(comment.postSlug || comment.postId) && (
+                {(comment.post_slug || comment.post_id) && (
                   <div className="mt-4 text-sm text-muted-foreground">
                     <Link
-                      to={`/blog/${comment.postSlug || comment.postId}`}
+                      to={`/blog/${comment.post_slug || comment.post_id}`}
                       className="text-primary hover:underline"
                     >
                       View Post

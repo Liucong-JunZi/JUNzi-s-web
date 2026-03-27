@@ -67,15 +67,12 @@ export function AdminResume() {
 
   const handleEdit = (item: ResumeItem) => {
     setEditingId(item.id);
-    // Handle both camelCase (frontend) and snake_case (backend) field names
-    const startDate = (item as any).start_date || item.startDate;
-    const endDate = (item as any).end_date || item.endDate;
     setFormData({
       title: item.title,
       company: item.company || '',
       location: item.location || '',
-      startDate: startDate ? startDate.split('T')[0] : '',
-      endDate: endDate ? endDate.split('T')[0] : '',
+      startDate: item.start_date ? item.start_date.split('T')[0] : '',
+      endDate: item.end_date ? item.end_date.split('T')[0] : '',
       description: item.description || '',
       type: item.type,
     });
@@ -156,9 +153,7 @@ export function AdminResume() {
     });
   };
 
-  // Helper to get start date from item (handles both camelCase and snake_case)
-  const getStartDate = (item: ResumeItem) => (item as any).start_date || item.startDate;
-  const getEndDate = (item: ResumeItem) => (item as any).end_date || item.endDate;
+  // Helper functions removed - using item.start_date / item.end_date directly
 
   if (loading) {
     return (
@@ -300,7 +295,7 @@ export function AdminResume() {
             ) : (
               <div className="space-y-4">
                 {items
-                  .sort((a, b) => new Date(getStartDate(b)).getTime() - new Date(getStartDate(a)).getTime())
+                  .sort((a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime())
                   .map((item) => (
                     <div
                       key={item.id}
@@ -315,8 +310,8 @@ export function AdminResume() {
                             <p className="text-sm text-muted-foreground">{item.company}</p>
                           )}
                           <p className="text-xs text-muted-foreground mt-1">
-                            {formatDate(getStartDate(item))}
-                            {getEndDate(item) ? ` - ${formatDate(getEndDate(item))}` : ' - Present'}
+                            {formatDate(item.start_date)}
+                            {item.end_date ? ` - ${formatDate(item.end_date)}` : ' - Present'}
                           </p>
                           <span className="inline-block mt-2 px-2 py-1 text-xs rounded bg-muted capitalize">
                             {item.type}

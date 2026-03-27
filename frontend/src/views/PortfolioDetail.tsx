@@ -46,13 +46,12 @@ export function PortfolioDetail() {
     });
   };
 
-  // Helper to get field from project (handles both camelCase and snake_case)
-  const getCreatedAt = (project: Project) => (project as any).created_at || (project as any).createdAt;
-  const getCoverImage = (project: Project) => project.cover_image || (project as any).imageUrl;
-  const getGithubUrl = (project: Project) => project.github_url || (project as any).githubUrl;
-  const getDemoUrl = (project: Project) => project.demo_url || (project as any).demoUrl;
+  // Helper to get field from project
+  const getCoverImage = (project: Project) => project.cover_image;
+  const getGithubUrl = (project: Project) => project.github_url;
+  const getDemoUrl = (project: Project) => project.demo_url;
   const getTechStack = (project: Project): string[] => {
-    const tech = project.tech_stack || (project as any).techStack;
+    const tech = project.tech_stack;
     if (Array.isArray(tech)) return tech;
     if (typeof tech === 'string' && tech) return tech.split(',').map((t: string) => t.trim()).filter(Boolean);
     return [];
@@ -60,6 +59,7 @@ export function PortfolioDetail() {
 
   const getStatusLabel = (status: string) => {
     const statusMap: Record<string, string> = {
+      active: 'Active',
       planning: 'Planning',
       in_progress: 'In Progress',
       completed: 'Completed',
@@ -70,6 +70,7 @@ export function PortfolioDetail() {
 
   const getStatusColor = (status: string) => {
     const colorMap: Record<string, string> = {
+      active: 'bg-emerald-500',
       planning: 'bg-yellow-500',
       in_progress: 'bg-blue-500',
       completed: 'bg-green-500',
@@ -146,7 +147,7 @@ export function PortfolioDetail() {
             <div className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
               <span>
-                {formatDate(getCreatedAt(project))}
+                {formatDate(project.created_at)}
               </span>
             </div>
           </div>

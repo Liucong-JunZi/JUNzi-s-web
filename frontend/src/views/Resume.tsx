@@ -34,10 +34,6 @@ export function Resume() {
     });
   };
 
-  // Helper to get date field from item (handles both camelCase and snake_case)
-  const getStartDate = (item: ResumeItem) => (item as any).start_date || item.startDate;
-  const getEndDate = (item: ResumeItem) => (item as any).end_date || item.endDate;
-
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'work':
@@ -76,7 +72,7 @@ export function Resume() {
         const header = `## ${item.title}${item.company ? ` at ${item.company}` : ''}`;
         const meta = [
           item.location ? `**Location:** ${item.location}` : '',
-          `**Period:** ${formatDate(getStartDate(item))}${getEndDate(item) ? ` - ${formatDate(getEndDate(item))}` : ' - Present'}`,
+          `**Period:** ${formatDate(item.start_date)}${item.end_date ? ` - ${formatDate(item.end_date)}` : ' - Present'}`,
         ]
           .filter(Boolean)
           .join('\n');
@@ -146,7 +142,7 @@ export function Resume() {
 
               <div className="space-y-6">
                 {items
-                  .sort((a, b) => new Date(getStartDate(b)).getTime() - new Date(getStartDate(a)).getTime())
+                  .sort((a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime())
                   .map((item) => (
                     <div
                       key={item.id}
@@ -160,8 +156,8 @@ export function Resume() {
                           )}
                         </div>
                         <Badge variant="outline">
-                          {formatDate(getStartDate(item))}
-                          {getEndDate(item) ? ` - ${formatDate(getEndDate(item))}` : ' - Present'}
+                          {formatDate(item.start_date)}
+                          {item.end_date ? ` - ${formatDate(item.end_date)}` : ' - Present'}
                         </Badge>
                       </div>
 

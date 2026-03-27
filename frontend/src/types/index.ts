@@ -2,9 +2,9 @@ export interface User {
   id: number;
   username: string;
   email: string;
-  avatar?: string;
-  githubId?: string;
-  createdAt: string;
+  avatar_url?: string;
+  github_id?: string;
+  created_at: string;
 }
 
 export interface Post {
@@ -13,14 +13,16 @@ export interface Post {
   slug: string;
   content: string;
   summary?: string;
-  coverImage?: string;
+  cover_image?: string;
   author: User;
   tags: Tag[];
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
   status: 'draft' | 'published';
-  viewCount: number;
-  likeCount: number;
+  view_count: number;
+  like_count: number;
+  author_id?: number;
+  category_id?: number;
 }
 
 export interface Tag {
@@ -33,14 +35,14 @@ export interface Comment {
   id: number;
   content: string;
   author?: User;
-  authorName?: string;
-  authorEmail?: string;
-  postId: number;
-  postSlug?: string;
-  parentId?: number;
+  author_name?: string;
+  author_email?: string;
+  post_id: number;
+  post_slug?: string;
+  parent_id?: number;
   replies?: Comment[];
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Project {
@@ -48,7 +50,7 @@ export interface Project {
   title: string;
   description: string;
   tech_stack?: string;  // Backend stores as comma-separated string
-  status: 'planning' | 'in_progress' | 'completed' | 'archived';
+  status: 'active' | 'planning' | 'in_progress' | 'completed' | 'archived';
   sort_order?: number;
   cover_image?: string;
   demo_url?: string;
@@ -62,12 +64,13 @@ export interface ResumeItem {
   title: string;
   company: string;
   location?: string;
-  startDate: string;
-  endDate?: string;
+  start_date: string;
+  end_date?: string;
   description?: string;
   type: 'work' | 'education' | 'project';
-  createdAt: string;
-  updatedAt: string;
+  sort_order?: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface AuthState {

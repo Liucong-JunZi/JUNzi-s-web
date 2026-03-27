@@ -9,7 +9,7 @@ import { Card, CardContent } from '../../components/ui/card';
 import { ArrowLeft, Save, Upload } from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
 
-type ProjectStatus = 'planning' | 'in_progress' | 'completed' | 'archived';
+type ProjectStatus = 'active' | 'planning' | 'in_progress' | 'completed' | 'archived';
 
 export function ProjectEditor() {
   const { id } = useParams<{ id: string }>();
@@ -21,7 +21,7 @@ export function ProjectEditor() {
     title: '',
     description: '',
     techStack: '',
-    status: 'planning' as ProjectStatus,
+    status: 'active' as ProjectStatus,
     sortOrder: 0,
     coverImage: '',
     demoUrl: '',
@@ -40,17 +40,17 @@ export function ProjectEditor() {
     setLoading(true);
     try {
       const project = await projectsAPI.getById(Number(id));
-      // Handle both snake_case (backend) and camelCase field names
-      const techStack = project.tech_stack || (project as any).techStack || '';
+      // Handle snake_case field names from backend
+      const techStack = project.tech_stack || '';
       setFormData({
         title: project.title,
         description: project.description || '',
         techStack: Array.isArray(techStack) ? techStack.join(', ') : techStack,
-        status: project.status || 'planning',
-        sortOrder: project.sort_order || (project as any).sortOrder || 0,
-        coverImage: project.cover_image || (project as any).imageUrl || '',
-        demoUrl: project.demo_url || (project as any).demoUrl || '',
-        githubUrl: project.github_url || (project as any).githubUrl || '',
+        status: project.status || 'active',
+        sortOrder: project.sort_order || 0,
+        coverImage: project.cover_image || '',
+        demoUrl: project.demo_url || '',
+        githubUrl: project.github_url || '',
       });
     } catch (error) {
       console.error('Failed to fetch project:', error);
@@ -240,6 +240,7 @@ export function ProjectEditor() {
                     onChange={handleChange}
                     className="w-full mt-1 px-3 py-2 border rounded-md bg-background"
                   >
+                    <option value="active">Active</option>
                     <option value="planning">Planning</option>
                     <option value="in_progress">In Progress</option>
                     <option value="completed">Completed</option>
