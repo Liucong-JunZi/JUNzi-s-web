@@ -1,0 +1,158 @@
+import { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { projectsAPI } from '../api';
+import type { Project } from '../types';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { Badge } from '../components/ui/badge';
+import { Button } from '../components/ui/button';
+import { ExternalLink, ArrowLeft, Calendar } from 'lucide-react';
+
+// Custom Github icon
+function GithubIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+    </svg>
+  );
+}
+
+export function PortfolioDetail() {
+  const { slug } = useParams<{ slug: string }>();
+  const [project, setProject] = useState<Project | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (slug) {
+      fetchProject();
+    }
+  }, [slug]);
+
+  const fetchProject = async () => {
+    setLoading(true);
+    try {
+      const data = await projectsAPI.getBySlug(slug!);
+      setProject(data);
+    } catch (error) {
+      console.error('Failed to fetch project:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-12">
+        <div className="text-center">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!project) {
+    return (
+      <div className="container mx-auto px-4 py-12">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Project not found</h1>
+          <Button asChild>
+            <Link to="/portfolio">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Portfolio
+            </Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-12">
+      {/* Back Button */}
+      <Button variant="ghost" asChild className="mb-6">
+        <Link to="/portfolio">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Portfolio
+        </Link>
+      </Button>
+
+      <article className="max-w-4xl mx-auto">
+        {/* Header */}
+        <header className="mb-8">
+          <h1 className="text-4xl font-bold mb-4">{project.title}</h1>
+          <p className="text-xl text-muted-foreground mb-4">{project.description}</p>
+
+          <div className="flex flex-wrap items-center gap-4 mb-4">
+            {project.githubUrl && (
+              <Button asChild>
+                <a href={project.githubUrl} target="_blank" rel="noopener noreferrer">
+                  <GithubIcon className="mr-2 h-4 w-4" />
+                  View Code
+                </a>
+              </Button>
+            )}
+            {project.demoUrl && (
+              <Button variant="outline" asChild>
+                <a href={project.demoUrl} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Live Demo
+                </a>
+              </Button>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <Calendar className="h-4 w-4" />
+              <span>
+                {formatDate(project.startDate)}
+                {project.endDate ? ` - ${formatDate(project.endDate)}` : ' - Present'}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2 mt-4">
+            {project.tags.map((tag) => (
+              <Badge key={tag.id} variant="secondary">
+                {tag.name}
+              </Badge>
+            ))}
+          </div>
+        </header>
+
+        {/* Cover Image */}
+        {project.coverImage && (
+          <img
+            src={project.coverImage}
+            alt={project.title}
+            className="w-full h-[400px] object-cover rounded-lg mb-8"
+          />
+        )}
+
+        {/* Project Images */}
+        {project.images && project.images.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            {project.images.map((image, index) => (
+              <img
+                key={index}
+                src={image}
+                alt={`${project.title} screenshot ${index + 1}`}
+                className="w-full h-64 object-cover rounded-lg"
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Content */}
+        <div className="prose prose-neutral dark:prose-invert max-w-none">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{project.content}</ReactMarkdown>
+        </div>
+      </article>
+    </div>
+  );
+}
