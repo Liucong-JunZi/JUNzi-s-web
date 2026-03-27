@@ -237,6 +237,11 @@ export const commentsAPI = {
     return response.data.comment || response.data;
   },
 
+  updateStatus: async (id: number, status: string): Promise<Comment> => {
+    const response = await api.put(`/admin/comments/${id}/status`, { status });
+    return response.data.comment || response.data;
+  },
+
   delete: async (id: number): Promise<void> => {
     await api.delete(`/admin/comments/${id}`);
   },
@@ -276,6 +281,11 @@ export const projectsAPI = {
 
   getById: async (id: number): Promise<Project> => {
     const response = await api.get(`/projects/${id}`);
+    return response.data.project || response.data;
+  },
+
+  getByIdAdmin: async (id: number): Promise<Project> => {
+    const response = await api.get(`/admin/projects/${id}`);
     return response.data.project || response.data;
   },
 

@@ -39,7 +39,7 @@ export function ProjectEditor() {
   const fetchProject = async () => {
     setLoading(true);
     try {
-      const project = await projectsAPI.getById(Number(id));
+      const project = await projectsAPI.getByIdAdmin(Number(id));
       // Handle snake_case field names from backend
       const techStack = project.tech_stack || '';
       setFormData({
