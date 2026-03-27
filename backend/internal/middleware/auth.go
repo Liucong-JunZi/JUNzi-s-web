@@ -57,18 +57,27 @@ func getEnvOrDefault(key, defaultValue string) string {
 
 func AuthRequired(cfg *config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		authHeader := c.GetHeader("Authorization")
-		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header required"})
-			c.Abort()
-			return
-		}
+		var tokenString string
 
-		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-		if tokenString == authHeader {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Bearer token required"})
-			c.Abort()
-			return
+		// First try to get token from cookie
+		cookieToken, err := c.Cookie("access_token")
+		if err == nil && cookieToken != "" {
+			tokenString = cookieToken
+		} else {
+			// Fall back to Authorization header for backward compatibility
+			authHeader := c.GetHeader("Authorization")
+			if authHeader == "" {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization required"})
+				c.Abort()
+				return
+			}
+
+			tokenString = strings.TrimPrefix(authHeader, "Bearer ")
+			if tokenString == authHeader {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "Bearer token required"})
+				c.Abort()
+				return
+			}
 		}
 
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -84,6 +93,14 @@ func AuthRequired(cfg *config.Config) gin.HandlerFunc {
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
+			c.Abort()
+			return
+		}
+
+		// Verify it's an access token (not refresh token)
+		tokenType, ok := claims["type"].(string)
+		if ok && tokenType != "access" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token type"})
 			c.Abort()
 			return
 		}

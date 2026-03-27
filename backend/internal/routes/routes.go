@@ -1,7 +1,10 @@
 package routes
 
 import (
+	"time"
+
 	"github.com/gin-gonic/gin"
+	"github.com/liucong/personal-website/internal/cache"
 	"github.com/liucong/personal-website/internal/config"
 	"github.com/liucong/personal-website/internal/controllers"
 	"github.com/liucong/personal-website/internal/middleware"
@@ -16,6 +19,9 @@ func Setup(cfg *config.Config) *gin.Engine {
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 	router.Use(middleware.CORS())
+
+	// Add rate limiting middleware (100 requests per minute)
+	router.Use(middleware.RateLimiterWithConfig(cache.Client, 100))
 
 	// Static files
 	router.Static("/uploads", "./uploads")
@@ -36,7 +42,7 @@ func Setup(cfg *config.Config) *gin.Engine {
 	{
 		// Health check
 		api.GET("/health", func(c *gin.Context) {
-			c.JSON(200, gin.H{"status": "ok"})
+			c.JSON(200, gin.H{"status": "ok", "timestamp": time.Now().Unix()})
 		})
 
 		// Public routes
@@ -69,6 +75,7 @@ func Setup(cfg *config.Config) *gin.Engine {
 			auth.GET("/github", authController.GitHubRedirect)
 			auth.GET("/github/callback", authController.GitHubCallback)
 			auth.POST("/logout", authController.Logout)
+			auth.POST("/refresh", authController.RefreshToken)
 			auth.GET("/me", middleware.AuthRequired(cfg), authController.GetCurrentUser)
 		}
 
