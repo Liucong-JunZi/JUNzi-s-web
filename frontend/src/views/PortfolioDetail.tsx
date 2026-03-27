@@ -4,7 +4,7 @@ import { projectsAPI } from '../api';
 import type { Project } from '../types';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
-import { ExternalLink, ArrowLeft, Calendar, MapPin } from 'lucide-react';
+import { ExternalLink, ArrowLeft, Calendar } from 'lucide-react';
 
 // Custom Github icon
 function GithubIcon({ className }: { className?: string }) {
@@ -39,10 +39,23 @@ export function PortfolioDetail() {
   };
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
     });
+  };
+
+  // Helper to get field from project (handles both camelCase and snake_case)
+  const getCreatedAt = (project: Project) => (project as any).created_at || (project as any).createdAt;
+  const getCoverImage = (project: Project) => project.cover_image || (project as any).imageUrl;
+  const getGithubUrl = (project: Project) => project.github_url || (project as any).githubUrl;
+  const getDemoUrl = (project: Project) => project.demo_url || (project as any).demoUrl;
+  const getTechStack = (project: Project): string[] => {
+    const tech = project.tech_stack || (project as any).techStack;
+    if (Array.isArray(tech)) return tech;
+    if (typeof tech === 'string' && tech) return tech.split(',').map((t: string) => t.trim()).filter(Boolean);
+    return [];
   };
 
   const getStatusLabel = (status: string) => {
@@ -111,17 +124,17 @@ export function PortfolioDetail() {
           <p className="text-xl text-muted-foreground mb-4">{project.description}</p>
 
           <div className="flex flex-wrap items-center gap-4 mb-4">
-            {project.githubUrl && (
+            {getGithubUrl(project) && (
               <Button asChild>
-                <a href={project.githubUrl} target="_blank" rel="noopener noreferrer">
+                <a href={getGithubUrl(project)!} target="_blank" rel="noopener noreferrer">
                   <GithubIcon className="mr-2 h-4 w-4" />
                   View Code
                 </a>
               </Button>
             )}
-            {project.demoUrl && (
+            {getDemoUrl(project) && (
               <Button variant="outline" asChild>
-                <a href={project.demoUrl} target="_blank" rel="noopener noreferrer">
+                <a href={getDemoUrl(project)!} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="mr-2 h-4 w-4" />
                   Live Demo
                 </a>
@@ -133,15 +146,15 @@ export function PortfolioDetail() {
             <div className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
               <span>
-                {formatDate(project.createdAt)}
+                {formatDate(getCreatedAt(project))}
               </span>
             </div>
           </div>
 
           {/* Tech Stack */}
-          {project.techStack && project.techStack.length > 0 && (
+          {getTechStack(project).length > 0 && (
             <div className="flex flex-wrap gap-2 mt-4">
-              {project.techStack.map((tech, index) => (
+              {getTechStack(project).map((tech, index) => (
                 <Badge key={index} variant="secondary">
                   {tech}
                 </Badge>
@@ -151,9 +164,9 @@ export function PortfolioDetail() {
         </header>
 
         {/* Cover Image */}
-        {project.imageUrl && (
+        {getCoverImage(project) && (
           <img
-            src={project.imageUrl}
+            src={getCoverImage(project)!}
             alt={project.title}
             className="w-full h-[400px] object-cover rounded-lg mb-8"
           />

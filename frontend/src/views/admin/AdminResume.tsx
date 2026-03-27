@@ -67,12 +67,15 @@ export function AdminResume() {
 
   const handleEdit = (item: ResumeItem) => {
     setEditingId(item.id);
+    // Handle both camelCase (frontend) and snake_case (backend) field names
+    const startDate = (item as any).start_date || item.startDate;
+    const endDate = (item as any).end_date || item.endDate;
     setFormData({
       title: item.title,
       company: item.company || '',
       location: item.location || '',
-      startDate: item.startDate.split('T')[0],
-      endDate: item.endDate ? item.endDate.split('T')[0] : '',
+      startDate: startDate ? startDate.split('T')[0] : '',
+      endDate: endDate ? endDate.split('T')[0] : '',
       description: item.description || '',
       type: item.type,
     });
@@ -83,12 +86,13 @@ export function AdminResume() {
     setSaving(true);
 
     try {
+      // Map camelCase form fields to snake_case for backend
       const data = {
         title: formData.title,
         company: formData.company || undefined,
         location: formData.location || undefined,
-        startDate: formData.startDate,
-        endDate: formData.endDate || undefined,
+        start_date: formData.startDate,
+        end_date: formData.endDate || undefined,
         description: formData.description || undefined,
         type: formData.type,
       };
@@ -145,11 +149,16 @@ export function AdminResume() {
   };
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
     });
   };
+
+  // Helper to get start date from item (handles both camelCase and snake_case)
+  const getStartDate = (item: ResumeItem) => (item as any).start_date || item.startDate;
+  const getEndDate = (item: ResumeItem) => (item as any).end_date || item.endDate;
 
   if (loading) {
     return (
@@ -291,7 +300,7 @@ export function AdminResume() {
             ) : (
               <div className="space-y-4">
                 {items
-                  .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
+                  .sort((a, b) => new Date(getStartDate(b)).getTime() - new Date(getStartDate(a)).getTime())
                   .map((item) => (
                     <div
                       key={item.id}
@@ -306,8 +315,8 @@ export function AdminResume() {
                             <p className="text-sm text-muted-foreground">{item.company}</p>
                           )}
                           <p className="text-xs text-muted-foreground mt-1">
-                            {formatDate(item.startDate)}
-                            {item.endDate ? ` - ${formatDate(item.endDate)}` : ' - Present'}
+                            {formatDate(getStartDate(item))}
+                            {getEndDate(item) ? ` - ${formatDate(getEndDate(item))}` : ' - Present'}
                           </p>
                           <span className="inline-block mt-2 px-2 py-1 text-xs rounded bg-muted capitalize">
                             {item.type}

@@ -105,7 +105,20 @@ export const postsAPI = {
     tag?: string;
     search?: string;
   }): Promise<{ posts: Post[]; total: number; page: number; limit: number }> => {
-    const response = await api.get('/posts', { params });
+    // Map frontend params to backend expected params
+    const mappedParams: any = {
+      page: params?.page,
+      page_size: params?.limit,  // Backend expects page_size instead of limit
+      tag_id: params?.tag,        // Backend expects tag_id instead of tag
+      search: params?.search,
+    };
+    // Remove undefined values
+    Object.keys(mappedParams).forEach(key => {
+      if (mappedParams[key] === undefined) {
+        delete mappedParams[key];
+      }
+    });
+    const response = await api.get('/posts', { params: mappedParams });
     return response.data;
   },
 
@@ -120,12 +133,34 @@ export const postsAPI = {
   },
 
   create: async (data: Partial<Post>): Promise<Post> => {
-    const response = await api.post('/admin/posts', data);
+    // Map coverImage to cover_image for backend
+    // Map tags (number[]) to tag_ids for backend
+    const mappedData: any = { ...data };
+    if (mappedData.coverImage) {
+      mappedData.cover_image = mappedData.coverImage;
+      delete mappedData.coverImage;
+    }
+    if (mappedData.tags && Array.isArray(mappedData.tags)) {
+      mappedData.tag_ids = mappedData.tags;
+      delete mappedData.tags;
+    }
+    const response = await api.post('/admin/posts', mappedData);
     return response.data.post || response.data;
   },
 
   update: async (id: number, data: Partial<Post>): Promise<Post> => {
-    const response = await api.put(`/admin/posts/${id}`, data);
+    // Map coverImage to cover_image for backend
+    // Map tags (number[]) to tag_ids for backend
+    const mappedData: any = { ...data };
+    if (mappedData.coverImage) {
+      mappedData.cover_image = mappedData.coverImage;
+      delete mappedData.coverImage;
+    }
+    if (mappedData.tags && Array.isArray(mappedData.tags)) {
+      mappedData.tag_ids = mappedData.tags;
+      delete mappedData.tags;
+    }
+    const response = await api.put(`/admin/posts/${id}`, mappedData);
     return response.data.post || response.data;
   },
 
@@ -158,7 +193,21 @@ export const commentsAPI = {
   },
 
   create: async (data: { content: string; postId?: number; parentId?: number; authorName?: string; authorEmail?: string }): Promise<Comment> => {
-    const response = await api.post('/comments', data);
+    // Map postId to post_id for backend
+    const mappedData: any = {
+      content: data.content,
+      post_id: data.postId,
+      parent_id: data.parentId,
+      author_name: data.authorName,
+      author_email: data.authorEmail,
+    };
+    // Remove undefined values
+    Object.keys(mappedData).forEach(key => {
+      if (mappedData[key] === undefined) {
+        delete mappedData[key];
+      }
+    });
+    const response = await api.post('/comments', mappedData);
     return response.data.comment || response.data;
   },
 
@@ -188,12 +237,46 @@ export const projectsAPI = {
   },
 
   create: async (data: Partial<Project>): Promise<Project> => {
-    const response = await api.post('/admin/projects', data);
+    // Map frontend field names to backend expected snake_case
+    const mappedData: any = {
+      title: data.title,
+      description: data.description,
+      tech_stack: data.tech_stack,
+      status: data.status,
+      sort_order: data.sort_order,
+      cover_image: data.cover_image,
+      demo_url: data.demo_url,
+      github_url: data.github_url,
+    };
+    // Remove undefined values
+    Object.keys(mappedData).forEach(key => {
+      if (mappedData[key] === undefined) {
+        delete mappedData[key];
+      }
+    });
+    const response = await api.post('/admin/projects', mappedData);
     return response.data.project || response.data;
   },
 
   update: async (id: number, data: Partial<Project>): Promise<Project> => {
-    const response = await api.put(`/admin/projects/${id}`, data);
+    // Map frontend field names to backend expected snake_case
+    const mappedData: any = {
+      title: data.title,
+      description: data.description,
+      tech_stack: data.tech_stack,
+      status: data.status,
+      sort_order: data.sort_order,
+      cover_image: data.cover_image,
+      demo_url: data.demo_url,
+      github_url: data.github_url,
+    };
+    // Remove undefined values
+    Object.keys(mappedData).forEach(key => {
+      if (mappedData[key] === undefined) {
+        delete mappedData[key];
+      }
+    });
+    const response = await api.put(`/admin/projects/${id}`, mappedData);
     return response.data.project || response.data;
   },
 

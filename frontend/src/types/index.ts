@@ -47,14 +47,14 @@ export interface Project {
   id: number;
   title: string;
   description: string;
-  techStack?: string[];
+  tech_stack?: string;  // Backend stores as comma-separated string
   status: 'planning' | 'in_progress' | 'completed' | 'archived';
-  sortOrder?: number;
-  imageUrl?: string;
-  demoUrl?: string;
-  githubUrl?: string;
-  createdAt: string;
-  updatedAt: string;
+  sort_order?: number;
+  cover_image?: string;
+  demo_url?: string;
+  github_url?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ResumeItem {

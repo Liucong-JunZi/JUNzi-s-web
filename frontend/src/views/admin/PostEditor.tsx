@@ -126,17 +126,17 @@ export function PostEditor() {
         summary: formData.summary,
         coverImage: formData.coverImage,
         status: formData.status,
-        tags: selectedTags,
+        tags: selectedTags,  // Will be mapped to tag_ids in API layer
       };
 
       if (isEdit) {
-        await postsAPI.update(Number(id), postData);
+        await postsAPI.update(Number(id), postData as any);
         toast({
           title: 'Success',
           description: 'Post updated successfully',
         });
       } else {
-        const post = await postsAPI.create(postData);
+        const post = await postsAPI.create(postData as any);
         toast({
           title: 'Success',
           description: 'Post created successfully',

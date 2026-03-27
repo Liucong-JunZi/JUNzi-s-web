@@ -51,10 +51,21 @@ export function AdminProjects() {
   };
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
     });
+  };
+
+  // Helper to get field from project (handles both camelCase and snake_case)
+  const getCreatedAt = (project: Project) => (project as any).created_at || (project as any).createdAt;
+  const getSortOrder = (project: Project) => project.sort_order ?? (project as any).sortOrder;
+  const getTechStack = (project: Project): string[] => {
+    const tech = project.tech_stack || (project as any).techStack;
+    if (Array.isArray(tech)) return tech;
+    if (typeof tech === 'string' && tech) return tech.split(',').map((t: string) => t.trim()).filter(Boolean);
+    return [];
   };
 
   const getStatusLabel = (status: string) => {
@@ -119,9 +130,9 @@ export function AdminProjects() {
                       </Badge>
                     </div>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span>{formatDate(project.createdAt)}</span>
-                      {project.sortOrder !== undefined && (
-                        <span>Order: {project.sortOrder}</span>
+                      <span>{formatDate(getCreatedAt(project))}</span>
+                      {getSortOrder(project) !== undefined && (
+                        <span>Order: {getSortOrder(project)}</span>
                       )}
                     </div>
                   </div>
@@ -148,9 +159,9 @@ export function AdminProjects() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground mb-4">{project.description}</p>
-                {project.techStack && project.techStack.length > 0 && (
+                {getTechStack(project).length > 0 && (
                   <div className="flex flex-wrap gap-2">
-                    {project.techStack.map((tech, index) => (
+                    {getTechStack(project).map((tech, index) => (
                       <Badge key={index} variant="outline">
                         {tech}
                       </Badge>
