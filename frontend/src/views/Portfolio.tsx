@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { projectsAPI } from '../api';
 import type { Project } from '../types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Badge } from '../components/ui/button';
+import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
 import { ExternalLink } from 'lucide-react';
 

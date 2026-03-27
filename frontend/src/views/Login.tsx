@@ -17,15 +17,15 @@ function GithubIcon({ className }: { className?: string }) {
 export function Login() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { login, isAuthenticated } = useAuthStore();
+  const { setUser, isAuthenticated } = useAuthStore();
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Define handleCallback before it's used in useEffect
-  const handleCallback = async (code: string) => {
+  // Handle session restoration from OAuth callback
+  const handleCallback = async () => {
     setIsProcessing(true);
     try {
-      const { user, token } = await authAPI.callback(code);
-      login(user, token);
+      const user = await authAPI.me();
+      setUser(user);
       // Redirect to the original page after login, or home
       const redirectPath = authAPI.getRedirectPath() || '/';
       navigate(redirectPath);
@@ -43,13 +43,16 @@ export function Login() {
       return;
     }
 
-    const code = searchParams.get('code');
-    if (code && !isProcessing) {
-      handleCallback(code);
+    // Check if this is an OAuth callback (no code parameter with cookie-based auth)
+    const fromCallback = searchParams.get('callback');
+    if (fromCallback === 'true' && !isProcessing) {
+      handleCallback();
     }
   }, [searchParams, isAuthenticated, isProcessing, navigate]);
 
   const handleGitHubLogin = () => {
+    // Save current location for post-login redirect
+    sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
     authAPI.login();
   };
 
@@ -57,8 +60,8 @@ export function Login() {
     return null;
   }
 
-  const code = searchParams.get('code');
-  if (code) {
+  const fromCallback = searchParams.get('callback');
+  if (fromCallback) {
     return (
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-md mx-auto text-center">
