@@ -109,7 +109,7 @@ export const postsAPI = {
     const mappedParams: any = {
       page: params?.page,
       page_size: params?.limit,  // Backend expects page_size instead of limit
-      tag_id: params?.tag,        // Backend expects tag_id instead of tag
+      tag: params?.tag,
       search: params?.search,
     };
     // Remove undefined values
@@ -119,6 +119,25 @@ export const postsAPI = {
       }
     });
     const response = await api.get('/posts', { params: mappedParams });
+    return response.data;
+  },
+
+  adminListPosts: async (params?: {
+    page?: number;
+    limit?: number;
+    tag?: string;
+    search?: string;
+  }): Promise<{ posts: Post[]; total: number; page: number; limit: number }> => {
+    const mappedParams: any = {
+      page: params?.page,
+      page_size: params?.limit,
+      tag: params?.tag,
+      search: params?.search,
+    };
+    Object.keys(mappedParams).forEach(key => {
+      if (mappedParams[key] === undefined) delete mappedParams[key];
+    });
+    const response = await api.get('/admin/posts', { params: mappedParams });
     return response.data;
   },
 
@@ -227,6 +246,21 @@ export const projectsAPI = {
       if (mappedParams[key] === undefined) delete mappedParams[key];
     });
     const response = await api.get('/projects', { params: mappedParams });
+    return response.data;
+  },
+
+  adminListProjects: async (params?: {
+    page?: number;
+    limit?: number;
+  }): Promise<{ projects: Project[]; total: number; page: number; limit: number }> => {
+    const mappedParams: any = {
+      page: params?.page,
+      page_size: params?.limit,
+    };
+    Object.keys(mappedParams).forEach(key => {
+      if (mappedParams[key] === undefined) delete mappedParams[key];
+    });
+    const response = await api.get('/admin/projects', { params: mappedParams });
     return response.data;
   },
 

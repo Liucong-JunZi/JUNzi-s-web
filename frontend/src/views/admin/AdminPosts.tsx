@@ -20,7 +20,7 @@ export function AdminPosts() {
   const fetchPosts = async () => {
     setLoading(true);
     try {
-      const response = await postsAPI.getAll({ limit: 100 });
+      const response = await postsAPI.adminListPosts({ limit: 100 });
       setPosts(response.posts);
     } catch (error) {
       console.error('Failed to fetch posts:', error);
