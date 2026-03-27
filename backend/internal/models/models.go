@@ -96,7 +96,7 @@ type Comment struct {
 	PostID    *uint          `json:"post_id"`
 	Post      *Post          `json:"post" gorm:"foreignKey:PostID"`
 	UserID    uint           `json:"user_id"`
-	User      User           `json:"user" gorm:"foreignKey:UserID"`
+	User      User           `json:"author" gorm:"foreignKey:UserID"`
 	ParentID  *uint          `json:"parent_id"`
 	Replies   []Comment      `json:"replies" gorm:"foreignKey:ParentID"`
 	Status    string         `json:"status" gorm:"default:pending"` // pending, approved, rejected

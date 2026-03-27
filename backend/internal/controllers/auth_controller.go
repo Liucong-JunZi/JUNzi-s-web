@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -36,7 +37,12 @@ func NewAuthController(cfg *config.Config) *AuthController {
 			Endpoint:     github.Endpoint,
 			RedirectURL:  cfg.GitHub.CallbackURL,
 		},
-		frontendURL: "http://localhost:5173",
+		frontendURL: func() string {
+			if v := os.Getenv("FRONTEND_URL"); v != "" {
+				return v
+			}
+			return "http://localhost:5173"
+		}(),
 	}
 }
 
@@ -46,6 +52,11 @@ type GitHubUser struct {
 	Email     string `json:"email"`
 	AvatarURL string `json:"avatar_url"`
 	Bio       string `json:"bio"`
+}
+
+// isSecureCookie returns true when running in production
+func isSecureCookie() bool {
+	return os.Getenv("APP_ENV") == "production"
 }
 
 // generateState generates a random state string for CSRF protection
@@ -178,8 +189,8 @@ func (ac *AuthController) GitHubCallback(c *gin.Context) {
 	}
 
 	// Set tokens as HttpOnly cookies (more secure than URL params)
-	c.SetCookie("access_token", accessTokenString, 3600, "/", "", false, true)   // 1 hour
-	c.SetCookie("refresh_token", refreshTokenString, 604800, "/", "", false, true) // 7 days
+	c.SetCookie("access_token", accessTokenString, 3600, "/", "", isSecureCookie(), true)   // 1 hour
+	c.SetCookie("refresh_token", refreshTokenString, 604800, "/", "", isSecureCookie(), true) // 7 days
 
 	// Redirect to frontend
 	frontendURL := fmt.Sprintf("%s/auth/callback", ac.frontendURL)
@@ -260,7 +271,7 @@ func (ac *AuthController) RefreshToken(c *gin.Context) {
 	}
 
 	// Set new access token cookie
-	c.SetCookie("access_token", accessTokenString, 3600, "/", "", false, true)
+	c.SetCookie("access_token", accessTokenString, 3600, "/", "", isSecureCookie(), true)
 
 	c.JSON(http.StatusOK, gin.H{"message": "Token refreshed successfully"})
 }
@@ -268,7 +279,7 @@ func (ac *AuthController) RefreshToken(c *gin.Context) {
 // Logout handles user logout
 func (ac *AuthController) Logout(c *gin.Context) {
 	// Clear cookies by setting max age to -1
-	c.SetCookie("access_token", "", -1, "/", "", false, true)
-	c.SetCookie("refresh_token", "", -1, "/", "", false, true)
+	c.SetCookie("access_token", "", -1, "/", "", isSecureCookie(), true)
+	c.SetCookie("refresh_token", "", -1, "/", "", isSecureCookie(), true)
 	c.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
 }

@@ -106,7 +106,7 @@ services:
     networks:
       - junzi-network
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -117,7 +117,7 @@ services:
       context: ./frontend
       dockerfile: ../docker/frontend/Dockerfile
       args:
-        - VITE_API_URL=${VITE_API_URL:-http://localhost:8080}
+        - VITE_API_URL=${VITE_API_URL:-http://localhost:8080/api}
     container_name: junzi-frontend
     restart: unless-stopped
     ports:

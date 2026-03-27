@@ -92,6 +92,56 @@ func (pc *PostController) ListPosts(c *gin.Context) {
 	})
 }
 
+// AdminListPosts lists all posts for admin (no default status filter)
+func (pc *PostController) AdminListPosts(c *gin.Context) {
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", c.DefaultQuery("limit", "10")))
+	status := c.Query("status")
+	categoryID := c.Query("category_id")
+	tagID := c.Query("tag_id")
+	tag := c.Query("tag")
+	search := c.Query("search")
+
+	offset := (page - 1) * pageSize
+
+	query := database.DB.Model(&models.Post{}).Preload("Author").Preload("Category").Preload("Tags")
+
+	if status != "" {
+		query = query.Where("status = ?", status)
+	}
+	// No default status filter for admin — return all posts
+
+	if categoryID != "" {
+		query = query.Where("category_id = ?", categoryID)
+	}
+
+	if tagID != "" {
+		query = query.Joins("JOIN post_tags ON post_tags.post_id = posts.id AND post_tags.tag_id = ?", tagID)
+	} else if tag != "" {
+		query = query.Joins("JOIN post_tags ON post_tags.post_id = posts.id").Joins("JOIN tags ON tags.id = post_tags.tag_id AND tags.slug = ?", tag)
+	}
+
+	if search != "" {
+		query = query.Where("title LIKE ? OR content LIKE ?", "%"+search+"%", "%"+search+"%")
+	}
+
+	var total int64
+	query.Count(&total)
+
+	var posts []models.Post
+	if err := query.Order("created_at DESC").Offset(offset).Limit(pageSize).Find(&posts).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch posts"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"posts":     posts,
+		"total":     total,
+		"page":      page,
+		"page_size": pageSize,
+	})
+}
+
 // GetPostBySlug gets a single post by slug
 func (pc *PostController) GetPostBySlug(c *gin.Context) {
 	slug := c.Param("slug")

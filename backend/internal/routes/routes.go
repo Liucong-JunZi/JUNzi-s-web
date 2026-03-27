@@ -100,6 +100,8 @@ func Setup(cfg *config.Config) *gin.Engine {
 				// Projects management
 				admin.POST("/projects", projectController.CreateProject)
 				admin.PUT("/projects/:id", projectController.UpdateProject)
+				admin.GET("/posts", postController.AdminListPosts)
+				admin.GET("/projects", projectController.AdminListProjects)
 				admin.DELETE("/projects/:id", projectController.DeleteProject)
 
 				// Resume management

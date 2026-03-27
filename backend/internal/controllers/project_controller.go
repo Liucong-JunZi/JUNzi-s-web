@@ -72,6 +72,38 @@ func (pc *ProjectController) ListProjects(c *gin.Context) {
 	})
 }
 
+// AdminListProjects lists all projects for admin (no default status filter)
+func (pc *ProjectController) AdminListProjects(c *gin.Context) {
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", c.DefaultQuery("limit", "10")))
+	status := c.Query("status")
+
+	offset := (page - 1) * pageSize
+
+	query := database.DB.Model(&models.Project{})
+
+	if status != "" {
+		query = query.Where("status = ?", status)
+	}
+	// No default status filter for admin — return all projects
+
+	var total int64
+	query.Count(&total)
+
+	var projects []models.Project
+	if err := query.Order("sort_order ASC, created_at DESC").Offset(offset).Limit(pageSize).Find(&projects).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch projects"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"projects":  projects,
+		"total":     total,
+		"page":      page,
+		"page_size": pageSize,
+	})
+}
+
 // GetProject gets a single project by ID
 func (pc *ProjectController) GetProject(c *gin.Context) {
 	id := c.Param("id")
