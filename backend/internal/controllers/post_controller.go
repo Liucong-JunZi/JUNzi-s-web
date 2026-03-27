@@ -294,12 +294,12 @@ func (pc *PostController) DeletePost(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Post deleted successfully"})
 }
 
-// LikePost increments the like count for a post
+// LikePost increments the like count for a published post
 func (pc *PostController) LikePost(c *gin.Context) {
 	id := c.Param("id")
 
 	var post models.Post
-	if err := database.DB.First(&post, id).Error; err != nil {
+	if err := database.DB.Where("status = ?", "published").First(&post, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
 		return
 	}

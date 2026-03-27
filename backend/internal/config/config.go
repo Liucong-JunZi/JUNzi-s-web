@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -94,7 +95,14 @@ func Load() (*Config, error) {
 		},
 	}
 
-	return cfg, nil
+	return cfg, validate(cfg)
+}
+
+func validate(cfg *Config) error {
+	if cfg.JWT.Secret == "" || cfg.JWT.Secret == "your-secret-key" {
+		return fmt.Errorf("JWT_SECRET environment variable must be set and must not be the default value")
+	}
+	return nil
 }
 
 func getEnv(key, defaultValue string) string {

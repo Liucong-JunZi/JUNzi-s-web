@@ -162,7 +162,10 @@ func (rc *ResumeController) UpdateResume(c *gin.Context) {
 	if req.Type != "" {
 		updates["type"] = req.Type
 	}
-	updates["sort_order"] = req.SortOrder
+	// Only update sort_order if a non-zero value is provided; otherwise preserve existing
+	if req.SortOrder != 0 {
+		updates["sort_order"] = req.SortOrder
+	}
 
 	if err := database.DB.Model(&resume).Updates(updates).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update resume item"})
