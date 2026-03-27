@@ -87,11 +87,6 @@ export const authAPI = {
     window.location.href = `${API_BASE_URL}/auth/github`;
   },
 
-  callback: async (code: string): Promise<{ user: User; token: string }> => {
-    const response = await api.get(`/auth/callback?code=${code}`);
-    return response.data;
-  },
-
   logout: async (): Promise<void> => {
     await api.post('/auth/logout');
   },
