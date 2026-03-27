@@ -28,20 +28,21 @@ type CreatePostRequest struct {
 }
 
 type UpdatePostRequest struct {
-	Title      string `json:"title"`
-	Slug       string `json:"slug"`
-	Content    string `json:"content"`
-	Summary    string `json:"summary"`
-	CoverImage string `json:"cover_image"`
-	Status     string `json:"status"`
-	CategoryID uint   `json:"category_id"`
-	Tags       []uint `json:"tags"`
+	Title      *string `json:"title"`
+	Slug       *string `json:"slug"`
+	Content    *string `json:"content"`
+	Summary    *string `json:"summary"`
+	CoverImage *string `json:"cover_image"`
+	Status     *string `json:"status"`
+	CategoryID uint    `json:"category_id"`
+	Tags       []uint  `json:"tags"`
 }
 
 // ListPosts lists all posts with pagination
 func (pc *PostController) ListPosts(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", c.DefaultQuery("limit", "10")))
+	page, pageSize = sanitizePagination(page, pageSize)
 	categoryID := c.Query("category_id")
 	tagID := c.Query("tag_id")
 	tag := c.Query("tag")
@@ -91,6 +92,7 @@ func (pc *PostController) ListPosts(c *gin.Context) {
 func (pc *PostController) AdminListPosts(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", c.DefaultQuery("limit", "10")))
+	page, pageSize = sanitizePagination(page, pageSize)
 	status := c.Query("status")
 	categoryID := c.Query("category_id")
 	tagID := c.Query("tag_id")
@@ -236,23 +238,23 @@ func (pc *PostController) UpdatePost(c *gin.Context) {
 	}
 
 	updates := map[string]interface{}{}
-	if req.Title != "" {
-		updates["title"] = req.Title
+	if req.Title != nil {
+		updates["title"] = *req.Title
 	}
-	if req.Slug != "" {
-		updates["slug"] = req.Slug
+	if req.Slug != nil {
+		updates["slug"] = *req.Slug
 	}
-	if req.Content != "" {
-		updates["content"] = req.Content
+	if req.Content != nil {
+		updates["content"] = *req.Content
 	}
-	if req.Summary != "" {
-		updates["summary"] = req.Summary
+	if req.Summary != nil {
+		updates["summary"] = *req.Summary
 	}
-	if req.CoverImage != "" {
-		updates["cover_image"] = req.CoverImage
+	if req.CoverImage != nil {
+		updates["cover_image"] = *req.CoverImage
 	}
-	if req.Status != "" {
-		updates["status"] = req.Status
+	if req.Status != nil {
+		updates["status"] = *req.Status
 	}
 	if req.CategoryID != 0 {
 		updates["category_id"] = req.CategoryID

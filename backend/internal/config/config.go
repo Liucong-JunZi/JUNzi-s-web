@@ -91,7 +91,7 @@ func Load() (*Config, error) {
 			CallbackURL:  getEnv("GITHUB_CALLBACK_URL", "http://localhost:8080/api/auth/github/callback"),
 		},
 		JWT: JWTConfig{
-			Secret: getEnv("JWT_SECRET", "your-secret-key"),
+			Secret: getEnv("JWT_SECRET", ""),
 		},
 	}
 
@@ -101,6 +101,9 @@ func Load() (*Config, error) {
 func validate(cfg *Config) error {
 	if cfg.JWT.Secret == "" || cfg.JWT.Secret == "your-secret-key" {
 		return fmt.Errorf("JWT_SECRET environment variable must be set and must not be the default value")
+	}
+	if len(cfg.JWT.Secret) < 32 {
+		return fmt.Errorf("JWT_SECRET must be at least 32 characters long")
 	}
 	return nil
 }

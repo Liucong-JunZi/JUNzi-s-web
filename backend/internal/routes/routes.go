@@ -20,7 +20,11 @@ func Setup(cfg *config.Config) *gin.Engine {
 	// Configure trusted proxies: use X-Real-IP header set by Nginx proxy
 	// In Docker, Nginx runs in a separate container (not 127.0.0.1), so we
 	// trust the header directly rather than listing specific proxy IPs.
-	router.TrustedPlatform = "X-Real-IP"
+	// Only trust X-Real-IP header in production (behind Nginx proxy).
+	// In debug mode, accept direct connections without proxy header spoofing risk.
+	if cfg.Server.Mode == "release" {
+		router.TrustedPlatform = "X-Real-IP"
+	}
 
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
