@@ -151,11 +151,10 @@ func (pc *PostController) GetPostBySlug(c *gin.Context) {
 	}
 
 	// Increment view count atomically to avoid race condition
-	database.DB.Model(&models.Post{}).Where("id = ?", post.ID).
-		UpdateColumn("view_count", database.DB.Raw("view_count + 1"))
-
-	// Update the post struct to reflect the new view count
-	post.ViewCount++
+	if err := database.DB.Model(&models.Post{}).Where("id = ?", post.ID).
+		UpdateColumn("view_count", database.DB.Raw("view_count + 1")).Error; err == nil {
+		post.ViewCount++
+	}
 
 	c.JSON(http.StatusOK, gin.H{"post": post})
 }
@@ -307,8 +306,11 @@ func (pc *PostController) LikePost(c *gin.Context) {
 	}
 
 	// Increment like count atomically
-	database.DB.Model(&models.Post{}).Where("id = ?", post.ID).
-		UpdateColumn("like_count", database.DB.Raw("COALESCE(like_count, 0) + 1"))
+	if err := database.DB.Model(&models.Post{}).Where("id = ?", post.ID).
+		UpdateColumn("like_count", database.DB.Raw("COALESCE(like_count, 0) + 1")).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update like count"})
+		return
+	}
 
 	// Reload to get updated like_count
 	database.DB.First(&post, post.ID)
