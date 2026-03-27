@@ -132,6 +132,59 @@ func AdminRequired() gin.HandlerFunc {
 	}
 }
 
+// OriginRefererCheck validates that the request's Origin or Referer header
+// matches an allowed origin. Unlike CSRFProtection, this does not depend on
+// any cookie lifetime — suitable for endpoints like /auth/refresh where the
+// CSRF cookie may have already expired.
+func OriginRefererCheck() gin.HandlerFunc {
+	allowedOrigins := getEnvOrDefault("CORS_ALLOWED_ORIGINS", "http://localhost:5173")
+
+	return func(c *gin.Context) {
+		origin := c.Request.Header.Get("Origin")
+		referer := c.Request.Header.Get("Referer")
+
+		// At least one must be present
+		if origin == "" && referer == "" {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Origin or Referer header required"})
+			c.Abort()
+			return
+		}
+
+		if origin != "" {
+			if !isOriginAllowed(origin, allowedOrigins) {
+				c.JSON(http.StatusForbidden, gin.H{"error": "Origin not allowed"})
+				c.Abort()
+				return
+			}
+		} else {
+			// Extract origin from Referer URL
+			rOrigin := refererOrigin(referer)
+			if rOrigin == "" || !isOriginAllowed(rOrigin, allowedOrigins) {
+				c.JSON(http.StatusForbidden, gin.H{"error": "Referer origin not allowed"})
+				c.Abort()
+				return
+			}
+		}
+
+		c.Next()
+	}
+}
+
+// refererOrigin extracts the origin (scheme://host[:port]) from a URL string.
+func refererOrigin(raw string) string {
+	// Find the end of scheme://host[:port] — first '/' after "://"
+	schemeIdx := strings.Index(raw, "://")
+	if schemeIdx < 0 {
+		return ""
+	}
+	rest := raw[schemeIdx+3:]
+	slashIdx := strings.Index(rest, "/")
+	if slashIdx < 0 {
+		return raw // no path — entire string is origin
+	}
+	return raw[:schemeIdx+3+slashIdx]
+}
+
 // CSRFProtection implements the double-submit cookie pattern for CSRF protection.
 // It skips safe methods (GET, HEAD, OPTIONS) and validates that the X-CSRF-Token
 // header matches the csrf_token cookie on state-changing requests.

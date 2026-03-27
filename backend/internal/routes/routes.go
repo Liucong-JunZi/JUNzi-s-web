@@ -98,10 +98,10 @@ func Setup(cfg *config.Config) *gin.Engine {
 			auth.GET("/github", authController.GitHubRedirect)
 			auth.GET("/github/callback", authController.GitHubCallback)
 			auth.POST("/logout", middleware.CSRFProtection(), authController.Logout)
-			// NOTE: /refresh intentionally has no CSRF — the csrf_token cookie expires
-			// alongside the access_token (both 1h), so by the time a refresh is needed
-			// the CSRF cookie is gone and the check would always fail.
-			auth.POST("/refresh", authController.RefreshToken)
+			// /refresh uses Origin/Referer check instead of double-submit CSRF —
+			// the csrf_token cookie expires alongside the access_token so the
+			// standard CSRF check would always fail when refresh is actually needed.
+			auth.POST("/refresh", middleware.OriginRefererCheck(), authController.RefreshToken)
 			auth.GET("/me", middleware.AuthRequired(cfg), authController.GetCurrentUser)
 		}
 
