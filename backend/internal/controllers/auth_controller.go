@@ -3,8 +3,9 @@ package controllers
 import (
 	"context"
 	"crypto/rand"
-	"encoding/hex"
+	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/liucong/personal-website/internal/cache"
 	"github.com/liucong/personal-website/internal/config"
 	"github.com/liucong/personal-website/internal/database"
@@ -91,6 +93,37 @@ func (ac *AuthController) generateState() (string, error) {
 		return "", err
 	}
 	return hex.EncodeToString(bytes), nil
+}
+
+// tokenHash returns a SHA-256 hex digest of the token string for use as a
+// Redis blocklist key. Using a hash avoids storing raw tokens in Redis.
+func tokenHash(tokenString string) string {
+	h := sha256.Sum256([]byte(tokenString))
+	return hex.EncodeToString(h[:])
+}
+
+// revokeRefreshToken adds a refresh token to the Redis blocklist.
+// The TTL is set to the token's remaining lifetime so the entry auto-expires.
+func revokeRefreshToken(tokenString string, expiresAt time.Time) error {
+	key := "refresh_revoked:" + tokenHash(tokenString)
+	ttl := time.Until(expiresAt)
+	if ttl <= 0 {
+		return nil // already expired, no need to blocklist
+	}
+	ctx := context.Background()
+	return cache.Client.Set(ctx, key, "1", ttl).Err()
+}
+
+// isRefreshTokenRevoked checks whether a refresh token has been revoked.
+// Fail-closed: if Redis is unreachable, the token is treated as revoked.
+func isRefreshTokenRevoked(tokenString string) bool {
+	key := "refresh_revoked:" + tokenHash(tokenString)
+	ctx := context.Background()
+	val, err := cache.Client.Get(ctx, key).Result()
+	if err != nil {
+		return true // fail-closed: Redis error → treat as revoked
+	}
+	return val != ""
 }
 
 // GitHubRedirect redirects to GitHub OAuth page
@@ -219,10 +252,12 @@ func (ac *AuthController) GitHubCallback(c *gin.Context) {
 		return
 	}
 
-	// Generate refresh token (7 days expiration)
+	// Generate refresh token (7 days expiration) with unique ID for revocation
+	refreshJTI := uuid.New().String()
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub":  user.ID,
 		"type": "refresh",
+		"jti":  refreshJTI,
 		"exp":  now.Add(time.Hour * 24 * 7).Unix(),
 		"iat":  now.Unix(),
 	})
@@ -267,7 +302,8 @@ func (ac *AuthController) GetCurrentUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"user": user})
 }
 
-// RefreshToken refreshes the access token using a valid refresh token
+// RefreshToken refreshes the access token using a valid refresh token.
+// The old refresh token is blocklisted in Redis to prevent reuse (rotation).
 func (ac *AuthController) RefreshToken(c *gin.Context) {
 	refreshTokenStr, err := c.Cookie("refresh_token")
 	if err != nil {
@@ -275,7 +311,16 @@ func (ac *AuthController) RefreshToken(c *gin.Context) {
 		return
 	}
 
+	// Check if the token has been revoked (fail-closed)
+	if isRefreshTokenRevoked(refreshTokenStr) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Refresh token has been revoked"})
+		return
+	}
+
 	token, err := jwt.Parse(refreshTokenStr, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
 		return []byte(ac.cfg.JWT.Secret), nil
 	})
 
@@ -306,6 +351,12 @@ func (ac *AuthController) RefreshToken(c *gin.Context) {
 		return
 	}
 
+	// Revoke the old refresh token now that we've validated it
+	// (rotation: each refresh token can only be used once)
+	if exp, ok := claims["exp"].(float64); ok {
+		revokeRefreshToken(refreshTokenStr, time.Unix(int64(exp), 0))
+	}
+
 	now := time.Now()
 
 	// Generate new access token (1 hour expiration)
@@ -323,8 +374,25 @@ func (ac *AuthController) RefreshToken(c *gin.Context) {
 		return
 	}
 
-	// Set new access token cookie
+	// Generate new refresh token with rotation
+	newRefreshJTI := uuid.New().String()
+	newRefreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub":  user.ID,
+		"type": "refresh",
+		"jti":  newRefreshJTI,
+		"exp":  now.Add(time.Hour * 24 * 7).Unix(),
+		"iat":  now.Unix(),
+	})
+
+	newRefreshTokenString, err := newRefreshToken.SignedString([]byte(ac.cfg.JWT.Secret))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate refresh token"})
+		return
+	}
+
+	// Set new token cookies
 	setCookie(c, "access_token", accessTokenString, 3600, true)
+	setCookie(c, "refresh_token", newRefreshTokenString, 604800, true)
 
 	// Generate new CSRF token
 	csrfToken, err := generateCSRFToken()
@@ -337,8 +405,22 @@ func (ac *AuthController) RefreshToken(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Token refreshed successfully", "csrf_token": csrfToken})
 }
 
-// Logout handles user logout
+// Logout handles user logout — revokes the refresh token and clears cookies.
 func (ac *AuthController) Logout(c *gin.Context) {
+	// Revoke the refresh token if present
+	if refreshTokenStr, err := c.Cookie("refresh_token"); err == nil && refreshTokenStr != "" {
+		// Parse to get expiry for blocklist TTL
+		if token, err := jwt.Parse(refreshTokenStr, func(token *jwt.Token) (interface{}, error) {
+			return []byte(ac.cfg.JWT.Secret), nil
+		}); err == nil && token.Valid {
+			if claims, ok := token.Claims.(jwt.MapClaims); ok {
+				if exp, ok := claims["exp"].(float64); ok {
+					revokeRefreshToken(refreshTokenStr, time.Unix(int64(exp), 0))
+				}
+			}
+		}
+	}
+
 	// Clear cookies by setting max age to -1
 	setCookie(c, "access_token", "", -1, true)
 	setCookie(c, "refresh_token", "", -1, true)

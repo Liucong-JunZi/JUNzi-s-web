@@ -1,7 +1,9 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 
@@ -82,6 +84,9 @@ func AuthRequired(cfg *config.Config) gin.HandlerFunc {
 		}
 
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			}
 			return []byte(cfg.JWT.Secret), nil
 		})
 
@@ -170,19 +175,17 @@ func OriginRefererCheck() gin.HandlerFunc {
 	}
 }
 
-// refererOrigin extracts the origin (scheme://host[:port]) from a URL string.
+// refererOrigin extracts the origin (scheme://host[:port]) from a URL string
+// using the standard library parser for robustness.
 func refererOrigin(raw string) string {
-	// Find the end of scheme://host[:port] — first '/' after "://"
-	schemeIdx := strings.Index(raw, "://")
-	if schemeIdx < 0 {
+	u, err := url.Parse(raw)
+	if err != nil {
 		return ""
 	}
-	rest := raw[schemeIdx+3:]
-	slashIdx := strings.Index(rest, "/")
-	if slashIdx < 0 {
-		return raw // no path — entire string is origin
+	if u.Scheme == "" || u.Host == "" {
+		return ""
 	}
-	return raw[:schemeIdx+3+slashIdx]
+	return u.Scheme + "://" + u.Host
 }
 
 // CSRFProtection implements the double-submit cookie pattern for CSRF protection.
