@@ -108,4 +108,4 @@ backup-mysql: ## 备份 MySQL 数据
 health: ## 检查服务健康状态
 	@echo "检查服务健康状态..."
 	@curl -s http://localhost/health && echo " - Frontend: OK" || echo " - Frontend: FAILED"
-	@curl -s http://localhost:8080/health && echo " - Backend: OK" || echo " - Backend: FAILED"
+	@curl -s http://localhost:8080/api/health && echo " - Backend: OK" || echo " - Backend: FAILED"
