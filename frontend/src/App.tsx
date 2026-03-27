@@ -29,7 +29,7 @@ function App() {
           <Route path="blog" element={<Blog />} />
           <Route path="blog/:slug" element={<BlogPost />} />
           <Route path="portfolio" element={<Portfolio />} />
-          <Route path="portfolio/:slug" element={<PortfolioDetail />} />
+          <Route path="portfolio/:id" element={<PortfolioDetail />} />
           <Route path="resume" element={<Resume />} />
           <Route path="login" element={<Login />} />
 

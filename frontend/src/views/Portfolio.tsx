@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 import { projectsAPI } from '../api';
 import type { Project } from '../types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Badge } from '../components/ui/badge';
+import { Badge } from '../components/ui/button';
 import { Button } from '../components/ui/button';
-import { ExternalLink, Star } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 
 // Custom Github icon
 function GithubIcon({ className }: { className?: string }) {
@@ -19,19 +19,15 @@ function GithubIcon({ className }: { className?: string }) {
 export function Portfolio() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showFeaturedOnly, setShowFeaturedOnly] = useState(false);
 
   useEffect(() => {
     fetchProjects();
-  }, [showFeaturedOnly]);
+  }, []);
 
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const response = await projectsAPI.getAll({
-        featured: showFeaturedOnly || undefined,
-        limit: 50,
-      });
+      const response = await projectsAPI.getAll({ limit: 50 });
       setProjects(response.projects);
     } catch (error) {
       console.error('Failed to fetch projects:', error);
@@ -40,21 +36,34 @@ export function Portfolio() {
     }
   };
 
+  const getStatusColor = (status: string) => {
+    const colorMap: Record<string, string> = {
+      planning: 'bg-yellow-500',
+      in_progress: 'bg-blue-500',
+      completed: 'bg-green-500',
+      archived: 'bg-gray-500',
+    };
+    return colorMap[status] || 'bg-gray-500';
+  };
+
+  const getStatusLabel = (status: string) => {
+    const statusMap: Record<string, string> = {
+      planning: 'Planning',
+      in_progress: 'In Progress',
+      completed: 'Completed',
+      archived: 'Archived',
+    };
+    return statusMap[status] || status;
+  };
+
   return (
     <div className="container mx-auto px-4 py-12">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-4">Portfolio</h1>
-        <p className="text-muted-foreground mb-6">
+        <p className="text-muted-foreground">
           A showcase of projects I've built and contributed to.
         </p>
-        <Button
-          variant={showFeaturedOnly ? 'default' : 'outline'}
-          onClick={() => setShowFeaturedOnly(!showFeaturedOnly)}
-        >
-          <Star className="mr-2 h-4 w-4" />
-          {showFeaturedOnly ? 'Show All Projects' : 'Featured Only'}
-        </Button>
       </div>
 
       {/* Projects Grid */}
@@ -68,9 +77,9 @@ export function Portfolio() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project) => (
             <Card key={project.id} className="flex flex-col hover:shadow-lg transition-shadow">
-              {project.coverImage && (
+              {project.imageUrl && (
                 <img
-                  src={project.coverImage}
+                  src={project.imageUrl}
                   alt={project.title}
                   className="w-full h-48 object-cover rounded-t-lg"
                 />
@@ -78,23 +87,22 @@ export function Portfolio() {
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <CardTitle className="line-clamp-1">{project.title}</CardTitle>
-                  {project.featured && (
-                    <Badge variant="secondary" className="ml-2">
-                      <Star className="h-3 w-3 mr-1" />
-                      Featured
-                    </Badge>
-                  )}
+                  <Badge className={`${getStatusColor(project.status)} text-white ml-2`}>
+                    {getStatusLabel(project.status)}
+                  </Badge>
                 </div>
                 <CardDescription className="line-clamp-2">{project.description}</CardDescription>
               </CardHeader>
               <CardContent className="flex-1 flex flex-col">
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {project.tags.slice(0, 4).map((tag) => (
-                    <Badge key={tag.id} variant="outline">
-                      {tag.name}
-                    </Badge>
-                  ))}
-                </div>
+                {project.techStack && project.techStack.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {project.techStack.slice(0, 4).map((tech, index) => (
+                      <Badge key={index} variant="outline">
+                        {tech}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
                 <div className="mt-auto flex gap-2">
                   {project.githubUrl && (
                     <Button variant="outline" size="sm" asChild>
@@ -113,7 +121,7 @@ export function Portfolio() {
                     </Button>
                   )}
                   <Button variant="ghost" size="sm" asChild className="ml-auto">
-                    <Link to={`/portfolio/${project.slug}`}>Details</Link>
+                    <Link to={`/portfolio/${project.id}`}>Details</Link>
                   </Button>
                 </div>
               </CardContent>
