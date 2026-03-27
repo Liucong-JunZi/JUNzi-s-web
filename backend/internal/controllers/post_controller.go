@@ -93,8 +93,12 @@ func (pc *PostController) GetPostBySlug(c *gin.Context) {
 		return
 	}
 
-	// Increment view count
-	database.DB.Model(&post).Update("view_count", post.ViewCount+1)
+	// Increment view count atomically to avoid race condition
+	database.DB.Model(&models.Post{}).Where("id = ?", post.ID).
+		UpdateColumn("view_count", database.DB.Raw("view_count + 1"))
+
+	// Update the post struct to reflect the new view count
+	post.ViewCount++
 
 	c.JSON(http.StatusOK, gin.H{"post": post})
 }
