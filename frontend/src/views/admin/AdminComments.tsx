@@ -127,10 +127,10 @@ export function AdminComments() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm">{comment.content}</p>
-                {(comment.post_slug || comment.post_id) && (
+                {(comment.post?.slug || comment.post_slug) && (
                   <div className="mt-4 text-sm text-muted-foreground">
                     <Link
-                      to={`/blog/${comment.post_slug || comment.post_id}`}
+                      to={`/blog/${comment.post?.slug || comment.post_slug}`}
                       className="text-primary hover:underline"
                     >
                       View Post
