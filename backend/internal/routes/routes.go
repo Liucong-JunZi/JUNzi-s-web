@@ -16,6 +16,10 @@ func Setup(cfg *config.Config) *gin.Engine {
 
 	// Create router
 	router := gin.New()
+
+	// Configure trusted proxies to prevent X-Forwarded-For spoofing
+	router.SetTrustedProxies([]string{"127.0.0.1"})
+
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 	router.Use(middleware.CORS())
