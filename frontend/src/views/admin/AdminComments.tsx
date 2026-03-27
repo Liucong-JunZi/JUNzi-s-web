@@ -5,7 +5,7 @@ import type { Comment } from '../../types';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
-import { Trash2, MessageCircle } from 'lucide-react';
+import { Trash2, MessageCircle, CheckCircle, XCircle } from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
 
 const PAGE_SIZE = 20;
@@ -60,6 +60,25 @@ export function AdminComments() {
       toast({
         title: 'Error',
         description: 'Failed to delete comment',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleUpdateStatus = async (id: number, status: 'approved' | 'rejected') => {
+    try {
+      const updated = await commentsAPI.updateStatus(id, status);
+      setComments((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, status: updated.status || status } : c))
+      );
+      toast({
+        title: 'Success',
+        description: `Comment ${status}`,
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: `Failed to ${status === 'approved' ? 'approve' : 'reject'} comment`,
         variant: 'destructive',
       });
     }
@@ -121,18 +140,55 @@ export function AdminComments() {
                       {getAuthorEmail(comment) && (
                         <Badge variant="outline">{getAuthorEmail(comment)}</Badge>
                       )}
+                      <Badge
+                        variant={
+                          comment.status === 'approved'
+                            ? 'default'
+                            : comment.status === 'rejected'
+                            ? 'destructive'
+                            : 'secondary'
+                        }
+                      >
+                        {comment.status === 'approved'
+                          ? 'Approved'
+                          : comment.status === 'rejected'
+                          ? 'Rejected'
+                          : 'Pending'}
+                      </Badge>
                     </div>
                     <div className="text-sm text-muted-foreground">
                       {formatDate(comment.created_at)}
                     </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDelete(comment.id)}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    {comment.status !== 'approved' && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title="Approve"
+                        onClick={() => handleUpdateStatus(comment.id, 'approved')}
+                      >
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                      </Button>
+                    )}
+                    {comment.status !== 'rejected' && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title="Reject"
+                        onClick={() => handleUpdateStatus(comment.id, 'rejected')}
+                      >
+                        <XCircle className="h-4 w-4 text-orange-500" />
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDelete(comment.id)}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>

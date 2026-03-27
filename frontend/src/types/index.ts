@@ -42,6 +42,7 @@ export interface Comment {
   post?: { id: number; slug: string; title?: string };
   parent_id?: number;
   replies?: Comment[];
+  status: 'pending' | 'approved' | 'rejected';
   created_at: string;
   updated_at: string;
 }
