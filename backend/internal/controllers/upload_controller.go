@@ -1,6 +1,9 @@
 package controllers
 
 import (
+	"bytes"
+	"fmt"
+	"mime/multipart"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -69,6 +72,12 @@ func (uc *UploadController) UploadImage(c *gin.Context) {
 		return
 	}
 
+	// Validate actual file content (not just Content-Type header which can be forged)
+	if err := validateImageContent(file); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	result, err := storage.UploadFile(c.Request.Context(), &uc.cfg.MinIO, file)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to upload image"})
@@ -81,4 +90,38 @@ func (uc *UploadController) UploadImage(c *gin.Context) {
 		"filename": result.Filename,
 		"size":     result.Size,
 	})
+}
+
+// validateImageContent reads the file content to verify it's actually an image
+// by checking magic bytes, not just the Content-Type header.
+func validateImageContent(fileHeader *multipart.FileHeader) error {
+	src, err := fileHeader.Open()
+	if err != nil {
+		return fmt.Errorf("failed to open file for validation")
+	}
+	defer src.Close()
+
+	buf := make([]byte, 512)
+	n, err := src.Read(buf)
+	if err != nil {
+		return fmt.Errorf("failed to read file content")
+	}
+	if n < 12 {
+		return fmt.Errorf("file too small to be a valid image")
+	}
+
+	// Check magic bytes for each image format
+	switch {
+	case bytes.HasPrefix(buf[:n], []byte{0xFF, 0xD8, 0xFF}):
+		// JPEG
+	case bytes.HasPrefix(buf[:n], []byte{0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A}):
+		// PNG
+	case bytes.HasPrefix(buf[:n], []byte("GIF87a")) || bytes.HasPrefix(buf[:n], []byte("GIF89a")):
+		// GIF
+	case bytes.HasPrefix(buf[:n], []byte("RIFF")) && n >= 12 && string(buf[8:12]) == "WEBP":
+		// WebP
+	default:
+		return fmt.Errorf("file content is not a valid JPEG, PNG, GIF, or WebP image")
+	}
+	return nil
 }

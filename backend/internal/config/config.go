@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
@@ -17,8 +18,9 @@ type Config struct {
 }
 
 type ServerConfig struct {
-	Port string
-	Mode string
+	Port           string
+	Mode           string
+	TrustedProxies string
 }
 
 type DatabaseConfig struct {
@@ -61,8 +63,9 @@ func Load() (*Config, error) {
 
 	cfg := &Config{
 		Server: ServerConfig{
-			Port: getEnv("SERVER_PORT", "8080"),
-			Mode: getEnv("GIN_MODE", "debug"),
+			Port:           getEnv("SERVER_PORT", "8080"),
+			Mode:           getEnv("GIN_MODE", "debug"),
+			TrustedProxies: getEnv("TRUSTED_PROXIES", "172.16.0.0/12"),
 		},
 		Database: DatabaseConfig{
 			Host:     getEnv("DB_HOST", "localhost"),
@@ -99,11 +102,42 @@ func Load() (*Config, error) {
 }
 
 func validate(cfg *Config) error {
-	if cfg.JWT.Secret == "" || cfg.JWT.Secret == "your-secret-key" {
-		return fmt.Errorf("JWT_SECRET environment variable must be set and must not be the default value")
+	if cfg.JWT.Secret == "" {
+		return fmt.Errorf("JWT_SECRET environment variable must be set")
 	}
 	if len(cfg.JWT.Secret) < 32 {
 		return fmt.Errorf("JWT_SECRET must be at least 32 characters long")
+	}
+	// Reject common placeholder patterns
+	lower := strings.ToLower(cfg.JWT.Secret)
+	placeholders := []string{"change_me", "change-me", "changeme", "your-secret", "secret-key", "example", "placeholder", "default", "test"}
+	for _, p := range placeholders {
+		if strings.Contains(lower, p) {
+			return fmt.Errorf("JWT_SECRET appears to contain a placeholder value, please generate a real secret (e.g., openssl rand -base64 32)")
+		}
+	}
+	// Check minimum entropy: must contain at least 3 distinct character categories
+	var hasUpper, hasLower, hasDigit, hasSpecial bool
+	for _, c := range cfg.JWT.Secret {
+		switch {
+		case c >= 'A' && c <= 'Z':
+			hasUpper = true
+		case c >= 'a' && c <= 'z':
+			hasLower = true
+		case c >= '0' && c <= '9':
+			hasDigit = true
+		default:
+			hasSpecial = true
+		}
+	}
+	categories := 0
+	for _, has := range []bool{hasUpper, hasLower, hasDigit, hasSpecial} {
+		if has {
+			categories++
+		}
+	}
+	if categories < 3 {
+		return fmt.Errorf("JWT_SECRET is too weak: must contain characters from at least 3 categories (uppercase, lowercase, digits, special characters)")
 	}
 	return nil
 }

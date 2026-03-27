@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -24,6 +25,17 @@ func Setup(cfg *config.Config) *gin.Engine {
 	// In debug mode, accept direct connections without proxy header spoofing risk.
 	if cfg.Server.Mode == "release" {
 		router.TrustedPlatform = "X-Real-IP"
+		// Only trust X-Real-IP from the Docker internal network (Nginx proxy).
+		// Default: 172.16.0.0/12 covers Docker's default bridge subnet range.
+		if cfg.Server.TrustedProxies != "" {
+			proxies := strings.Split(cfg.Server.TrustedProxies, ",")
+			for i := range proxies {
+				proxies[i] = strings.TrimSpace(proxies[i])
+			}
+			if err := router.SetTrustedProxies(proxies); err != nil {
+				router.TrustedPlatform = ""
+			}
+		}
 	}
 
 	router.Use(gin.Logger())
