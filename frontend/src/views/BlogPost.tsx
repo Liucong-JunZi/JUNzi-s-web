@@ -17,13 +17,16 @@ export function BlogPost() {
   const [comments, setComments] = useState<CommentType[]>([]);
   const [loading, setLoading] = useState(true);
   const [commentText, setCommentText] = useState('');
+  const [commentPage, setCommentPage] = useState(1);
+  const [commentTotal, setCommentTotal] = useState(0);
+  const [loadingMore, setLoadingMore] = useState(false);
   const { isAuthenticated } = useAuthStore();
   const { toast } = useToast();
 
   useEffect(() => {
     if (slug) {
       fetchPost();
-      fetchComments();
+      fetchComments(1);
     }
   }, [slug]);
 
@@ -39,12 +42,28 @@ export function BlogPost() {
     }
   };
 
-  const fetchComments = async () => {
-    try {
-      const data = await commentsAPI.getByPostSlug(slug!);
-      setComments(data);
-    } catch (error) {
-      console.error('Failed to fetch comments:', error);
+  const fetchComments = async (page = 1) => {
+    if (page === 1) {
+      try {
+        const data = await commentsAPI.getByPostSlug(slug!, { page: 1, page_size: 10 });
+        setComments(data.comments);
+        setCommentTotal(data.total);
+        setCommentPage(1);
+      } catch (error) {
+        console.error('Failed to fetch comments:', error);
+      }
+    } else {
+      setLoadingMore(true);
+      try {
+        const data = await commentsAPI.getByPostSlug(slug!, { page, page_size: 10 });
+        setComments((prev) => [...prev, ...data.comments]);
+        setCommentTotal(data.total);
+        setCommentPage(page);
+      } catch (error) {
+        console.error('Failed to fetch comments:', error);
+      } finally {
+        setLoadingMore(false);
+      }
     }
   };
 
@@ -226,6 +245,17 @@ export function BlogPost() {
                 ))
               )}
             </div>
+            {comments.length < commentTotal && (
+              <div className="mt-4 text-center">
+                <Button
+                  variant="outline"
+                  onClick={() => fetchComments(commentPage + 1)}
+                  disabled={loadingMore}
+                >
+                  {loadingMore ? 'Loading...' : 'Load More Comments'}
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </section>
