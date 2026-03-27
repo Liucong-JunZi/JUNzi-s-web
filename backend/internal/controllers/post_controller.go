@@ -224,3 +224,20 @@ func (pc *PostController) DeletePost(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Post deleted successfully"})
 }
+
+// LikePost increments the like count for a post
+func (pc *PostController) LikePost(c *gin.Context) {
+	id := c.Param("id")
+
+	var post models.Post
+	if err := database.DB.First(&post, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+		return
+	}
+
+	// Increment like count atomically
+	database.DB.Model(&models.Post{}).Where("id = ?", post.ID).
+		UpdateColumn("like_count", database.DB.Raw("COALESCE(like_count, 0) + 1"))
+
+	c.JSON(http.StatusOK, gin.H{"message": "Post liked successfully"})
+}
