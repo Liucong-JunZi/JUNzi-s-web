@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/liucong/personal-website/internal/config"
 	"github.com/liucong/personal-website/internal/models"
@@ -22,8 +23,12 @@ func Connect(cfg *config.DatabaseConfig) error {
 	)
 
 	var err error
+	logLevel := logger.Info
+	if os.Getenv("GIN_MODE") == "release" || os.Getenv("APP_ENV") == "production" {
+		logLevel = logger.Warn
+	}
 	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
+		Logger: logger.Default.LogMode(logLevel),
 	})
 	if err != nil {
 		return fmt.Errorf("failed to connect database: %w", err)

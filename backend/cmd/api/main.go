@@ -25,10 +25,9 @@ func main() {
 
 	// Connect to Redis
 	if err := cache.Connect(&cfg.Redis); err != nil {
-		log.Printf("Warning: Failed to connect redis: %v (some features may not work)", err)
-	} else {
-		log.Println("Redis connected successfully")
+		log.Fatalf("Failed to connect redis: %v", err)
 	}
+	log.Println("Redis connected successfully")
 
 	// Connect to MinIO
 	if err := storage.Connect(&cfg.MinIO); err != nil {
