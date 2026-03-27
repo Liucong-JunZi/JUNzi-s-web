@@ -10,10 +10,42 @@ const api = axios.create({
   },
 });
 
+// Security: Use sessionStorage instead of localStorage for token storage
+// This reduces the risk of token theft via XSS as sessionStorage is cleared when the browser/tab is closed
+const getToken = () => sessionStorage.getItem('token');
+
+// 401 Error Handling: Debounce mechanism to prevent multiple redirects
+let isRedirecting = false;
+let redirectTimer: ReturnType<typeof setTimeout> | null = null;
+
+const handle401Error = () => {
+  // Debounce: Skip if already redirecting
+  if (isRedirecting) return;
+
+  isRedirecting = true;
+
+  // Clear auth data
+  sessionStorage.removeItem('token');
+  sessionStorage.removeItem('auth-storage');
+
+  // Save current location for post-login redirect
+  const currentPath = window.location.pathname + window.location.search;
+  // Don't save login page as redirect target
+  if (!currentPath.startsWith('/login')) {
+    sessionStorage.setItem('redirectAfterLogin', currentPath);
+  }
+
+  // Redirect to login with a small delay to allow any pending operations to complete
+  redirectTimer = setTimeout(() => {
+    window.location.href = '/login';
+    isRedirecting = false;
+  }, 100);
+};
+
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -29,9 +61,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+      handle401Error();
     }
     return Promise.reject(error);
   }
@@ -55,6 +85,15 @@ export const authAPI = {
   me: async (): Promise<User> => {
     const response = await api.get('/auth/me');
     return response.data;
+  },
+
+  // Helper to redirect after login
+  getRedirectPath: (): string | null => {
+    const redirectPath = sessionStorage.getItem('redirectAfterLogin');
+    if (redirectPath) {
+      sessionStorage.removeItem('redirectAfterLogin');
+    }
+    return redirectPath;
   },
 };
 

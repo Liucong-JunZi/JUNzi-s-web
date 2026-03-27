@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { postsAPI, commentsAPI } from '../api';
 import type { Post, Comment as CommentType } from '../types';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import { SafeMarkdown } from '../components/SafeMarkdown';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -169,7 +168,7 @@ export function BlogPost() {
 
         {/* Post Content */}
         <div className="prose prose-neutral dark:prose-invert max-w-none mb-8">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content}</ReactMarkdown>
+          <SafeMarkdown content={post.content} />
         </div>
 
         {/* Actions */}
