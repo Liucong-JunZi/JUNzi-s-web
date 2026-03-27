@@ -28,7 +28,7 @@ type UpdateCategoryRequest struct {
 // ListCategories lists all categories
 func (cc *CategoryController) ListCategories(c *gin.Context) {
 	var categories []models.Category
-	if err := database.DB.Preload("Posts").Find(&categories).Error; err != nil {
+	if err := database.DB.Preload("Posts", "status = ?", "published").Find(&categories).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch categories"})
 		return
 	}
@@ -41,7 +41,7 @@ func (cc *CategoryController) GetCategory(c *gin.Context) {
 	id := c.Param("id")
 
 	var category models.Category
-	if err := database.DB.Preload("Posts").First(&category, id).Error; err != nil {
+	if err := database.DB.Preload("Posts", "status = ?", "published").First(&category, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Category not found"})
 		return
 	}
@@ -154,7 +154,7 @@ func (tc *TagController) GetTag(c *gin.Context) {
 	id := c.Param("id")
 
 	var tag models.Tag
-	if err := database.DB.Preload("Posts").First(&tag, id).Error; err != nil {
+	if err := database.DB.Preload("Posts", "status = ?", "published").First(&tag, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Tag not found"})
 		return
 	}

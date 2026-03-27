@@ -42,7 +42,6 @@ type UpdatePostRequest struct {
 func (pc *PostController) ListPosts(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", c.DefaultQuery("limit", "10")))
-	status := c.Query("status")
 	categoryID := c.Query("category_id")
 	tagID := c.Query("tag_id")
 	tag := c.Query("tag")
@@ -52,12 +51,8 @@ func (pc *PostController) ListPosts(c *gin.Context) {
 
 	query := database.DB.Model(&models.Post{}).Preload("Author").Preload("Category").Preload("Tags")
 
-	if status != "" {
-		query = query.Where("status = ?", status)
-	} else {
-		// Default to published for public requests
-		query = query.Where("status = ?", "published")
-	}
+	// Always force published status for public endpoint — ignore any client-supplied status param
+	query = query.Where("status = ?", "published")
 
 	if categoryID != "" {
 		query = query.Where("category_id = ?", categoryID)
@@ -148,7 +143,7 @@ func (pc *PostController) GetPostBySlug(c *gin.Context) {
 
 	var post models.Post
 	if err := database.DB.Preload("Author").Preload("Category").Preload("Tags").
-		Where("slug = ?", slug).First(&post).Error; err != nil {
+		Where("slug = ? AND status = ?", slug, "published").First(&post).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
 		return
 	}

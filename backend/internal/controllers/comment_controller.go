@@ -47,7 +47,7 @@ func (cc *CommentController) ListComments(c *gin.Context) {
 	query := database.DB.Model(&models.Comment{}).
 		Where("post_id = ? AND status = ? AND parent_id IS NULL", post.ID, "approved").
 		Preload("User").
-		Preload("Replies.User")
+		Preload("Replies", "status = ?", "approved").Preload("Replies.User")
 
 	var total int64
 	query.Count(&total)
@@ -91,6 +91,16 @@ func (cc *CommentController) CreateComment(c *gin.Context) {
 	}
 
 	if req.ParentID != nil {
+		// Verify parent comment belongs to the same post to prevent cross-post tree pollution
+		var parentComment models.Comment
+		if err := database.DB.First(&parentComment, *req.ParentID).Error; err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Parent comment not found"})
+			return
+		}
+		if parentComment.PostID == nil || *parentComment.PostID != req.PostID {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Parent comment does not belong to the specified post"})
+			return
+		}
 		comment.ParentID = req.ParentID
 	}
 
