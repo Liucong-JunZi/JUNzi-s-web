@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { projectsAPI } from '../api';
 import type { Project } from '../types';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import { SafeMarkdown } from '../components/SafeMarkdown';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
 import { ExternalLink, ArrowLeft, Calendar } from 'lucide-react';
@@ -150,7 +149,7 @@ export function PortfolioDetail() {
 
         {/* Content */}
         <div className="prose prose-neutral dark:prose-invert max-w-none">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{project.content}</ReactMarkdown>
+          <SafeMarkdown content={project.content} />
         </div>
       </article>
     </div>

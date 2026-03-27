@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { resumeAPI } from '../api';
 import type { Resume } from '../types';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import { SafeMarkdown } from '../components/SafeMarkdown';
 import { Button } from '../components/ui/button';
 import { Download, FileText } from 'lucide-react';
 
@@ -68,7 +67,7 @@ export function Resume() {
       {resume ? (
         <div className="max-w-4xl mx-auto bg-card border rounded-lg p-8 shadow-sm">
           <div className="prose prose-neutral dark:prose-invert max-w-none">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{resume.content}</ReactMarkdown>
+            <SafeMarkdown content={resume.content} />
           </div>
         </div>
       ) : (

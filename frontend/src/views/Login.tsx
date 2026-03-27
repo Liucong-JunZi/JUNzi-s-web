@@ -35,7 +35,9 @@ export function Login() {
     try {
       const { user, token } = await authAPI.callback(code);
       login(user, token);
-      navigate('/');
+      // Redirect to the original page after login, or home
+      const redirectPath = authAPI.getRedirectPath() || '/';
+      navigate(redirectPath);
     } catch (error) {
       console.error('Login failed:', error);
       navigate('/login');
