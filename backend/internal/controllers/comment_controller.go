@@ -34,6 +34,7 @@ func (cc *CommentController) ListComments(c *gin.Context) {
 	slug := c.Param("slug")
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
+	page, pageSize = sanitizePagination(page, pageSize)
 
 	offset := (page - 1) * pageSize
 
@@ -119,6 +120,7 @@ func (cc *CommentController) CreateComment(c *gin.Context) {
 func (cc *CommentController) ListAllComments(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", c.DefaultQuery("limit", "100")))
+	page, pageSize = sanitizePagination(page, pageSize)
 	status := c.Query("status")
 
 	offset := (page - 1) * pageSize

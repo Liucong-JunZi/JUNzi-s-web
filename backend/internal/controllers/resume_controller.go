@@ -27,14 +27,14 @@ type CreateResumeRequest struct {
 }
 
 type UpdateResumeRequest struct {
-	Title       string  `json:"title"`
-	Company     string  `json:"company"`
-	Location    string  `json:"location"`
-	StartDate   string  `json:"start_date"`
-	EndDate     *string `json:"end_date"`
-	Description string  `json:"description"`
-	Type        string  `json:"type"`
-	SortOrder   *int    `json:"sort_order"`
+	Title       *string  `json:"title"`
+	Company     *string  `json:"company"`
+	Location    *string  `json:"location"`
+	StartDate   string   `json:"start_date"`
+	EndDate     *string  `json:"end_date"`
+	Description *string  `json:"description"`
+	Type        *string  `json:"type"`
+	SortOrder   *int     `json:"sort_order"`
 }
 
 // ListResume lists all resume items
@@ -127,14 +127,14 @@ func (rc *ResumeController) UpdateResume(c *gin.Context) {
 	}
 
 	updates := map[string]interface{}{}
-	if req.Title != "" {
-		updates["title"] = req.Title
+	if req.Title != nil {
+		updates["title"] = *req.Title
 	}
-	if req.Company != "" {
-		updates["company"] = req.Company
+	if req.Company != nil {
+		updates["company"] = *req.Company
 	}
-	if req.Location != "" {
-		updates["location"] = req.Location
+	if req.Location != nil {
+		updates["location"] = *req.Location
 	}
 	if req.StartDate != "" {
 		startDate, err := parseDate(req.StartDate)
@@ -156,11 +156,11 @@ func (rc *ResumeController) UpdateResume(c *gin.Context) {
 			updates["end_date"] = endDate
 		}
 	}
-	if req.Description != "" {
-		updates["description"] = req.Description
+	if req.Description != nil {
+		updates["description"] = *req.Description
 	}
-	if req.Type != "" {
-		updates["type"] = req.Type
+	if req.Type != nil {
+		updates["type"] = *req.Type
 	}
 	// Use pointer for SortOrder: nil means not provided (preserve existing),
 	// non-nil means update (even if value is 0)

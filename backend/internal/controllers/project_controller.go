@@ -28,21 +28,22 @@ type CreateProjectRequest struct {
 }
 
 type UpdateProjectRequest struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Content     string `json:"content"`
-	CoverImage  string `json:"cover_image"`
-	DemoURL     string `json:"demo_url"`
-	GithubURL   string `json:"github_url"`
-	TechStack   string `json:"tech_stack"`
-	Status      string `json:"status"`
-	SortOrder   *int   `json:"sort_order"`
+	Title       *string `json:"title"`
+	Description *string `json:"description"`
+	Content     *string `json:"content"`
+	CoverImage  *string `json:"cover_image"`
+	DemoURL     *string `json:"demo_url"`
+	GithubURL   *string `json:"github_url"`
+	TechStack   *string `json:"tech_stack"`
+	Status      *string `json:"status"`
+	SortOrder   *int    `json:"sort_order"`
 }
 
 // ListProjects lists all projects
 func (pc *ProjectController) ListProjects(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", c.DefaultQuery("limit", "10")))
+	page, pageSize = sanitizePagination(page, pageSize)
 	offset := (page - 1) * pageSize
 
 	query := database.DB.Model(&models.Project{})
@@ -70,6 +71,7 @@ func (pc *ProjectController) ListProjects(c *gin.Context) {
 func (pc *ProjectController) AdminListProjects(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", c.DefaultQuery("limit", "10")))
+	page, pageSize = sanitizePagination(page, pageSize)
 	status := c.Query("status")
 
 	offset := (page - 1) * pageSize
@@ -173,29 +175,29 @@ func (pc *ProjectController) UpdateProject(c *gin.Context) {
 	}
 
 	updates := map[string]interface{}{}
-	if req.Title != "" {
-		updates["title"] = req.Title
+	if req.Title != nil {
+		updates["title"] = *req.Title
 	}
-	if req.Description != "" {
-		updates["description"] = req.Description
+	if req.Description != nil {
+		updates["description"] = *req.Description
 	}
-	if req.Content != "" {
-		updates["content"] = req.Content
+	if req.Content != nil {
+		updates["content"] = *req.Content
 	}
-	if req.CoverImage != "" {
-		updates["cover_image"] = req.CoverImage
+	if req.CoverImage != nil {
+		updates["cover_image"] = *req.CoverImage
 	}
-	if req.DemoURL != "" {
-		updates["demo_url"] = req.DemoURL
+	if req.DemoURL != nil {
+		updates["demo_url"] = *req.DemoURL
 	}
-	if req.GithubURL != "" {
-		updates["github_url"] = req.GithubURL
+	if req.GithubURL != nil {
+		updates["github_url"] = *req.GithubURL
 	}
-	if req.TechStack != "" {
-		updates["tech_stack"] = req.TechStack
+	if req.TechStack != nil {
+		updates["tech_stack"] = *req.TechStack
 	}
-	if req.Status != "" {
-		updates["status"] = req.Status
+	if req.Status != nil {
+		updates["status"] = *req.Status
 	}
 	if req.SortOrder != nil {
 		updates["sort_order"] = *req.SortOrder
