@@ -34,7 +34,7 @@ type UpdateResumeRequest struct {
 	EndDate     *string `json:"end_date"`
 	Description string  `json:"description"`
 	Type        string  `json:"type"`
-	SortOrder   int     `json:"sort_order"`
+	SortOrder   *int    `json:"sort_order"`
 }
 
 // ListResume lists all resume items
@@ -162,9 +162,10 @@ func (rc *ResumeController) UpdateResume(c *gin.Context) {
 	if req.Type != "" {
 		updates["type"] = req.Type
 	}
-	// Only update sort_order if a non-zero value is provided; otherwise preserve existing
-	if req.SortOrder != 0 {
-		updates["sort_order"] = req.SortOrder
+	// Use pointer for SortOrder: nil means not provided (preserve existing),
+	// non-nil means update (even if value is 0)
+	if req.SortOrder != nil {
+		updates["sort_order"] = *req.SortOrder
 	}
 
 	if err := database.DB.Model(&resume).Updates(updates).Error; err != nil {

@@ -36,7 +36,7 @@ type UpdateProjectRequest struct {
 	GithubURL   string `json:"github_url"`
 	TechStack   string `json:"tech_stack"`
 	Status      string `json:"status"`
-	SortOrder   int    `json:"sort_order"`
+	SortOrder   *int   `json:"sort_order"`
 }
 
 // ListProjects lists all projects
@@ -98,12 +98,25 @@ func (pc *ProjectController) AdminListProjects(c *gin.Context) {
 	})
 }
 
-// GetProject gets a single project by ID
+// GetProject gets a single project by ID (public, active only)
 func (pc *ProjectController) GetProject(c *gin.Context) {
 	id := c.Param("id")
 
 	var project models.Project
 	if err := database.DB.Where("id = ? AND status = ?", id, "active").First(&project).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Project not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"project": project})
+}
+
+// GetProjectAdmin gets a single project by ID regardless of status (admin only)
+func (pc *ProjectController) GetProjectAdmin(c *gin.Context) {
+	id := c.Param("id")
+
+	var project models.Project
+	if err := database.DB.First(&project, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Project not found"})
 		return
 	}
@@ -184,7 +197,9 @@ func (pc *ProjectController) UpdateProject(c *gin.Context) {
 	if req.Status != "" {
 		updates["status"] = req.Status
 	}
-	updates["sort_order"] = req.SortOrder
+	if req.SortOrder != nil {
+		updates["sort_order"] = *req.SortOrder
+	}
 
 	if err := database.DB.Model(&project).Updates(updates).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update project"})

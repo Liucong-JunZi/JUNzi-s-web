@@ -17,8 +17,10 @@ func Setup(cfg *config.Config) *gin.Engine {
 	// Create router
 	router := gin.New()
 
-	// Configure trusted proxies to prevent X-Forwarded-For spoofing
-	router.SetTrustedProxies([]string{"127.0.0.1"})
+	// Configure trusted proxies: use X-Real-IP header set by Nginx proxy
+	// In Docker, Nginx runs in a separate container (not 127.0.0.1), so we
+	// trust the header directly rather than listing specific proxy IPs.
+	router.TrustedPlatform = "X-Real-IP"
 
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
@@ -102,6 +104,7 @@ func Setup(cfg *config.Config) *gin.Engine {
 				admin.DELETE("/posts/:id", postController.DeletePost)
 
 				// Projects management
+				admin.GET("/projects/:id", projectController.GetProjectAdmin)
 				admin.POST("/projects", projectController.CreateProject)
 				admin.PUT("/projects/:id", projectController.UpdateProject)
 				admin.GET("/posts", postController.AdminListPosts)
