@@ -198,8 +198,8 @@ export const commentsAPI = {
     return response.data.comments || response.data;
   },
 
-  getAll: async (limit: number = 100): Promise<{ comments: Comment[] }> => {
-    const response = await api.get('/admin/comments', { params: { limit } });
+  getAll: async (params?: { page?: number; page_size?: number }): Promise<{ comments: Comment[]; total: number; page: number; page_size: number }> => {
+    const response = await api.get('/admin/comments', { params });
     return response.data;
   },
 

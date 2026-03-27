@@ -8,20 +8,25 @@ import { Badge } from '../../components/ui/badge';
 import { Trash2, MessageCircle } from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
 
+const PAGE_SIZE = 20;
+
 export function AdminComments() {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchComments();
-  }, []);
+    fetchComments(page);
+  }, [page]);
 
-  const fetchComments = async () => {
+  const fetchComments = async (page: number) => {
     setLoading(true);
     try {
-      const response = await commentsAPI.getAll();
+      const response = await commentsAPI.getAll({ page, page_size: PAGE_SIZE });
       setComments(response.comments || []);
+      setTotal(response.total || 0);
     } catch (error) {
       console.error('Failed to fetch comments:', error);
       toast({
@@ -140,6 +145,27 @@ export function AdminComments() {
               </CardContent>
             </Card>
           ))}
+          {total > PAGE_SIZE && (
+            <div className="flex items-center justify-center gap-4 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setPage((p) => p - 1)}
+                disabled={page === 1}
+              >
+                Previous
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                Page {page} of {Math.ceil(total / PAGE_SIZE)}
+              </span>
+              <Button
+                variant="outline"
+                onClick={() => setPage((p) => p + 1)}
+                disabled={page >= Math.ceil(total / PAGE_SIZE)}
+              >
+                Next
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { authAPI } from '../api';
 import { useAuthStore } from '../store/authStore';
 import { Button } from '../components/ui/button';
@@ -17,6 +17,7 @@ function GithubIcon({ className }: { className?: string }) {
 export function Login() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { setUser, isAuthenticated } = useAuthStore();
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -51,8 +52,13 @@ export function Login() {
   }, [searchParams, isAuthenticated, isProcessing, navigate]);
 
   const handleGitHubLogin = () => {
-    // Save current location for post-login redirect
-    sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
+    const from = (location.state as { from?: { pathname?: string } })?.from?.pathname;
+    const existing = sessionStorage.getItem('redirectAfterLogin');
+    if (from && from !== '/login') {
+      sessionStorage.setItem('redirectAfterLogin', from);
+    } else if (!existing || existing === '/login') {
+      sessionStorage.removeItem('redirectAfterLogin');
+    }
     authAPI.login();
   };
 

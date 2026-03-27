@@ -39,6 +39,7 @@ export interface Comment {
   author_email?: string;
   post_id: number;
   post_slug?: string;
+  post?: { id: number; slug: string; title?: string };
   parent_id?: number;
   replies?: Comment[];
   created_at: string;
