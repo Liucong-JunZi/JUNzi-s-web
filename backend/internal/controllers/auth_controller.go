@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -59,6 +60,28 @@ func isSecureCookie() bool {
 	return os.Getenv("APP_ENV") == "production"
 }
 
+// setCookie sets a cookie with SameSite=Lax using http.SetCookie.
+func setCookie(c *gin.Context, name, value string, maxAge int, httpOnly bool) {
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     name,
+		Value:    value,
+		MaxAge:   maxAge,
+		Path:     "/",
+		Secure:   isSecureCookie(),
+		HttpOnly: httpOnly,
+		SameSite: http.SameSiteLaxMode,
+	})
+}
+
+// generateCSRFToken generates a random CSRF token encoded as base64.
+func generateCSRFToken() (string, error) {
+	bytes := make([]byte, 32)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return base64.RawURLEncoding.EncodeToString(bytes), nil
+}
+
 // generateState generates a random state string for CSRF protection
 func (ac *AuthController) generateState() (string, error) {
 	bytes := make([]byte, 32)
@@ -84,7 +107,7 @@ func (ac *AuthController) GitHubRedirect(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie("oauth_state", state, 600, "/", "", isSecureCookie(), true)
+	setCookie(c, "oauth_state", state, 600, true)
 
 	url := ac.oauthConf.AuthCodeURL(state, oauth2.AccessTypeOffline)
 	c.Redirect(http.StatusTemporaryRedirect, url)
@@ -110,7 +133,7 @@ func (ac *AuthController) GitHubCallback(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid state"})
 		return
 	}
-	c.SetCookie("oauth_state", "", -1, "/", "", isSecureCookie(), true)
+	setCookie(c, "oauth_state", "", -1, true)
 
 	ctx := context.Background()
 	stateKey := "oauth_state:" + state
@@ -208,12 +231,20 @@ func (ac *AuthController) GitHubCallback(c *gin.Context) {
 		return
 	}
 
-	// Set tokens as HttpOnly cookies (more secure than URL params)
-	c.SetCookie("access_token", accessTokenString, 3600, "/", "", isSecureCookie(), true)   // 1 hour
-	c.SetCookie("refresh_token", refreshTokenString, 604800, "/", "", isSecureCookie(), true) // 7 days
+	// Set tokens as HttpOnly cookies with SameSite=Lax
+	setCookie(c, "access_token", accessTokenString, 3600, true)    // 1 hour
+	setCookie(c, "refresh_token", refreshTokenString, 604800, true) // 7 days
+
+	// Generate CSRF token for double-submit cookie pattern
+	csrfToken, err := generateCSRFToken()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate CSRF token"})
+		return
+	}
+	setCookie(c, "csrf_token", csrfToken, 3600, false) // not HttpOnly so JS can read it
 
 	// Redirect to frontend
-	frontendURL := fmt.Sprintf("%s/auth/callback", ac.frontendURL)
+	frontendURL := fmt.Sprintf("%s/auth/callback?csrf_token=%s", ac.frontendURL, csrfToken)
 	c.Redirect(http.StatusTemporaryRedirect, frontendURL)
 }
 
@@ -291,15 +322,24 @@ func (ac *AuthController) RefreshToken(c *gin.Context) {
 	}
 
 	// Set new access token cookie
-	c.SetCookie("access_token", accessTokenString, 3600, "/", "", isSecureCookie(), true)
+	setCookie(c, "access_token", accessTokenString, 3600, true)
 
-	c.JSON(http.StatusOK, gin.H{"message": "Token refreshed successfully"})
+	// Generate new CSRF token
+	csrfToken, err := generateCSRFToken()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate CSRF token"})
+		return
+	}
+	setCookie(c, "csrf_token", csrfToken, 3600, false)
+
+	c.JSON(http.StatusOK, gin.H{"message": "Token refreshed successfully", "csrf_token": csrfToken})
 }
 
 // Logout handles user logout
 func (ac *AuthController) Logout(c *gin.Context) {
 	// Clear cookies by setting max age to -1
-	c.SetCookie("access_token", "", -1, "/", "", isSecureCookie(), true)
-	c.SetCookie("refresh_token", "", -1, "/", "", isSecureCookie(), true)
+	setCookie(c, "access_token", "", -1, true)
+	setCookie(c, "refresh_token", "", -1, true)
+	setCookie(c, "csrf_token", "", -1, false)
 	c.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
 }

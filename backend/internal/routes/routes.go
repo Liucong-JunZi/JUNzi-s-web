@@ -112,6 +112,7 @@ func Setup(cfg *config.Config) *gin.Engine {
 			// Admin routes
 			admin := protected.Group("/admin")
 			admin.Use(middleware.AdminRequired())
+			admin.Use(middleware.CSRFProtection())
 			{
 				// Posts management
 				admin.GET("/posts/:id", postController.GetPostByID)

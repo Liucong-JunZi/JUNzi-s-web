@@ -29,6 +29,13 @@ return tonumber(current)
 // RateLimiter creates a rate limiting middleware using Redis
 func RateLimiter(client *redis.Client, limit int, window time.Duration) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// Fail-closed: if Redis client is nil, reject the request
+		if client == nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Service temporarily unavailable"})
+			c.Abort()
+			return
+		}
+
 		ip := c.ClientIP()
 		key := "rate_limit:" + ip
 
@@ -36,8 +43,9 @@ func RateLimiter(client *redis.Client, limit int, window time.Duration) gin.Hand
 
 		result, err := rateLimitScript.Run(ctx, client, []string{key}, limit, int(window.Seconds())).Int()
 		if err != nil {
-			// If Redis error, allow request (fail open)
-			c.Next()
+			// Fail-closed: if Redis returns an error, reject the request
+			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Service temporarily unavailable"})
+			c.Abort()
 			return
 		}
 

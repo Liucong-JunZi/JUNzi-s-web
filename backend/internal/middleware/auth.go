@@ -20,6 +20,7 @@ func CORS() gin.HandlerFunc {
 		// Check if the request origin is in the allowed list
 		if isOriginAllowed(origin, allowedOrigins) {
 			c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
+			c.Writer.Header().Set("Vary", "Origin")
 		}
 
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
@@ -127,6 +128,41 @@ func AdminRequired() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+		c.Next()
+	}
+}
+
+// CSRFProtection implements the double-submit cookie pattern for CSRF protection.
+// It skips safe methods (GET, HEAD, OPTIONS) and validates that the X-CSRF-Token
+// header matches the csrf_token cookie on state-changing requests.
+func CSRFProtection() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Skip safe methods
+		if c.Request.Method == "GET" || c.Request.Method == "HEAD" || c.Request.Method == "OPTIONS" {
+			c.Next()
+			return
+		}
+
+		cookieToken, err := c.Cookie("csrf_token")
+		if err != nil || cookieToken == "" {
+			c.JSON(http.StatusForbidden, gin.H{"error": "CSRF token missing from cookie"})
+			c.Abort()
+			return
+		}
+
+		headerToken := c.GetHeader("X-CSRF-Token")
+		if headerToken == "" {
+			c.JSON(http.StatusForbidden, gin.H{"error": "CSRF token missing from header"})
+			c.Abort()
+			return
+		}
+
+		if cookieToken != headerToken {
+			c.JSON(http.StatusForbidden, gin.H{"error": "CSRF token mismatch"})
+			c.Abort()
+			return
+		}
+
 		c.Next()
 	}
 }

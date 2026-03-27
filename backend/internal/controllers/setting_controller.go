@@ -1,11 +1,13 @@
 package controllers
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/liucong/personal-website/internal/database"
 	"github.com/liucong/personal-website/internal/models"
+	"gorm.io/gorm"
 )
 
 type SettingController struct{}
@@ -53,7 +55,11 @@ func (sc *SettingController) UpdateSetting(c *gin.Context) {
 	result := database.DB.Where("key = ?", key).First(&setting)
 
 	if result.Error != nil {
-		// Create new setting
+		if !errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query setting"})
+			return
+		}
+		// Record not found, create new setting
 		setting = models.Setting{
 			Key:   key,
 			Value: req.Value,
@@ -83,31 +89,37 @@ func (sc *SettingController) UpdateSettings(c *gin.Context) {
 
 	// Use transaction
 	tx := database.DB.Begin()
+	defer tx.Rollback()
 
 	for key, value := range req {
 		var setting models.Setting
 		result := tx.Where("key = ?", key).First(&setting)
 
 		if result.Error != nil {
+			if !errors.Is(result.Error, gorm.ErrRecordNotFound) {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query setting"})
+				return
+			}
 			setting = models.Setting{
 				Key:   key,
 				Value: value,
 			}
 			if err := tx.Create(&setting).Error; err != nil {
-				tx.Rollback()
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create setting"})
 				return
 			}
 		} else {
 			if err := tx.Model(&setting).Update("value", value).Error; err != nil {
-				tx.Rollback()
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update setting"})
 				return
 			}
 		}
 	}
 
-	tx.Commit()
+	if err := tx.Commit().Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit settings"})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Settings updated successfully"})
 }
