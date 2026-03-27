@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { User, Post, Comment, Project, Resume, Tag } from '../types';
+import type { User, Post, Comment, Project, ResumeItem, Tag } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
 
@@ -8,6 +8,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // Enable cookies for OAuth session
 });
 
 // Security: Use sessionStorage instead of localStorage for token storage
@@ -113,6 +114,11 @@ export const postsAPI = {
     return response.data.post || response.data;
   },
 
+  getById: async (id: number): Promise<Post> => {
+    const response = await api.get(`/admin/posts/${id}`);
+    return response.data.post || response.data;
+  },
+
   create: async (data: Partial<Post>): Promise<Post> => {
     const response = await api.post('/admin/posts', data);
     return response.data.post || response.data;
@@ -157,12 +163,12 @@ export const commentsAPI = {
   },
 
   update: async (id: number, content: string): Promise<Comment> => {
-    const response = await api.put(`/comments/${id}`, { content });
+    const response = await api.put(`/admin/comments/${id}`, { content });
     return response.data.comment || response.data;
   },
 
   delete: async (id: number): Promise<void> => {
-    await api.delete(`/comments/${id}`);
+    await api.delete(`/admin/comments/${id}`);
   },
 };
 
@@ -171,14 +177,13 @@ export const projectsAPI = {
   getAll: async (params?: {
     page?: number;
     limit?: number;
-    featured?: boolean;
   }): Promise<{ projects: Project[]; total: number; page: number; limit: number }> => {
     const response = await api.get('/projects', { params });
     return response.data;
   },
 
-  getBySlug: async (slug: string): Promise<Project> => {
-    const response = await api.get(`/projects/${slug}`);
+  getById: async (id: number): Promise<Project> => {
+    const response = await api.get(`/projects/${id}`);
     return response.data.project || response.data;
   },
 
@@ -199,14 +204,23 @@ export const projectsAPI = {
 
 // Resume API
 export const resumeAPI = {
-  get: async (): Promise<Resume> => {
+  getAll: async (): Promise<ResumeItem[]> => {
     const response = await api.get('/resume');
     return response.data.resume || response.data;
   },
 
-  update: async (id: number, data: { title: string; content: string }): Promise<Resume> => {
+  create: async (data: Partial<ResumeItem>): Promise<ResumeItem> => {
+    const response = await api.post('/admin/resume', data);
+    return response.data.resume || response.data;
+  },
+
+  update: async (id: number, data: Partial<ResumeItem>): Promise<ResumeItem> => {
     const response = await api.put(`/admin/resume/${id}`, data);
     return response.data.resume || response.data;
+  },
+
+  delete: async (id: number): Promise<void> => {
+    await api.delete(`/admin/resume/${id}`);
   },
 };
 

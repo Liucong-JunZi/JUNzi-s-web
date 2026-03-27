@@ -2,10 +2,9 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { projectsAPI } from '../api';
 import type { Project } from '../types';
-import { SafeMarkdown } from '../components/SafeMarkdown';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
-import { ExternalLink, ArrowLeft, Calendar } from 'lucide-react';
+import { ExternalLink, ArrowLeft, Calendar, MapPin } from 'lucide-react';
 
 // Custom Github icon
 function GithubIcon({ className }: { className?: string }) {
@@ -17,20 +16,20 @@ function GithubIcon({ className }: { className?: string }) {
 }
 
 export function PortfolioDetail() {
-  const { slug } = useParams<{ slug: string }>();
+  const { id } = useParams<{ id: string }>();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (slug) {
+    if (id) {
       fetchProject();
     }
-  }, [slug]);
+  }, [id]);
 
   const fetchProject = async () => {
     setLoading(true);
     try {
-      const data = await projectsAPI.getBySlug(slug!);
+      const data = await projectsAPI.getById(Number(id));
       setProject(data);
     } catch (error) {
       console.error('Failed to fetch project:', error);
@@ -44,6 +43,26 @@ export function PortfolioDetail() {
       year: 'numeric',
       month: 'long',
     });
+  };
+
+  const getStatusLabel = (status: string) => {
+    const statusMap: Record<string, string> = {
+      planning: 'Planning',
+      in_progress: 'In Progress',
+      completed: 'Completed',
+      archived: 'Archived',
+    };
+    return statusMap[status] || status;
+  };
+
+  const getStatusColor = (status: string) => {
+    const colorMap: Record<string, string> = {
+      planning: 'bg-yellow-500',
+      in_progress: 'bg-blue-500',
+      completed: 'bg-green-500',
+      archived: 'bg-gray-500',
+    };
+    return colorMap[status] || 'bg-gray-500';
   };
 
   if (loading) {
@@ -83,7 +102,12 @@ export function PortfolioDetail() {
       <article className="max-w-4xl mx-auto">
         {/* Header */}
         <header className="mb-8">
-          <h1 className="text-4xl font-bold mb-4">{project.title}</h1>
+          <div className="flex items-center gap-3 mb-4">
+            <h1 className="text-4xl font-bold">{project.title}</h1>
+            <Badge className={`${getStatusColor(project.status)} text-white`}>
+              {getStatusLabel(project.status)}
+            </Badge>
+          </div>
           <p className="text-xl text-muted-foreground mb-4">{project.description}</p>
 
           <div className="flex flex-wrap items-center gap-4 mb-4">
@@ -109,48 +133,31 @@ export function PortfolioDetail() {
             <div className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
               <span>
-                {formatDate(project.startDate)}
-                {project.endDate ? ` - ${formatDate(project.endDate)}` : ' - Present'}
+                {formatDate(project.createdAt)}
               </span>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2 mt-4">
-            {project.tags.map((tag) => (
-              <Badge key={tag.id} variant="secondary">
-                {tag.name}
-              </Badge>
-            ))}
-          </div>
+          {/* Tech Stack */}
+          {project.techStack && project.techStack.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-4">
+              {project.techStack.map((tech, index) => (
+                <Badge key={index} variant="secondary">
+                  {tech}
+                </Badge>
+              ))}
+            </div>
+          )}
         </header>
 
         {/* Cover Image */}
-        {project.coverImage && (
+        {project.imageUrl && (
           <img
-            src={project.coverImage}
+            src={project.imageUrl}
             alt={project.title}
             className="w-full h-[400px] object-cover rounded-lg mb-8"
           />
         )}
-
-        {/* Project Images */}
-        {project.images && project.images.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-            {project.images.map((image, index) => (
-              <img
-                key={index}
-                src={image}
-                alt={`${project.title} screenshot ${index + 1}`}
-                className="w-full h-64 object-cover rounded-lg"
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Content */}
-        <div className="prose prose-neutral dark:prose-invert max-w-none">
-          <SafeMarkdown content={project.content} />
-        </div>
       </article>
     </div>
   );

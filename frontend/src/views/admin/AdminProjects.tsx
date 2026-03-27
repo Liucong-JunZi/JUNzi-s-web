@@ -5,7 +5,7 @@ import type { Project } from '../../types';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
-import { Plus, Edit, Trash2, Eye, Star } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye } from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
 
 export function AdminProjects() {
@@ -57,6 +57,26 @@ export function AdminProjects() {
     });
   };
 
+  const getStatusLabel = (status: string) => {
+    const statusMap: Record<string, string> = {
+      planning: 'Planning',
+      in_progress: 'In Progress',
+      completed: 'Completed',
+      archived: 'Archived',
+    };
+    return statusMap[status] || status;
+  };
+
+  const getStatusColor = (status: string) => {
+    const colorMap: Record<string, string> = {
+      planning: 'bg-yellow-500',
+      in_progress: 'bg-blue-500',
+      completed: 'bg-green-500',
+      archived: 'bg-gray-500',
+    };
+    return colorMap[status] || 'bg-gray-500';
+  };
+
   return (
     <div className="container mx-auto px-4 py-12">
       {/* Header */}
@@ -94,21 +114,20 @@ export function AdminProjects() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <CardTitle className="text-xl">{project.title}</CardTitle>
-                      {project.featured && (
-                        <Badge variant="default">
-                          <Star className="h-3 w-3 mr-1" />
-                          Featured
-                        </Badge>
-                      )}
+                      <Badge className={`${getStatusColor(project.status)} text-white`}>
+                        {getStatusLabel(project.status)}
+                      </Badge>
                     </div>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span>{formatDate(project.startDate)}</span>
-                      {project.endDate && <span>to {formatDate(project.endDate)}</span>}
+                      <span>{formatDate(project.createdAt)}</span>
+                      {project.sortOrder !== undefined && (
+                        <span>Order: {project.sortOrder}</span>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <Button variant="ghost" size="icon" asChild>
-                      <Link to={`/portfolio/${project.slug}`} target="_blank">
+                      <Link to={`/portfolio/${project.id}`} target="_blank">
                         <Eye className="h-4 w-4" />
                       </Link>
                     </Button>
@@ -129,13 +148,15 @@ export function AdminProjects() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground mb-4">{project.description}</p>
-                <div className="flex flex-wrap gap-2">
-                  {project.tags.map((tag) => (
-                    <Badge key={tag.id} variant="outline">
-                      {tag.name}
-                    </Badge>
-                  ))}
-                </div>
+                {project.techStack && project.techStack.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {project.techStack.map((tech, index) => (
+                      <Badge key={index} variant="outline">
+                        {tech}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}

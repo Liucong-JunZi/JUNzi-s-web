@@ -12,13 +12,13 @@ export interface Post {
   title: string;
   slug: string;
   content: string;
-  excerpt?: string;
+  summary?: string;
   coverImage?: string;
   author: User;
   tags: Tag[];
   createdAt: string;
   updatedAt: string;
-  published: boolean;
+  status: 'draft' | 'published';
   viewCount: number;
   likeCount: number;
 }
@@ -46,31 +46,31 @@ export interface Comment {
 export interface Project {
   id: number;
   title: string;
-  slug: string;
   description: string;
-  content: string;
-  coverImage?: string;
-  images?: string[];
-  tags: Tag[];
-  githubUrl?: string;
+  techStack?: string[];
+  status: 'planning' | 'in_progress' | 'completed' | 'archived';
+  sortOrder?: number;
+  imageUrl?: string;
   demoUrl?: string;
-  startDate: string;
-  endDate?: string;
-  featured: boolean;
+  githubUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface Resume {
+export interface ResumeItem {
   id: number;
   title: string;
-  content: string;
+  company: string;
+  location?: string;
+  startDate: string;
+  endDate?: string;
+  description?: string;
+  type: 'work' | 'education' | 'project';
   createdAt: string;
   updatedAt: string;
 }
 
 export interface AuthState {
   user: User | null;
-  token: string | null;
   isAuthenticated: boolean;
 }

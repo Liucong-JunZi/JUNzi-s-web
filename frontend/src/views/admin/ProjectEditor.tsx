@@ -1,16 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { projectsAPI, tagsAPI, uploadAPI } from '../../api';
-import type { Tag } from '../../types';
+import { projectsAPI, uploadAPI } from '../../api';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Textarea } from '../../components/ui/textarea';
 import { Label } from '../../components/ui/label';
-import { Badge } from '../../components/ui/badge';
 import { Card, CardContent } from '../../components/ui/card';
-import { Switch } from '../../components/ui/switch';
 import { ArrowLeft, Save, Upload } from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
+
+type ProjectStatus = 'planning' | 'in_progress' | 'completed' | 'archived';
 
 export function ProjectEditor() {
   const { id } = useParams<{ id: string }>();
@@ -20,54 +19,37 @@ export function ProjectEditor() {
 
   const [formData, setFormData] = useState({
     title: '',
-    slug: '',
     description: '',
-    content: '',
-    coverImage: '',
+    techStack: '',
+    status: 'planning' as ProjectStatus,
+    sortOrder: 0,
+    imageUrl: '',
     demoUrl: '',
     githubUrl: '',
-    featured: false,
-    startDate: '',
-    endDate: '',
   });
-  const [availableTags, setAvailableTags] = useState<Tag[]>([]);
-  const [selectedTags, setSelectedTags] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    fetchTags();
     if (isEdit) {
       fetchProject();
     }
   }, [id]);
 
-  const fetchTags = async () => {
-    try {
-      const tags = await tagsAPI.getAll();
-      setAvailableTags(tags);
-    } catch (error) {
-      console.error('Failed to fetch tags:', error);
-    }
-  };
-
   const fetchProject = async () => {
     setLoading(true);
     try {
-      const project = await projectsAPI.getBySlug(id!);
+      const project = await projectsAPI.getById(Number(id));
       setFormData({
         title: project.title,
-        slug: project.slug,
         description: project.description || '',
-        content: project.content || '',
-        coverImage: project.coverImage || '',
+        techStack: project.techStack?.join(', ') || '',
+        status: project.status || 'planning',
+        sortOrder: project.sortOrder || 0,
+        imageUrl: project.imageUrl || '',
         demoUrl: project.demoUrl || '',
         githubUrl: project.githubUrl || '',
-        featured: project.featured,
-        startDate: project.startDate ? project.startDate.split('T')[0] : '',
-        endDate: project.endDate ? project.endDate.split('T')[0] : '',
       });
-      setSelectedTags(project.tags.map((t) => t.id));
     } catch (error) {
       console.error('Failed to fetch project:', error);
       toast({
@@ -80,18 +62,12 @@ export function ProjectEditor() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-
-    // Auto-generate slug from title
-    if (name === 'title' && !isEdit) {
-      const slug = value
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
-      setFormData((prev) => ({ ...prev, slug }));
-    }
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === 'sortOrder' ? parseInt(value) || 0 : value,
+    }));
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,7 +76,7 @@ export function ProjectEditor() {
 
     try {
       const result = await uploadAPI.uploadImage(file);
-      setFormData((prev) => ({ ...prev, coverImage: result.url }));
+      setFormData((prev) => ({ ...prev, imageUrl: result.url }));
       toast({
         title: 'Success',
         description: 'Image uploaded successfully',
@@ -114,20 +90,20 @@ export function ProjectEditor() {
     }
   };
 
-  const toggleTag = (tagId: number) => {
-    setSelectedTags((prev) =>
-      prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId]
-    );
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
 
     try {
       const projectData = {
-        ...formData,
-        tagIds: selectedTags,
+        title: formData.title,
+        description: formData.description,
+        techStack: formData.techStack.split(',').map(t => t.trim()).filter(Boolean),
+        status: formData.status,
+        sortOrder: formData.sortOrder,
+        imageUrl: formData.imageUrl,
+        demoUrl: formData.demoUrl,
+        githubUrl: formData.githubUrl,
       };
 
       if (isEdit) {
@@ -199,18 +175,6 @@ export function ProjectEditor() {
                 </div>
 
                 <div>
-                  <Label htmlFor="slug">Slug</Label>
-                  <Input
-                    id="slug"
-                    name="slug"
-                    value={formData.slug}
-                    onChange={handleChange}
-                    required
-                    placeholder="project-url-slug"
-                  />
-                </div>
-
-                <div>
                   <Label htmlFor="description">Description</Label>
                   <Textarea
                     id="description"
@@ -224,14 +188,13 @@ export function ProjectEditor() {
                 </div>
 
                 <div>
-                  <Label htmlFor="content">Content (Markdown)</Label>
-                  <Textarea
-                    id="content"
-                    name="content"
-                    value={formData.content}
+                  <Label htmlFor="techStack">Tech Stack (comma-separated)</Label>
+                  <Input
+                    id="techStack"
+                    name="techStack"
+                    value={formData.techStack}
                     onChange={handleChange}
-                    rows={15}
-                    placeholder="Write your project content in Markdown..."
+                    placeholder="React, TypeScript, Go, PostgreSQL"
                   />
                 </div>
 
@@ -266,36 +229,31 @@ export function ProjectEditor() {
           <div className="space-y-6">
             <Card>
               <CardContent className="pt-6 space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="featured">Featured</Label>
-                  <Switch
-                    id="featured"
-                    checked={formData.featured}
-                    onCheckedChange={(checked) =>
-                      setFormData((prev) => ({ ...prev, featured: checked }))
-                    }
-                  />
+                <div>
+                  <Label htmlFor="status">Status</Label>
+                  <select
+                    id="status"
+                    name="status"
+                    value={formData.status}
+                    onChange={handleChange}
+                    className="w-full mt-1 px-3 py-2 border rounded-md bg-background"
+                  >
+                    <option value="planning">Planning</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                    <option value="archived">Archived</option>
+                  </select>
                 </div>
 
                 <div>
-                  <Label htmlFor="startDate">Start Date</Label>
+                  <Label htmlFor="sortOrder">Sort Order</Label>
                   <Input
-                    id="startDate"
-                    name="startDate"
-                    type="date"
-                    value={formData.startDate}
+                    id="sortOrder"
+                    name="sortOrder"
+                    type="number"
+                    value={formData.sortOrder}
                     onChange={handleChange}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="endDate">End Date</Label>
-                  <Input
-                    id="endDate"
-                    name="endDate"
-                    type="date"
-                    value={formData.endDate}
-                    onChange={handleChange}
+                    min={0}
                   />
                 </div>
 
@@ -309,9 +267,9 @@ export function ProjectEditor() {
             <Card>
               <CardContent className="pt-6 space-y-4">
                 <Label>Cover Image</Label>
-                {formData.coverImage && (
+                {formData.imageUrl && (
                   <img
-                    src={formData.coverImage}
+                    src={formData.imageUrl}
                     alt="Cover"
                     className="w-full h-40 object-cover rounded-lg"
                   />
@@ -333,24 +291,6 @@ export function ProjectEditor() {
                     <Upload className="mr-2 h-4 w-4" />
                     Upload Image
                   </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6 space-y-4">
-                <Label>Tags</Label>
-                <div className="flex flex-wrap gap-2">
-                  {availableTags.map((tag) => (
-                    <Badge
-                      key={tag.id}
-                      variant={selectedTags.includes(tag.id) ? 'default' : 'outline'}
-                      className="cursor-pointer"
-                      onClick={() => toggleTag(tag.id)}
-                    >
-                      {tag.name}
-                    </Badge>
-                  ))}
                 </div>
               </CardContent>
             </Card>

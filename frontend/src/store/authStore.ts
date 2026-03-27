@@ -4,51 +4,44 @@ import type { User } from '../types';
 
 interface AuthStore {
   user: User | null;
-  token: string | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
   setUser: (user: User | null) => void;
-  setToken: (token: string | null) => void;
-  login: (user: User, token: string) => void;
+  login: (user: User) => void;
   logout: () => void;
+  setLoading: (loading: boolean) => void;
 }
 
 /**
- * Security Note: Token Storage Strategy
+ * Security Note: Authentication Strategy
  *
- * We use sessionStorage instead of localStorage for the following security benefits:
- * 1. Session-scoped: Token is cleared when the browser/tab is closed
- * 2. Reduced XSS persistence: Even if XSS occurs, token doesn't persist across sessions
- * 3. Reduced exposure window: Token lifetime is limited to the browsing session
+ * We use HttpOnly cookies for authentication (managed by backend):
+ * 1. More secure against XSS attacks (JavaScript cannot access cookies)
+ * 2. Session is managed entirely server-side
+ * 3. withCredentials: true in axios enables cookie transmission
  *
- * For production environments, consider:
- * - Using HttpOnly cookies (requires backend support)
- * - Implementing CSP headers to further mitigate XSS risks
- * - Using short-lived tokens with refresh token rotation
+ * The store only caches the user object for UI purposes.
  */
 export const useAuthStore = create<AuthStore>()(
   persist(
     (set) => ({
       user: null,
-      token: null,
       isAuthenticated: false,
+      isLoading: true,
       setUser: (user) => set({ user, isAuthenticated: !!user }),
-      setToken: (token) => set({ token }),
-      login: (user, token) => {
-        // Use sessionStorage for better security (session-scoped, cleared on browser close)
-        sessionStorage.setItem('token', token);
-        set({ user, token, isAuthenticated: true });
+      login: (user) => {
+        set({ user, isAuthenticated: true });
       },
       logout: () => {
-        sessionStorage.removeItem('token');
-        set({ user: null, token: null, isAuthenticated: false });
+        set({ user: null, isAuthenticated: false });
       },
+      setLoading: (loading) => set({ isLoading: loading }),
     }),
     {
       name: 'auth-storage',
       storage: createJSONStorage(() => sessionStorage),
       partialize: (state) => ({
         user: state.user,
-        token: state.token,
         isAuthenticated: state.isAuthenticated,
       }),
     }

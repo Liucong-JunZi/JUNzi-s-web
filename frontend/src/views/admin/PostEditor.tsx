@@ -8,9 +8,10 @@ import { Textarea } from '../../components/ui/textarea';
 import { Label } from '../../components/ui/label';
 import { Badge } from '../../components/ui/badge';
 import { Card, CardContent } from '../../components/ui/card';
-import { Switch } from '../../components/ui/switch';
 import { ArrowLeft, Save, Upload } from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
+
+type PostStatus = 'draft' | 'published';
 
 export function PostEditor() {
   const { id } = useParams<{ id: string }>();
@@ -22,9 +23,9 @@ export function PostEditor() {
     title: '',
     slug: '',
     content: '',
-    excerpt: '',
+    summary: '',
     coverImage: '',
-    published: false,
+    status: 'draft' as PostStatus,
   });
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [selectedTags, setSelectedTags] = useState<number[]>([]);
@@ -50,17 +51,15 @@ export function PostEditor() {
   const fetchPost = async () => {
     setLoading(true);
     try {
-      // We need to fetch by ID, but API only has getBySlug
-      // In a real app, you'd have a getById endpoint
-      // For now, we'll work with slug
-      const post = await postsAPI.getBySlug(id!);
+      // Use getById for admin editing
+      const post = await postsAPI.getById(Number(id));
       setFormData({
         title: post.title,
         slug: post.slug,
         content: post.content,
-        excerpt: post.excerpt || '',
+        summary: post.summary || '',
         coverImage: post.coverImage || '',
-        published: post.published,
+        status: post.status || 'draft',
       });
       setSelectedTags(post.tags.map((t) => t.id));
     } catch (error) {
@@ -121,8 +120,13 @@ export function PostEditor() {
 
     try {
       const postData = {
-        ...formData,
-        tagIds: selectedTags,
+        title: formData.title,
+        slug: formData.slug,
+        content: formData.content,
+        summary: formData.summary,
+        coverImage: formData.coverImage,
+        status: formData.status,
+        tags: selectedTags,
       };
 
       if (isEdit) {
@@ -219,11 +223,11 @@ export function PostEditor() {
                 </div>
 
                 <div>
-                  <Label htmlFor="excerpt">Excerpt</Label>
+                  <Label htmlFor="summary">Summary</Label>
                   <Textarea
-                    id="excerpt"
-                    name="excerpt"
-                    value={formData.excerpt}
+                    id="summary"
+                    name="summary"
+                    value={formData.summary}
                     onChange={handleChange}
                     rows={3}
                     placeholder="Brief description of the post"
@@ -237,15 +241,18 @@ export function PostEditor() {
           <div className="space-y-6">
             <Card>
               <CardContent className="pt-6 space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="published">Published</Label>
-                  <Switch
-                    id="published"
-                    checked={formData.published}
-                    onCheckedChange={(checked) =>
-                      setFormData((prev) => ({ ...prev, published: checked }))
-                    }
-                  />
+                <div>
+                  <Label htmlFor="status">Status</Label>
+                  <select
+                    id="status"
+                    name="status"
+                    value={formData.status}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, status: e.target.value as PostStatus }))}
+                    className="w-full mt-1 px-3 py-2 border rounded-md bg-background"
+                  >
+                    <option value="draft">Draft</option>
+                    <option value="published">Published</option>
+                  </select>
                 </div>
 
                 <Button type="submit" className="w-full" disabled={saving}>

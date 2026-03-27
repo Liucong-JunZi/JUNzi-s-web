@@ -1,20 +1,42 @@
 import { useState, useEffect } from 'react';
 import { resumeAPI } from '../../api';
-import type { Resume } from '../../types';
+import type { ResumeItem } from '../../types';
 import { Button } from '../../components/ui/button';
 import { Textarea } from '../../components/ui/textarea';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
-import { Save } from 'lucide-react';
+import { Plus, Save, Trash2, Edit, X } from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
 
+type ResumeItemType = 'work' | 'education' | 'project';
+
+interface FormData {
+  title: string;
+  company: string;
+  location: string;
+  startDate: string;
+  endDate: string;
+  description: string;
+  type: ResumeItemType;
+}
+
+const emptyForm: FormData = {
+  title: '',
+  company: '',
+  location: '',
+  startDate: '',
+  endDate: '',
+  description: '',
+  type: 'work',
+};
+
 export function AdminResume() {
-  const [title, setTitle] = useState('My Resume');
-  const [content, setContent] = useState('');
-  const [resumeId, setResumeId] = useState<number | null>(null);
+  const [items, setItems] = useState<ResumeItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [formData, setFormData] = useState<FormData>(emptyForm);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -24,90 +46,109 @@ export function AdminResume() {
   const fetchResume = async () => {
     setLoading(true);
     try {
-      const resume: Resume = await resumeAPI.get();
-      setResumeId(resume.id);
-      setTitle(resume.title);
-      setContent(resume.content);
+      const data = await resumeAPI.getAll();
+      setItems(data);
     } catch (error) {
       console.error('Failed to fetch resume:', error);
-      // If no resume exists, start with default content
-      setContent(`# John Doe
-
-## Contact
-- Email: john@example.com
-- Phone: (555) 123-4567
-- Location: San Francisco, CA
-- LinkedIn: linkedin.com/in/johndoe
-- GitHub: github.com/johndoe
-
-## Summary
-Experienced software developer with a passion for building scalable web applications and solving complex problems. Proficient in modern web technologies and cloud infrastructure.
-
-## Experience
-
-### Senior Software Engineer
-**Tech Company** | *2020 - Present*
-- Led development of microservices architecture serving 1M+ users
-- Implemented CI/CD pipelines reducing deployment time by 60%
-- Mentored junior developers and conducted code reviews
-
-### Software Engineer
-**Startup Inc** | *2018 - 2020*
-- Developed RESTful APIs using Node.js and Express
-- Built responsive frontends with React and TypeScript
-- Improved application performance by 40% through optimization
-
-## Skills
-- **Languages**: TypeScript, JavaScript, Python, Go
-- **Frontend**: React, Vue.js, Next.js, Tailwind CSS
-- **Backend**: Node.js, Express, PostgreSQL, MongoDB
-- **DevOps**: Docker, Kubernetes, AWS, CI/CD
-- **Tools**: Git, Linux, VS Code
-
-## Education
-
-### Bachelor of Science in Computer Science
-**University Name** | *2014 - 2018*
-- GPA: 3.8/4.0
-- Dean's List: 6 semesters
-- Relevant coursework: Data Structures, Algorithms, Software Engineering
-
-## Projects
-
-### Personal Blog Platform
-- Full-stack blog application with React and Go
-- Features: Markdown support, comment system, admin dashboard
-- Technologies: React, TypeScript, Gin, PostgreSQL, Redis
-
-### Task Management App
-- Real-time collaborative task management tool
-- Implemented WebSocket for real-time updates
-- Technologies: Vue.js, Node.js, Socket.io, MongoDB
-`);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSave = async () => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const resetForm = () => {
+    setFormData(emptyForm);
+    setEditingId(null);
+  };
+
+  const handleEdit = (item: ResumeItem) => {
+    setEditingId(item.id);
+    setFormData({
+      title: item.title,
+      company: item.company || '',
+      location: item.location || '',
+      startDate: item.startDate.split('T')[0],
+      endDate: item.endDate ? item.endDate.split('T')[0] : '',
+      description: item.description || '',
+      type: item.type,
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setSaving(true);
+
     try {
-      if (resumeId) {
-        await resumeAPI.update(resumeId, { title, content });
+      const data = {
+        title: formData.title,
+        company: formData.company || undefined,
+        location: formData.location || undefined,
+        startDate: formData.startDate,
+        endDate: formData.endDate || undefined,
+        description: formData.description || undefined,
+        type: formData.type,
+      };
+
+      if (editingId) {
+        await resumeAPI.update(editingId, data);
+        toast({
+          title: 'Success',
+          description: 'Resume item updated successfully',
+        });
+      } else {
+        await resumeAPI.create(data);
+        toast({
+          title: 'Success',
+          description: 'Resume item created successfully',
+        });
       }
-      toast({
-        title: 'Success',
-        description: 'Resume updated successfully',
-      });
+
+      resetForm();
+      fetchResume();
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to update resume',
+        description: `Failed to ${editingId ? 'update' : 'create'} resume item`,
         variant: 'destructive',
       });
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this item?')) {
+      return;
+    }
+
+    try {
+      await resumeAPI.delete(id);
+      setItems(items.filter((item) => item.id !== id));
+      if (editingId === id) {
+        resetForm();
+      }
+      toast({
+        title: 'Success',
+        description: 'Resume item deleted successfully',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to delete resume item',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+    });
   };
 
   if (loading) {
@@ -124,54 +165,175 @@ Experienced software developer with a passion for building scalable web applicat
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2">Edit Resume</h1>
         <p className="text-muted-foreground">
-          Update your resume content using Markdown formatting
+          Manage your professional experience, education, and projects
         </p>
       </div>
 
-      {/* Editor */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Form */}
         <Card>
           <CardHeader>
-            <CardTitle>Editor</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>{editingId ? 'Edit Item' : 'Add New Item'}</CardTitle>
+              {editingId && (
+                <Button variant="ghost" size="sm" onClick={resetForm}>
+                  <X className="h-4 w-4 mr-1" />
+                  Cancel
+                </Button>
+              )}
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="title">Title</Label>
-              <Input
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Resume Title"
-              />
-            </div>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <Label htmlFor="type">Type</Label>
+                <select
+                  id="type"
+                  name="type"
+                  value={formData.type}
+                  onChange={handleChange}
+                  className="w-full mt-1 px-3 py-2 border rounded-md bg-background"
+                >
+                  <option value="work">Work Experience</option>
+                  <option value="education">Education</option>
+                  <option value="project">Project</option>
+                </select>
+              </div>
 
-            <div>
-              <Label htmlFor="content">Content (Markdown)</Label>
-              <Textarea
-                id="content"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                rows={30}
-                className="font-mono text-sm"
-                placeholder="Write your resume in Markdown..."
-              />
-            </div>
+              <div>
+                <Label htmlFor="title">Title / Position</Label>
+                <Input
+                  id="title"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleChange}
+                  required
+                  placeholder="Software Engineer"
+                />
+              </div>
 
-            <Button onClick={handleSave} disabled={saving} className="w-full">
-              <Save className="mr-2 h-4 w-4" />
-              {saving ? 'Saving...' : 'Save Resume'}
-            </Button>
+              <div>
+                <Label htmlFor="company">Company / Institution</Label>
+                <Input
+                  id="company"
+                  name="company"
+                  value={formData.company}
+                  onChange={handleChange}
+                  placeholder="Company Name"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="location">Location</Label>
+                <Input
+                  id="location"
+                  name="location"
+                  value={formData.location}
+                  onChange={handleChange}
+                  placeholder="San Francisco, CA"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="startDate">Start Date</Label>
+                  <Input
+                    id="startDate"
+                    name="startDate"
+                    type="date"
+                    value={formData.startDate}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="endDate">End Date (leave empty if current)</Label>
+                  <Input
+                    id="endDate"
+                    name="endDate"
+                    type="date"
+                    value={formData.endDate}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="description">Description (Markdown)</Label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  rows={6}
+                  placeholder="Describe your responsibilities and achievements..."
+                />
+              </div>
+
+              <Button type="submit" disabled={saving} className="w-full">
+                {saving ? 'Saving...' : editingId ? 'Update Item' : 'Add Item'}
+                {!saving && (editingId ? <Save className="ml-2 h-4 w-4" /> : <Plus className="ml-2 h-4 w-4" />)}
+              </Button>
+            </form>
           </CardContent>
         </Card>
 
+        {/* Items List */}
         <Card>
           <CardHeader>
-            <CardTitle>Preview</CardTitle>
+            <CardTitle>Resume Items ({items.length})</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="prose prose-neutral dark:prose-invert max-w-none min-h-[600px]">
-              <pre className="whitespace-pre-wrap text-sm">{content}</pre>
-            </div>
+            {items.length === 0 ? (
+              <p className="text-muted-foreground text-center py-8">
+                No resume items yet. Add your first item using the form.
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {items
+                  .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
+                  .map((item) => (
+                    <div
+                      key={item.id}
+                      className={`border rounded-lg p-4 ${
+                        editingId === item.id ? 'border-primary bg-primary/5' : ''
+                      }`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h4 className="font-semibold">{item.title}</h4>
+                          {item.company && (
+                            <p className="text-sm text-muted-foreground">{item.company}</p>
+                          )}
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {formatDate(item.startDate)}
+                            {item.endDate ? ` - ${formatDate(item.endDate)}` : ' - Present'}
+                          </p>
+                          <span className="inline-block mt-2 px-2 py-1 text-xs rounded bg-muted capitalize">
+                            {item.type}
+                          </span>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEdit(item)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDelete(item.id)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
