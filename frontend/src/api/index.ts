@@ -134,32 +134,24 @@ export const postsAPI = {
 
   create: async (data: Partial<Post>): Promise<Post> => {
     // Map coverImage to cover_image for backend
-    // Map tags (number[]) to tag_ids for backend
     const mappedData: any = { ...data };
     if (mappedData.coverImage) {
       mappedData.cover_image = mappedData.coverImage;
       delete mappedData.coverImage;
     }
-    if (mappedData.tags && Array.isArray(mappedData.tags)) {
-      mappedData.tag_ids = mappedData.tags;
-      delete mappedData.tags;
-    }
+    // tags stays as-is, backend expects "tags"
     const response = await api.post('/admin/posts', mappedData);
     return response.data.post || response.data;
   },
 
   update: async (id: number, data: Partial<Post>): Promise<Post> => {
     // Map coverImage to cover_image for backend
-    // Map tags (number[]) to tag_ids for backend
     const mappedData: any = { ...data };
     if (mappedData.coverImage) {
       mappedData.cover_image = mappedData.coverImage;
       delete mappedData.coverImage;
     }
-    if (mappedData.tags && Array.isArray(mappedData.tags)) {
-      mappedData.tag_ids = mappedData.tags;
-      delete mappedData.tags;
-    }
+    // tags stays as-is, backend expects "tags"
     const response = await api.put(`/admin/posts/${id}`, mappedData);
     return response.data.post || response.data;
   },
@@ -168,7 +160,7 @@ export const postsAPI = {
     await api.delete(`/admin/posts/${id}`);
   },
 
-  like: async (id: number): Promise<{ likeCount: number }> => {
+  like: async (id: number): Promise<{ like_count: number }> => {
     const response = await api.post(`/posts/${id}/like`);
     return response.data;
   },
@@ -227,7 +219,14 @@ export const projectsAPI = {
     page?: number;
     limit?: number;
   }): Promise<{ projects: Project[]; total: number; page: number; limit: number }> => {
-    const response = await api.get('/projects', { params });
+    const mappedParams: any = {
+      page: params?.page,
+      page_size: params?.limit,
+    };
+    Object.keys(mappedParams).forEach(key => {
+      if (mappedParams[key] === undefined) delete mappedParams[key];
+    });
+    const response = await api.get('/projects', { params: mappedParams });
     return response.data;
   },
 

@@ -58,11 +58,10 @@ export function AdminProjects() {
     });
   };
 
-  // Helper to get field from project (handles both camelCase and snake_case)
-  const getCreatedAt = (project: Project) => (project as any).created_at || (project as any).createdAt;
-  const getSortOrder = (project: Project) => project.sort_order ?? (project as any).sortOrder;
+  // Helper to get field from project
+  const getSortOrder = (project: Project) => project.sort_order;
   const getTechStack = (project: Project): string[] => {
-    const tech = project.tech_stack || (project as any).techStack;
+    const tech = project.tech_stack;
     if (Array.isArray(tech)) return tech;
     if (typeof tech === 'string' && tech) return tech.split(',').map((t: string) => t.trim()).filter(Boolean);
     return [];
@@ -70,6 +69,7 @@ export function AdminProjects() {
 
   const getStatusLabel = (status: string) => {
     const statusMap: Record<string, string> = {
+      active: 'Active',
       planning: 'Planning',
       in_progress: 'In Progress',
       completed: 'Completed',
@@ -80,6 +80,7 @@ export function AdminProjects() {
 
   const getStatusColor = (status: string) => {
     const colorMap: Record<string, string> = {
+      active: 'bg-emerald-500',
       planning: 'bg-yellow-500',
       in_progress: 'bg-blue-500',
       completed: 'bg-green-500',
@@ -130,7 +131,7 @@ export function AdminProjects() {
                       </Badge>
                     </div>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span>{formatDate(getCreatedAt(project))}</span>
+                      <span>{formatDate(project.created_at)}</span>
                       {getSortOrder(project) !== undefined && (
                         <span>Order: {getSortOrder(project)}</span>
                       )}

@@ -58,7 +58,7 @@ export function PostEditor() {
         slug: post.slug,
         content: post.content,
         summary: post.summary || '',
-        coverImage: post.coverImage || '',
+        coverImage: post.cover_image || '',
         status: post.status || 'draft',
       });
       setSelectedTags(post.tags.map((t) => t.id));

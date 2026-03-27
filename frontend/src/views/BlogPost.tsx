@@ -52,7 +52,7 @@ export function BlogPost() {
     if (!post) return;
     try {
       const result = await postsAPI.like(post.id);
-      setPost({ ...post, likeCount: result.likeCount });
+      setPost({ ...post, like_count: result.like_count });
       toast({
         title: 'Success',
         description: 'You liked this post!',
@@ -136,14 +136,14 @@ export function BlogPost() {
           <div className="flex flex-wrap items-center gap-4 text-muted-foreground mb-4">
             <div className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
-              <span>{formatDate(post.createdAt)}</span>
+              <span>{formatDate(post.created_at)}</span>
             </div>
             <div className="flex items-center gap-1">
               <Clock className="h-4 w-4" />
               <span>{Math.ceil(post.content.length / 200)} min read</span>
             </div>
             <div className="flex items-center gap-1">
-              <span>{post.viewCount} views</span>
+              <span>{post.view_count} views</span>
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -158,9 +158,9 @@ export function BlogPost() {
         </header>
 
         {/* Cover Image */}
-        {post.coverImage && (
+        {post.cover_image && (
           <img
-            src={post.coverImage}
+            src={post.cover_image}
             alt={post.title}
             className="w-full h-[400px] object-cover rounded-lg mb-8"
           />
@@ -175,7 +175,7 @@ export function BlogPost() {
         <div className="flex items-center gap-4 py-4 border-t">
           <Button variant="outline" onClick={handleLike}>
             <Heart className="mr-2 h-4 w-4" />
-            Like ({post.likeCount})
+            Like ({post.like_count})
           </Button>
           <div className="flex items-center text-muted-foreground">
             <MessageCircle className="mr-2 h-4 w-4" />
@@ -246,14 +246,14 @@ function CommentItem({ comment }: { comment: CommentType }) {
     if (comment.author) {
       return comment.author.username;
     }
-    return comment.authorName || 'Anonymous';
+    return comment.author_name || 'Anonymous';
   };
 
   return (
     <div className="border rounded-lg p-4">
       <div className="flex items-center gap-3 mb-2">
         <div className="font-semibold">{getAuthorName()}</div>
-        <div className="text-sm text-muted-foreground">{formatDate(comment.createdAt)}</div>
+        <div className="text-sm text-muted-foreground">{formatDate(comment.created_at)}</div>
       </div>
       <p className="text-sm">{comment.content}</p>
       {comment.replies && comment.replies.length > 0 && (
