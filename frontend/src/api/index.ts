@@ -22,31 +22,33 @@ function getCookie(name: string): string | undefined {
   if (parts.length === 2) return parts.pop()?.split(';').shift();
 }
 
-// 401 Error Handling: Debounce mechanism to prevent multiple redirects
-let isRedirecting = false;
+// 401 Error Handling: Try token refresh before redirecting to login
+let isRefreshing = false;
+let failedQueue: Array<{ resolve: (value: unknown) => void; reject: (reason: unknown) => void }> = [];
+
+const processQueue = (error: unknown) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(undefined);
+    }
+  });
+  failedQueue = [];
+};
 
 const handle401Error = () => {
-  // Debounce: Skip if already redirecting
-  if (isRedirecting) return;
-
-  isRedirecting = true;
-
   // Clear auth data
   sessionStorage.removeItem('token');
   sessionStorage.removeItem('auth-storage');
 
   // Save current location for post-login redirect
   const currentPath = window.location.pathname + window.location.search;
-  // Don't save login page as redirect target
   if (!currentPath.startsWith('/login')) {
     sessionStorage.setItem('redirectAfterLogin', currentPath);
   }
 
-  // Redirect to login with a small delay to allow any pending operations to complete
-  setTimeout(() => {
-    window.location.href = '/login';
-    isRedirecting = false;
-  }, 100);
+  window.location.href = '/login';
 };
 
 // Request interceptor to add auth token and CSRF token
@@ -70,13 +72,44 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor to handle errors
+// Response interceptor: try token refresh on 401 before giving up
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      handle401Error();
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      // Don't try to refresh if the refresh endpoint itself failed
+      if (originalRequest.url?.includes('/auth/refresh')) {
+        handle401Error();
+        return Promise.reject(error);
+      }
+
+      if (isRefreshing) {
+        // Queue this request to retry after the in-flight refresh completes
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then(() => api(originalRequest));
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        // Attempt silent token refresh (cookies are sent automatically)
+        await api.post('/auth/refresh');
+        processQueue(null);
+        // Retry the original request with the new access_token cookie
+        return api(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError);
+        handle401Error();
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
     }
+
     return Promise.reject(error);
   }
 );
@@ -89,6 +122,11 @@ export const authAPI = {
 
   logout: async (): Promise<void> => {
     await api.post('/auth/logout');
+  },
+
+  refresh: async (): Promise<{ message: string; csrf_token: string }> => {
+    const response = await api.post('/auth/refresh');
+    return response.data;
   },
 
   me: async (): Promise<User> => {
