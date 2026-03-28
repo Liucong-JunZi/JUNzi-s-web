@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/liucong/personal-website/internal/cache"
 	"github.com/liucong/personal-website/internal/config"
@@ -40,6 +41,10 @@ func main() {
 
 	// Start server
 	log.Printf("Server starting on port %s", cfg.Server.Port)
+	// Warn if running in production without explicit HTTPS acknowledgment
+	if os.Getenv("GIN_MODE") == "release" || os.Getenv("APP_ENV") == "production" {
+		log.Println("[SECURITY] Production mode detected. Ensure TLS termination is configured (external proxy, Cloudflare, or nginx HTTPS block).")
+	}
 	if err := router.Run(":" + cfg.Server.Port); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}

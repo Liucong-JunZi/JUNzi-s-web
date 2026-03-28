@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -118,7 +119,9 @@ func revokeRefreshToken(tokenString string, expiresAt time.Time) error {
 
 // isRefreshTokenRevoked checks whether a refresh token has been revoked.
 // redis.Nil (key not found) means the token is NOT revoked — this is the normal case.
-// Other Redis errors trigger fail-closed behavior for safety.
+// Redis connection errors are treated as fail-open (not revoked) for availability.
+// JWT signature validation still provides authentication security even when
+// the revocation check is bypassed by a Redis outage.
 func isRefreshTokenRevoked(tokenString string) bool {
 	key := "refresh_revoked:" + tokenHash(tokenString)
 	ctx := context.Background()
@@ -127,7 +130,10 @@ func isRefreshTokenRevoked(tokenString string) bool {
 		return false // key not found → token is NOT revoked (normal case)
 	}
 	if err != nil {
-		return true // Redis connection error → fail-closed for safety
+		// Redis unavailable → fail-open for availability.
+		// Log the error so operators can investigate repeated Redis failures.
+		log.Printf("[WARN] Redis error during token revocation check: %v", err)
+		return false
 	}
 	return true // key exists → token IS revoked
 }

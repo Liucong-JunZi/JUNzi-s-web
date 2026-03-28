@@ -111,7 +111,7 @@ func Setup(cfg *config.Config) *gin.Engine {
 		protected.Use(middleware.AuthRequired(cfg))
 		{
 			// User routes (authenticated users)
-			protected.POST("/comments", middleware.RateLimiter(cache.Client, 20, time.Minute), commentController.CreateComment)
+			protected.POST("/comments", middleware.CSRFProtection(), middleware.RateLimiter(cache.Client, 20, time.Minute), commentController.CreateComment)
 
 			// Admin routes
 			admin := protected.Group("/admin")

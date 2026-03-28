@@ -1,3 +1,5 @@
+# For supply chain integrity, pin base images with SHA256 digests.
+# Run: ./scripts/pin-docker-digests.sh to get current digests.
 # ==================== 构建阶段 ====================
 FROM node:20.11-alpine AS builder
 
