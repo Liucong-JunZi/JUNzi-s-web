@@ -59,14 +59,14 @@ export function AdminPosts() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="container mx-auto px-4 py-12" data-testid="admin-posts-page">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-4xl font-bold mb-2">Manage Posts</h1>
           <p className="text-muted-foreground">Create, edit, and delete blog posts</p>
         </div>
-        <Button asChild>
+        <Button asChild data-testid="new-post-btn">
           <Link to="/admin/posts/new">
             <Plus className="mr-2 h-4 w-4" />
             New Post
@@ -89,16 +89,16 @@ export function AdminPosts() {
       ) : (
         <div className="space-y-4">
           {posts.map((post) => (
-            <Card key={post.id}>
+            <Card key={post.id} data-testid="post-row">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <CardTitle className="text-xl">{post.title}</CardTitle>
+                      <CardTitle className="text-xl" data-testid="post-title">{post.title}</CardTitle>
                       {post.status === 'published' ? (
-                        <Badge variant="default">Published</Badge>
+                        <Badge variant="default" data-testid="post-status">Published</Badge>
                       ) : (
-                        <Badge variant="secondary">Draft</Badge>
+                        <Badge variant="secondary" data-testid="post-status">Draft</Badge>
                       )}
                     </div>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -113,7 +113,7 @@ export function AdminPosts() {
                         <Eye className="h-4 w-4" />
                       </Link>
                     </Button>
-                    <Button variant="ghost" size="icon" asChild>
+                    <Button variant="ghost" size="icon" asChild data-testid={`edit-post-btn-${post.id}`}>
                       <Link to={`/admin/posts/${post.id}`}>
                         <Edit className="h-4 w-4" />
                       </Link>
@@ -122,6 +122,7 @@ export function AdminPosts() {
                       variant="ghost"
                       size="icon"
                       onClick={() => handleDelete(post.id, post.title)}
+                      data-testid={`delete-post-btn-${post.id}`}
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>

@@ -8,10 +8,10 @@ import (
 
 type User struct {
 	ID            uint           `json:"id" gorm:"primaryKey"`
-	GitHubID      string         `json:"github_id" gorm:"uniqueIndex"`
+	GitHubID      string         `json:"github_id" gorm:"column:github_id;uniqueIndex"`
 	Username      string         `json:"username"`
 	Email         string         `json:"email"`
-	AvatarURL     string         `json:"avatar_url"`
+	AvatarURL     string         `json:"avatar_url" gorm:"column:avatar_url"`
 	Bio           string         `json:"bio"`
 	Role          string         `json:"role" gorm:"default:user"` // admin, user
 	CreatedAt     time.Time      `json:"created_at"`
@@ -31,7 +31,7 @@ type Post struct {
 	LikeCount   int            `json:"like_count" gorm:"default:0"`
 	AuthorID    uint           `json:"author_id"`
 	Author      User           `json:"author" gorm:"foreignKey:AuthorID"`
-	CategoryID  uint           `json:"category_id"`
+	CategoryID  *uint          `json:"category_id"`
 	Category    Category       `json:"category" gorm:"foreignKey:CategoryID"`
 	Tags        []Tag          `json:"tags" gorm:"many2many:post_tags;"`
 	CreatedAt   time.Time      `json:"created_at"`

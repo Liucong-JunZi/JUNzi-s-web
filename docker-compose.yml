@@ -110,6 +110,7 @@ services:
       - GITHUB_CALLBACK_URL=${GITHUB_CALLBACK_URL:-http://localhost/api/auth/github/callback}
       - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set in .env file}
       - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost}
+      - TEST_MODE=${TEST_MODE:-false}
       - FRONTEND_URL=${FRONTEND_URL:-http://localhost}
       - MINIO_PUBLIC_URL=${MINIO_PUBLIC_URL:-http://localhost:9000}
     depends_on:

@@ -67,7 +67,7 @@ export function AdminDashboard() {
   ];
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="container mx-auto px-4 py-12" data-testid="admin-dashboard">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2">Dashboard</h1>
@@ -116,7 +116,7 @@ export function AdminDashboard() {
         <h2 className="text-2xl font-bold mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {quickActions.map((action) => (
-            <Card key={action.title} className="hover:shadow-lg transition-shadow">
+            <Card key={action.title} className="hover:shadow-lg transition-shadow" data-testid={action.title === 'Create Post' ? 'create-post-action' : undefined}>
               <CardContent className="pt-6">
                 <div className="flex items-start gap-4">
                   <div className="p-2 bg-primary/10 rounded-lg">
@@ -140,7 +140,7 @@ export function AdminDashboard() {
       <div>
         <h2 className="text-2xl font-bold mb-4">Manage Content</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Button asChild variant="outline" className="h-24">
+          <Button asChild variant="outline" className="h-24" data-testid="manage-posts-action">
             <Link to="/admin/posts" className="flex flex-col gap-2">
               <FileText className="h-6 w-6" />
               <span>Manage Posts</span>

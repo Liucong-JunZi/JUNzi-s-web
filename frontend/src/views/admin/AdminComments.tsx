@@ -109,7 +109,7 @@ export function AdminComments() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="container mx-auto px-4 py-12" data-testid="admin-comments-page">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
@@ -131,7 +131,7 @@ export function AdminComments() {
       ) : (
         <div className="space-y-4">
           {comments.map((comment) => (
-            <Card key={comment.id}>
+            <Card key={comment.id} data-testid={`comment-row-${comment.id}`}>
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -148,6 +148,7 @@ export function AdminComments() {
                             ? 'destructive'
                             : 'secondary'
                         }
+                        data-testid={`comment-status-${comment.id}`}
                       >
                         {comment.status === 'approved'
                           ? 'Approved'
@@ -167,6 +168,7 @@ export function AdminComments() {
                         size="icon"
                         title="Approve"
                         onClick={() => handleUpdateStatus(comment.id, 'approved')}
+                        data-testid={`approve-comment-btn-${comment.id}`}
                       >
                         <CheckCircle className="h-4 w-4 text-green-600" />
                       </Button>
@@ -177,6 +179,7 @@ export function AdminComments() {
                         size="icon"
                         title="Reject"
                         onClick={() => handleUpdateStatus(comment.id, 'rejected')}
+                        data-testid={`reject-comment-btn-${comment.id}`}
                       >
                         <XCircle className="h-4 w-4 text-orange-500" />
                       </Button>
@@ -185,6 +188,7 @@ export function AdminComments() {
                       variant="ghost"
                       size="icon"
                       onClick={() => handleDelete(comment.id)}
+                      data-testid={`delete-comment-btn-${comment.id}`}
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>

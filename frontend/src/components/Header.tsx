@@ -90,7 +90,7 @@ export function Header() {
           {isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full" data-testid="user-avatar">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={user?.avatar_url} alt={user?.username} />
                     <AvatarFallback>
@@ -108,16 +108,16 @@ export function Header() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {user?.role === 'admin' && (
-                  <DropdownMenuItem asChild>
+                  <DropdownMenuItem asChild data-testid="dashboard-link">
                     <Link to="/admin">Dashboard</Link>
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout}>Log out</DropdownMenuItem>
+                <DropdownMenuItem onClick={logout} data-testid="logout-btn">Log out</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button asChild>
+            <Button asChild data-testid="login-btn">
               <Link to="/login">
                 <GithubIcon className="mr-2 h-4 w-4" />
                 Login

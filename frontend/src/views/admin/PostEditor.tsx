@@ -194,6 +194,7 @@ export function PostEditor() {
                     onChange={handleChange}
                     required
                     placeholder="Enter post title"
+                    data-testid="post-title-input"
                   />
                 </div>
 
@@ -206,6 +207,7 @@ export function PostEditor() {
                     onChange={handleChange}
                     required
                     placeholder="post-url-slug"
+                    data-testid="post-slug-input"
                   />
                 </div>
 
@@ -219,6 +221,7 @@ export function PostEditor() {
                     required
                     rows={20}
                     placeholder="Write your post content in Markdown..."
+                    data-testid="post-content-input"
                   />
                 </div>
 
@@ -231,6 +234,7 @@ export function PostEditor() {
                     onChange={handleChange}
                     rows={3}
                     placeholder="Brief description of the post"
+                    data-testid="post-summary-input"
                   />
                 </div>
               </CardContent>
@@ -249,13 +253,14 @@ export function PostEditor() {
                     value={formData.status}
                     onChange={(e) => setFormData((prev) => ({ ...prev, status: e.target.value as PostStatus }))}
                     className="w-full mt-1 px-3 py-2 border rounded-md bg-background"
+                    data-testid="post-status-select"
                   >
                     <option value="draft">Draft</option>
                     <option value="published">Published</option>
                   </select>
                 </div>
 
-                <Button type="submit" className="w-full" disabled={saving}>
+                <Button type="submit" className="w-full" disabled={saving} data-testid="post-save-btn">
                   <Save className="mr-2 h-4 w-4" />
                   {saving ? 'Saving...' : 'Save Post'}
                 </Button>
@@ -279,6 +284,7 @@ export function PostEditor() {
                     onChange={handleImageUpload}
                     className="hidden"
                     id="cover-image"
+                    data-testid="cover-image-upload"
                   />
                   <Button
                     type="button"

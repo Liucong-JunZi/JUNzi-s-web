@@ -24,7 +24,7 @@ type CreatePostRequest struct {
 	Summary    string `json:"summary"`
 	CoverImage string `json:"cover_image"`
 	Status     string `json:"status"`
-	CategoryID uint   `json:"category_id"`
+	CategoryID *uint  `json:"category_id"`
 	Tags       []uint `json:"tags"`
 }
 
@@ -35,7 +35,7 @@ type UpdatePostRequest struct {
 	Summary    *string `json:"summary"`
 	CoverImage *string `json:"cover_image"`
 	Status     *string `json:"status"`
-	CategoryID uint    `json:"category_id"`
+	CategoryID *uint   `json:"category_id"`
 	Tags       []uint  `json:"tags"`
 }
 
@@ -188,6 +188,12 @@ func (pc *PostController) CreatePost(c *gin.Context) {
 
 	userID, _ := c.Get("userID")
 
+	// Treat category_id=0 (or absent) as NULL so the foreign key constraint is not violated.
+	categoryID := req.CategoryID
+	if categoryID != nil && *categoryID == 0 {
+		categoryID = nil
+	}
+
 	post := models.Post{
 		Title:      req.Title,
 		Slug:       req.Slug,
@@ -196,7 +202,7 @@ func (pc *PostController) CreatePost(c *gin.Context) {
 		CoverImage: req.CoverImage,
 		Status:     req.Status,
 		AuthorID:   userID.(uint),
-		CategoryID: req.CategoryID,
+		CategoryID: categoryID,
 	}
 
 	if post.Status == "" {
@@ -260,8 +266,12 @@ func (pc *PostController) UpdatePost(c *gin.Context) {
 	if req.Status != nil {
 		updates["status"] = *req.Status
 	}
-	if req.CategoryID != 0 {
-		updates["category_id"] = req.CategoryID
+	if req.CategoryID != nil {
+		if *req.CategoryID == 0 {
+			updates["category_id"] = nil
+		} else {
+			updates["category_id"] = *req.CategoryID
+		}
 	}
 
 	if err := database.DB.Model(&post).Updates(updates).Error; err != nil {

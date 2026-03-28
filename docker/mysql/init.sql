@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS posts (
     cover_image VARCHAR(500),
     status VARCHAR(50) DEFAULT 'draft',
     view_count INT DEFAULT 0,
+    like_count INT DEFAULT 0,
     author_id BIGINT UNSIGNED NOT NULL,
     category_id BIGINT UNSIGNED,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

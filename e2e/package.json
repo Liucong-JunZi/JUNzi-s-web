@@ -1,0 +1,15 @@
+{
+  "name": "junziweb-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "npx playwright test",
+    "test:smoke": "npx playwright test --grep @p0",
+    "test:regression": "npx playwright test --grep \"@p0|@p1\"",
+    "test:ui": "npx playwright test --ui",
+    "report": "npx playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0"
+  }
+}

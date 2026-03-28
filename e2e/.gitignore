@@ -1,0 +1,8 @@
+node_modules/
+test-results/
+playwright-report/
+reports/
+storage/*.json
+!storage/.gitkeep
+!reports/.gitkeep
+*.tsbuildinfo

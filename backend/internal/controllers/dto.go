@@ -36,7 +36,7 @@ type PublicPost struct {
 	LikeCount  int             `json:"like_count"`
 	AuthorID   uint            `json:"author_id"`
 	Author     PublicUser      `json:"author"`
-	CategoryID uint            `json:"category_id"`
+	CategoryID *uint           `json:"category_id"`
 	Category   models.Category `json:"category"`
 	Tags       []models.Tag    `json:"tags"`
 	CreatedAt  time.Time       `json:"created_at"`

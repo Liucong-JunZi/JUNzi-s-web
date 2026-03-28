@@ -1,4 +1,5 @@
 .PHONY: help build up down logs restart clean ps generate-secrets init-env
+.PHONY: test-e2e test-e2e-smoke test-e2e-ui test-e2e-debug
 
 # 默认目标
 .DEFAULT_GOAL := help
@@ -73,10 +74,10 @@ minio-logs: ## 查看 MinIO 日志
 
 # ==================== 数据库命令 ====================
 mysql-cli: ## 进入 MySQL 命令行
-	@docker-compose exec mysql mysql -uroot -p$$(grep DB_PASSWORD .env 2>/dev/null | cut -d'=' -f2)
+	@docker-compose exec mysql mysql -uroot -p$$(grep DB_PASSWORD .env 2>/dev/null | cut -d'=' -f2-)
 
 redis-cli: ## 进入 Redis 命令行
-	@docker-compose exec redis redis-cli -a $(shell grep REDIS_PASSWORD .env 2>/dev/null | cut -d'=' -f2 || echo "")
+	@docker-compose exec redis redis-cli -a $(shell grep REDIS_PASSWORD .env 2>/dev/null | cut -d'=' -f2- || echo "")
 
 # ==================== 开发命令 ====================
 dev-backend: ## 本地开发后端
@@ -101,7 +102,7 @@ deploy: build up ## 部署 (构建并启动)
 
 # ==================== 备份命令 ====================
 backup-mysql: ## 备份 MySQL 数据
-	@docker-compose exec mysql mysqldump -uroot -p$$(grep DB_PASSWORD .env 2>/dev/null | cut -d'=' -f2) personal_website > backup_$$(date +%Y%m%d_%H%M%S).sql
+	@docker-compose exec mysql mysqldump -uroot -p$$(grep DB_PASSWORD .env 2>/dev/null | cut -d'=' -f2-) personal_website > backup_$$(date +%Y%m%d_%H%M%S).sql
 	@echo "备份完成"
 
 # ==================== 健康检查 ====================
@@ -109,6 +110,24 @@ health: ## 检查服务健康状态
 	@echo "检查服务健康状态..."
 	@curl -s http://localhost/health && echo " - Frontend: OK" || echo " - Frontend: FAILED"
 	@curl -s http://localhost:8080/api/health && echo " - Backend: OK" || echo " - Backend: FAILED"
+
+# ==================== E2E 测试命令 ====================
+test-e2e: ## 运行所有 E2E 测试 (需要 Docker 服务已启动且 TEST_MODE=true)
+	@echo "运行 E2E 测试..."
+	cd e2e && npm ci && npx playwright install --with-deps chromium
+	cd e2e && E2E_BASE_URL=http://localhost npx playwright test --reporter=list
+
+test-e2e-smoke: ## 仅运行 P0 冒烟测试
+	cd e2e && npm ci && npx playwright install --with-deps chromium
+	cd e2e && E2E_BASE_URL=http://localhost npx playwright test --grep @p0 --reporter=list
+
+test-e2e-ui: ## E2E 测试 UI 模式 (交互式调试)
+	cd e2e && npm ci && npx playwright install --with-deps chromium
+	cd e2e && E2E_BASE_URL=http://localhost npx playwright test --ui
+
+test-e2e-debug: ## E2E 测试 debug 模式
+	cd e2e && npm ci && npx playwright install --with-deps chromium
+	cd e2e && E2E_BASE_URL=http://localhost npx playwright test --debug --project=setup
 
 # ==================== 安全审计 ====================
 .PHONY: security-audit audit-go audit-npm audit-docker

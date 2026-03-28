@@ -88,7 +88,7 @@ export function Login() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Button onClick={handleGitHubLogin} className="w-full" size="lg">
+            <Button onClick={handleGitHubLogin} className="w-full" size="lg" data-testid="github-login-btn">
               <GithubIcon className="mr-2 h-5 w-5" />
               Continue with GitHub
             </Button>

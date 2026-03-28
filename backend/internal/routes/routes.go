@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"log"
+	"os"
 	"strings"
 	"time"
 
@@ -91,6 +93,14 @@ func Setup(cfg *config.Config) *gin.Engine {
 
 		// Public settings
 		api.GET("/settings/public", settingController.GetPublicSettings)
+
+		// Test-only login endpoint (bypasses GitHub OAuth). Registered on the
+		// api group (not the stricter auth group) to avoid E2E rate-limit issues.
+		// Only available when TEST_MODE=true.
+		if os.Getenv("TEST_MODE") == "true" {
+			log.Println("[TEST MODE] /api/auth/test-login endpoint registered")
+			api.POST("/auth/test-login", controllers.TestLoginHandler(cfg))
+		}
 
 		// Auth routes — stricter rate limit (10/min)
 		auth := api.Group("/auth")

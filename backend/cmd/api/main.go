@@ -45,6 +45,10 @@ func main() {
 	if os.Getenv("GIN_MODE") == "release" || os.Getenv("APP_ENV") == "production" {
 		log.Println("[SECURITY] Production mode detected. Ensure TLS termination is configured (external proxy, Cloudflare, or nginx HTTPS block).")
 	}
+	if os.Getenv("TEST_MODE") == "true" {
+		log.Println("[SECURITY WARNING] TEST_MODE is enabled. The /api/auth/test-login endpoint is active.")
+		log.Println("[SECURITY WARNING] This endpoint bypasses GitHub OAuth. NEVER set TEST_MODE=true in production.")
+	}
 	if err := router.Run(":" + cfg.Server.Port); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}

@@ -151,7 +151,7 @@ export function BlogPost() {
       {/* Post Header */}
       <article className="max-w-4xl mx-auto mb-12">
         <header className="mb-8">
-          <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
+          <h1 className="text-4xl font-bold mb-4" data-testid="post-title">{post.title}</h1>
           <div className="flex flex-wrap items-center gap-4 text-muted-foreground mb-4">
             <div className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
@@ -192,7 +192,7 @@ export function BlogPost() {
 
         {/* Actions */}
         <div className="flex items-center gap-4 py-4 border-t">
-          <Button variant="outline" onClick={handleLike}>
+          <Button variant="outline" onClick={handleLike} data-testid="like-btn">
             <Heart className="mr-2 h-4 w-4" />
             Like ({post.like_count})
           </Button>
@@ -204,7 +204,7 @@ export function BlogPost() {
       </article>
 
       {/* Comments Section */}
-      <section className="max-w-4xl mx-auto">
+      <section className="max-w-4xl mx-auto" data-testid="comments-section">
         <Card>
           <CardHeader>
             <CardTitle>Comments ({comments.length})</CardTitle>
@@ -218,8 +218,9 @@ export function BlogPost() {
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
                   rows={4}
+                  data-testid="comment-textarea"
                 />
-                <Button type="submit" disabled={!commentText.trim()}>
+                <Button type="submit" disabled={!commentText.trim()} data-testid="comment-submit-btn">
                   Post Comment
                 </Button>
               </form>
