@@ -4,3 +4,4 @@ services:
   backend:
     environment:
       - TEST_MODE=true
+      - CORS_ALLOWED_ORIGINS=http://localhost

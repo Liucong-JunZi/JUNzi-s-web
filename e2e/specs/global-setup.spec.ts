@@ -6,9 +6,8 @@ setup.describe.configure({ mode: 'serial' });
 const baseUrl = process.env.E2E_BASE_URL || 'http://localhost';
 
 setup.describe('Global setup', () => {
-  setup('bootstrap admin storage state', async ({ page }) => {
-    // 1. Login via API to get cookies
-    const res = await page.request.post('/api/auth/test-login', {
+  setup('bootstrap admin storage state', async ({ request }) => {
+    const res = await request.post('/api/auth/test-login', {
       headers: { 'Content-Type': 'application/json' },
       data: JSON.stringify({ role: 'admin' }),
     });
@@ -16,37 +15,20 @@ setup.describe('Global setup', () => {
 
     const loginBody = await res.json();
     expect(loginBody.user.role).toBe('admin');
+    expect(loginBody.csrf_token).toBeDefined();
 
-    // 2. Navigate to any page so sessionStorage is available
-    await page.goto('/');
-    // Wait for the page to actually load
-    await page.waitForLoadState('domcontentloaded');
+    // Verify session is valid via /api/auth/me
+    const me = await request.get('/api/auth/me');
+    expect(me.ok(), `me status: ${me.status()}`).toBeTruthy();
+    expect((await me.json()).user.role).toBe('admin');
 
-    // 3. Inject Zustand auth store into sessionStorage
-    // This matches the structure created by Zustand's persist middleware
-    await page.evaluate((user) => {
-      const authData = {
-        state: {
-          user: user,
-          isAuthenticated: true,
-        },
-        version: 0,
-      };
-      sessionStorage.setItem('auth-storage', JSON.stringify(authData));
-    }, loginBody.user);
-
-    // 4. Verify the session works by navigating to admin
-    await page.goto('/admin/posts');
-    // AdminRoute should NOT redirect to login - wait for admin page content
-    await expect(page.getByTestId('admin-posts-page')).toBeVisible({ timeout: 15_000 });
-
-    // 5. Save storage state (cookies + sessionStorage)
-    await page.context().storageState({ path: './storage/admin.storageState.json' });
+    // Save cookies to storageState — admin tests will restore session
+    // via the real path: cookies → /api/auth/me → Zustand store
+    await request.storageState({ path: './storage/admin.storageState.json' });
   });
 
-  setup('bootstrap user storage state', async ({ page }) => {
-    // 1. Login via API to get cookies
-    const res = await page.request.post('/api/auth/test-login', {
+  setup('bootstrap user storage state', async ({ request }) => {
+    const res = await request.post('/api/auth/test-login', {
       headers: { 'Content-Type': 'application/json' },
       data: JSON.stringify({ role: 'user' }),
     });
@@ -54,24 +36,13 @@ setup.describe('Global setup', () => {
 
     const loginBody = await res.json();
     expect(loginBody.user.role).toBe('user');
+    expect(loginBody.csrf_token).toBeDefined();
 
-    // 2. Navigate to any page so sessionStorage is available
-    await page.goto('/');
-    await page.waitForLoadState('domcontentloaded');
+    // Verify session is valid via /api/auth/me
+    const me = await request.get('/api/auth/me');
+    expect(me.ok(), `me status: ${me.status()}`).toBeTruthy();
+    expect((await me.json()).user.role).toBe('user');
 
-    // 3. Inject Zustand auth store into sessionStorage
-    await page.evaluate((user) => {
-      const authData = {
-        state: {
-          user: user,
-          isAuthenticated: true,
-        },
-        version: 0,
-      };
-      sessionStorage.setItem('auth-storage', JSON.stringify(authData));
-    }, loginBody.user);
-
-    // 4. Save storage state (cookies + sessionStorage)
-    await page.context().storageState({ path: './storage/user.storageState.json' });
+    await request.storageState({ path: './storage/user.storageState.json' });
   });
 });
