@@ -9,7 +9,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/liucong/personal-website/internal/audit"
 	"github.com/liucong/personal-website/internal/config"
+	"github.com/liucong/personal-website/internal/database"
+	"github.com/liucong/personal-website/internal/models"
 )
 
 func CORS() gin.HandlerFunc {
@@ -111,7 +114,6 @@ func AuthRequired(cfg *config.Config) gin.HandlerFunc {
 			return
 		}
 
-		// Store user info in context
 		// Convert userID from float64 to uint (JWT parses numbers as float64)
 		userIDFloat, ok := claims["sub"].(float64)
 		if !ok {
@@ -119,8 +121,19 @@ func AuthRequired(cfg *config.Config) gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		c.Set("userID", uint(userIDFloat))
-		c.Set("userRole", claims["role"])
+		userID := uint(userIDFloat)
+
+		// Look up current role from DB instead of trusting JWT claim,
+		// so role changes take effect before token expiry.
+		var user models.User
+		if err := database.DB.Select("role").First(&user, userID).Error; err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+			c.Abort()
+			return
+		}
+
+		c.Set("userID", userID)
+		c.Set("userRole", user.Role)
 		c.Next()
 	}
 }
@@ -129,6 +142,7 @@ func AdminRequired() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		role, exists := c.Get("userRole")
 		if !exists || role != "admin" {
+			audit.Log("admin_forbidden", "non-admin attempted admin action", c)
 			c.JSON(http.StatusForbidden, gin.H{"error": "Admin access required"})
 			c.Abort()
 			return
@@ -150,6 +164,7 @@ func OriginRefererCheck() gin.HandlerFunc {
 
 		// At least one must be present
 		if origin == "" && referer == "" {
+			audit.Log("origin_rejected", "missing Origin and Referer headers", c)
 			c.JSON(http.StatusForbidden, gin.H{"error": "Origin or Referer header required"})
 			c.Abort()
 			return
@@ -157,6 +172,7 @@ func OriginRefererCheck() gin.HandlerFunc {
 
 		if origin != "" {
 			if !isOriginAllowed(origin, allowedOrigins) {
+				audit.Log("origin_rejected", "Origin not allowed: "+origin, c)
 				c.JSON(http.StatusForbidden, gin.H{"error": "Origin not allowed"})
 				c.Abort()
 				return
@@ -165,6 +181,7 @@ func OriginRefererCheck() gin.HandlerFunc {
 			// Extract origin from Referer URL
 			rOrigin := refererOrigin(referer)
 			if rOrigin == "" || !isOriginAllowed(rOrigin, allowedOrigins) {
+				audit.Log("origin_rejected", "Referer origin not allowed: "+referer, c)
 				c.JSON(http.StatusForbidden, gin.H{"error": "Referer origin not allowed"})
 				c.Abort()
 				return
@@ -201,6 +218,7 @@ func CSRFProtection() gin.HandlerFunc {
 
 		cookieToken, err := c.Cookie("csrf_token")
 		if err != nil || cookieToken == "" {
+			audit.Log("csrf_rejected", "missing csrf_token cookie", c)
 			c.JSON(http.StatusForbidden, gin.H{"error": "CSRF token missing from cookie"})
 			c.Abort()
 			return
@@ -208,12 +226,14 @@ func CSRFProtection() gin.HandlerFunc {
 
 		headerToken := c.GetHeader("X-CSRF-Token")
 		if headerToken == "" {
+			audit.Log("csrf_rejected", "missing X-CSRF-Token header", c)
 			c.JSON(http.StatusForbidden, gin.H{"error": "CSRF token missing from header"})
 			c.Abort()
 			return
 		}
 
 		if cookieToken != headerToken {
+			audit.Log("csrf_rejected", "CSRF token mismatch", c)
 			c.JSON(http.StatusForbidden, gin.H{"error": "CSRF token mismatch"})
 			c.Abort()
 			return

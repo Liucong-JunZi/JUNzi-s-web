@@ -34,18 +34,22 @@ func Connect(cfg *config.DatabaseConfig) error {
 		return fmt.Errorf("failed to connect database: %w", err)
 	}
 
-	// Auto migrate
-	if err := DB.AutoMigrate(
-		&models.User{},
-		&models.Category{},
-		&models.Tag{},
-		&models.Post{},
-		&models.Project{},
-		&models.Resume{},
-		&models.Comment{},
-		&models.Setting{},
-	); err != nil {
-		return fmt.Errorf("failed to migrate database: %w", err)
+	// Auto migrate — can be disabled with AUTO_MIGRATE=false in production
+	if os.Getenv("AUTO_MIGRATE") != "false" {
+		if err := DB.AutoMigrate(
+			&models.User{},
+			&models.Category{},
+			&models.Tag{},
+			&models.Post{},
+			&models.Project{},
+			&models.Resume{},
+			&models.Comment{},
+			&models.Setting{},
+		); err != nil {
+			return fmt.Errorf("failed to migrate database: %w", err)
+		}
+	} else {
+		fmt.Println("AutoMigrate skipped (AUTO_MIGRATE=false)")
 	}
 
 	return nil

@@ -139,6 +139,23 @@ func validate(cfg *Config) error {
 	if categories < 3 {
 		return fmt.Errorf("JWT_SECRET is too weak: must contain characters from at least 3 categories (uppercase, lowercase, digits, special characters)")
 	}
+
+	// Production-specific security validations
+	if os.Getenv("APP_ENV") == "production" || os.Getenv("GIN_MODE") == "release" {
+		if cfg.MinIO.AccessKey == "minioadmin" && cfg.MinIO.SecretKey == "minioadmin" {
+			return fmt.Errorf("MINIO_ACCESS_KEY and MINIO_SECRET_KEY must be changed from defaults in production")
+		}
+		if !cfg.MinIO.UseSSL {
+			return fmt.Errorf("MINIO_USE_SSL must be true in production")
+		}
+		if cfg.Database.Password == "" {
+			return fmt.Errorf("DB_PASSWORD must be set in production")
+		}
+		if cfg.Redis.Password == "" {
+			return fmt.Errorf("REDIS_PASSWORD must be set in production")
+		}
+	}
+
 	return nil
 }
 

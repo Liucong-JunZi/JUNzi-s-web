@@ -15,6 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/liucong/personal-website/internal/audit"
 	"github.com/liucong/personal-website/internal/cache"
 	"github.com/liucong/personal-website/internal/config"
 	"github.com/liucong/personal-website/internal/database"
@@ -182,6 +183,7 @@ func (ac *AuthController) GitHubCallback(c *gin.Context) {
 	// Exchange code for token
 	token, err := ac.oauthConf.Exchange(context.Background(), code)
 	if err != nil {
+		audit.Log("login_failed", "OAuth token exchange failed", c)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to exchange token"})
 		return
 	}
@@ -280,6 +282,8 @@ func (ac *AuthController) GitHubCallback(c *gin.Context) {
 	}
 	setCookie(c, "csrf_token", csrfToken, 3600, false) // not HttpOnly so JS can read it
 
+	audit.Log("login_success", fmt.Sprintf("user_id=%d github_login=%s", user.ID, ghUser.Login), c)
+
 	// Redirect to frontend
 	frontendURL := fmt.Sprintf("%s/auth/callback", ac.frontendURL)
 	c.Redirect(http.StatusTemporaryRedirect, frontendURL)
@@ -313,6 +317,7 @@ func (ac *AuthController) RefreshToken(c *gin.Context) {
 
 	// Check if the token has been revoked (fail-closed)
 	if isRefreshTokenRevoked(refreshTokenStr) {
+		audit.Log("token_revoked_used", "revoked refresh token presented", c)
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Refresh token has been revoked"})
 		return
 	}
@@ -411,6 +416,9 @@ func (ac *AuthController) Logout(c *gin.Context) {
 	if refreshTokenStr, err := c.Cookie("refresh_token"); err == nil && refreshTokenStr != "" {
 		// Parse to get expiry for blocklist TTL
 		if token, err := jwt.Parse(refreshTokenStr, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			}
 			return []byte(ac.cfg.JWT.Secret), nil
 		}); err == nil && token.Valid {
 			if claims, ok := token.Claims.(jwt.MapClaims); ok {
@@ -425,5 +433,6 @@ func (ac *AuthController) Logout(c *gin.Context) {
 	setCookie(c, "access_token", "", -1, true)
 	setCookie(c, "refresh_token", "", -1, true)
 	setCookie(c, "csrf_token", "", -1, false)
+	audit.Log("logout", "user logged out", c)
 	c.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
 }

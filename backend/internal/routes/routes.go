@@ -71,7 +71,7 @@ func Setup(cfg *config.Config) *gin.Engine {
 		// Posts
 		api.GET("/posts", postController.ListPosts)
 		api.GET("/posts/:slug", postController.GetPostBySlug)
-		api.POST("/posts/:id/like", postController.LikePost)
+		api.POST("/posts/:id/like", middleware.RateLimiter(cache.Client, 20, time.Minute), postController.LikePost)
 
 		// Projects
 		api.GET("/projects", projectController.ListProjects)
@@ -92,8 +92,9 @@ func Setup(cfg *config.Config) *gin.Engine {
 		// Public settings
 		api.GET("/settings/public", settingController.GetPublicSettings)
 
-		// Auth routes
+		// Auth routes — stricter rate limit (10/min)
 		auth := api.Group("/auth")
+		auth.Use(middleware.RateLimiter(cache.Client, 10, time.Minute))
 		{
 			auth.GET("/github", authController.GitHubRedirect)
 			auth.GET("/github/callback", authController.GitHubCallback)
@@ -110,7 +111,7 @@ func Setup(cfg *config.Config) *gin.Engine {
 		protected.Use(middleware.AuthRequired(cfg))
 		{
 			// User routes (authenticated users)
-			protected.POST("/comments", commentController.CreateComment)
+			protected.POST("/comments", middleware.RateLimiter(cache.Client, 20, time.Minute), commentController.CreateComment)
 
 			// Admin routes
 			admin := protected.Group("/admin")
