@@ -38,7 +38,7 @@ jobs:
         run: pnpm install
       - name: Run npm audit
         working-directory: frontend
-        run: npx npm-audit --audit-level=high || true
+        run: npx npm-audit --audit-level=high
 
   docker-image-check:
     name: Docker Image Version Check
@@ -50,5 +50,12 @@ jobs:
           echo "=== Docker image versions in use ==="
           grep -E 'image:' docker-compose.yml || true
           echo ""
-          echo "=== Review for known vulnerabilities ==="
-          echo "Check https://hub.docker.com for security advisories"
+          echo "=== Dockerfile base images ==="
+          grep -E '^FROM ' docker/backend/Dockerfile docker/frontend/Dockerfile
+          echo ""
+          # Fail if any FROM line uses :latest (mutable tag)
+          if grep -E '^FROM .*:latest' docker/backend/Dockerfile docker/frontend/Dockerfile; then
+            echo "::error::Mutable :latest tag found in Dockerfile. Pin to a specific version."
+            exit 1
+          fi
+          echo "No mutable :latest tags found."

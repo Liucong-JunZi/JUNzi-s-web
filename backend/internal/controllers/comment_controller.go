@@ -60,7 +60,7 @@ func (cc *CommentController) ListComments(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"comments":  comments,
+		"comments":  toPublicComments(comments),
 		"total":     total,
 		"page":      page,
 		"page_size": pageSize,

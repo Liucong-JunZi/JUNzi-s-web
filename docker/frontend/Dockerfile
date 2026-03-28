@@ -1,5 +1,5 @@
 # ==================== 构建阶段 ====================
-FROM node:20-alpine AS builder
+FROM node:20.11-alpine AS builder
 
 # 设置工作目录
 WORKDIR /app
@@ -24,7 +24,7 @@ ENV VITE_API_URL=${VITE_API_URL}
 RUN pnpm build
 
 # ==================== 生产阶段 ====================
-FROM nginx:alpine AS production
+FROM nginx:1.27-alpine AS production
 
 # 复制 nginx 配置
 COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf

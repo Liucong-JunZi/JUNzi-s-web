@@ -82,9 +82,9 @@ func (pc *PostController) ListPosts(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"posts": posts,
-		"total": total,
-		"page":  page,
+		"posts":     toPublicPosts(posts),
+		"total":     total,
+		"page":      page,
 		"page_size": pageSize,
 	})
 }
@@ -161,7 +161,7 @@ func (pc *PostController) GetPostBySlug(c *gin.Context) {
 		post.ViewCount++
 	}
 
-	c.JSON(http.StatusOK, gin.H{"post": post})
+	c.JSON(http.StatusOK, gin.H{"post": toPublicPost(&post)})
 }
 
 // GetPostByID gets a single post by ID (admin only)

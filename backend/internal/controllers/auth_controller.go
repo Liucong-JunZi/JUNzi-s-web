@@ -17,6 +17,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/liucong/personal-website/internal/audit"
 	"github.com/liucong/personal-website/internal/cache"
+	"github.com/redis/go-redis/v9"
 	"github.com/liucong/personal-website/internal/config"
 	"github.com/liucong/personal-website/internal/database"
 	"github.com/liucong/personal-website/internal/models"
@@ -116,15 +117,19 @@ func revokeRefreshToken(tokenString string, expiresAt time.Time) error {
 }
 
 // isRefreshTokenRevoked checks whether a refresh token has been revoked.
-// Fail-closed: if Redis is unreachable, the token is treated as revoked.
+// redis.Nil (key not found) means the token is NOT revoked — this is the normal case.
+// Other Redis errors trigger fail-closed behavior for safety.
 func isRefreshTokenRevoked(tokenString string) bool {
 	key := "refresh_revoked:" + tokenHash(tokenString)
 	ctx := context.Background()
-	val, err := cache.Client.Get(ctx, key).Result()
-	if err != nil {
-		return true // fail-closed: Redis error → treat as revoked
+	_, err := cache.Client.Get(ctx, key).Result()
+	if err == redis.Nil {
+		return false // key not found → token is NOT revoked (normal case)
 	}
-	return val != ""
+	if err != nil {
+		return true // Redis connection error → fail-closed for safety
+	}
+	return true // key exists → token IS revoked
 }
 
 // GitHubRedirect redirects to GitHub OAuth page
@@ -303,7 +308,16 @@ func (ac *AuthController) GetCurrentUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"user": user})
+	c.JSON(http.StatusOK, gin.H{"user": gin.H{
+		"id":         user.ID,
+		"username":   user.Username,
+		"email":      user.Email,
+		"avatar_url": user.AvatarURL,
+		"bio":        user.Bio,
+		"role":       user.Role,
+		"created_at": user.CreatedAt,
+		"updated_at": user.UpdatedAt,
+	}})
 }
 
 // RefreshToken refreshes the access token using a valid refresh token.
