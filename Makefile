@@ -109,3 +109,25 @@ health: ## 检查服务健康状态
 	@echo "检查服务健康状态..."
 	@curl -s http://localhost/health && echo " - Frontend: OK" || echo " - Frontend: FAILED"
 	@curl -s http://localhost:8080/api/health && echo " - Backend: OK" || echo " - Backend: FAILED"
+
+# ==================== 安全审计 ====================
+.PHONY: security-audit audit-go audit-npm audit-docker
+
+# Run all security audits
+security-audit: audit-go audit-npm audit-docker
+
+# Go dependency vulnerability check
+audit-go:
+	cd backend && go install golang.org/x/vuln/cmd/govulncheck@latest && govulncheck ./...
+
+# NPM dependency audit
+audit-npm:
+	cd frontend && npx npm-audit --audit-level=moderate || true
+
+# Check for outdated Docker images with known vulnerabilities
+audit-docker:
+	@echo "Checking Docker image versions..."
+	@echo "MinIO: $(shell grep 'minio/minio:' docker-compose.yml)"
+	@echo "MySQL: $(shell grep 'mysql:' docker-compose.yml)"
+	@echo "Redis: $(shell grep 'redis:' docker-compose.yml)"
+	@echo "Review these versions at https://hub.docker.com for security advisories."

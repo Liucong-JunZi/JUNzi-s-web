@@ -34,8 +34,11 @@ func Connect(cfg *config.DatabaseConfig) error {
 		return fmt.Errorf("failed to connect database: %w", err)
 	}
 
-	// Auto migrate — can be disabled with AUTO_MIGRATE=false in production
-	if os.Getenv("AUTO_MIGRATE") != "false" {
+	// Auto migrate — in production, requires explicit AUTO_MIGRATE=true.
+	// In development, runs by default unless AUTO_MIGRATE=false.
+	autoMigrate := os.Getenv("AUTO_MIGRATE")
+	isProd := os.Getenv("APP_ENV") == "production" || os.Getenv("GIN_MODE") == "release"
+	if autoMigrate == "true" || (autoMigrate == "" && !isProd) {
 		if err := DB.AutoMigrate(
 			&models.User{},
 			&models.Category{},

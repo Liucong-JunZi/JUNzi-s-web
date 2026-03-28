@@ -1,3 +1,10 @@
+# ==================== 安全说明 ====================
+# TLS/HTTPS: This compose file listens on HTTP (port 80) only.
+# For production, use one of:
+#   1. External reverse proxy (Cloudflare, AWS ALB) for TLS termination
+#   2. Add a separate nginx container with TLS certs
+#   3. Use Caddy with auto-TLS as the frontend container
+# The backend HSTS header ensures browsers only use HTTPS once TLS is active.
 # ==================== 基础设施服务 ====================
 
 # MySQL 8.0
@@ -46,7 +53,7 @@ services:
 
   # MinIO (S3-compatible object storage)
   minio:
-    image: minio/minio:latest
+    image: minio/minio:RELEASE.2024-11-07T00-52-20Z
     container_name: junzi-minio
     restart: unless-stopped
     command: server /data --console-address ":9001"

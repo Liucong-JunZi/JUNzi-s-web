@@ -11,10 +11,6 @@ const api = axios.create({
   withCredentials: true, // Enable cookies for OAuth session
 });
 
-// Security: Use sessionStorage instead of localStorage for token storage
-// This reduces the risk of token theft via XSS as sessionStorage is cleared when the browser/tab is closed
-const getToken = () => sessionStorage.getItem('token');
-
 // Helper to read cookies (for CSRF token)
 function getCookie(name: string): string | undefined {
   const value = `; ${document.cookie}`;
@@ -39,7 +35,6 @@ const processQueue = (error: unknown) => {
 
 const handle401Error = () => {
   // Clear auth data
-  sessionStorage.removeItem('token');
   sessionStorage.removeItem('auth-storage');
 
   // Save current location for post-login redirect
@@ -54,10 +49,6 @@ const handle401Error = () => {
 // Request interceptor to add auth token and CSRF token
 api.interceptors.request.use(
   (config) => {
-    const token = getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
     // Add CSRF token for state-changing requests
     if (config.method && !['get', 'head', 'options'].includes(config.method.toLowerCase())) {
       const csrfToken = getCookie('csrf_token');

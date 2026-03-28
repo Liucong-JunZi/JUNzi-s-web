@@ -145,9 +145,6 @@ func validate(cfg *Config) error {
 		if cfg.MinIO.AccessKey == "minioadmin" && cfg.MinIO.SecretKey == "minioadmin" {
 			return fmt.Errorf("MINIO_ACCESS_KEY and MINIO_SECRET_KEY must be changed from defaults in production")
 		}
-		if !cfg.MinIO.UseSSL {
-			return fmt.Errorf("MINIO_USE_SSL must be true in production")
-		}
 		if cfg.Database.Password == "" {
 			return fmt.Errorf("DB_PASSWORD must be set in production")
 		}
