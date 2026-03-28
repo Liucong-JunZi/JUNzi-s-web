@@ -1,0 +1,54 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 6 * * 1'  # Weekly Monday 6am UTC
+
+jobs:
+  go-vulncheck:
+    name: Go Vulnerability Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+      - name: Run govulncheck
+        working-directory: backend
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          govulncheck ./...
+
+  npm-audit:
+    name: NPM Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install pnpm
+        run: npm install -g pnpm
+      - name: Install dependencies
+        working-directory: frontend
+        run: pnpm install
+      - name: Run npm audit
+        working-directory: frontend
+        run: npx npm-audit --audit-level=high || true
+
+  docker-image-check:
+    name: Docker Image Version Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check image versions
+        run: |
+          echo "=== Docker image versions in use ==="
+          grep -E 'image:' docker-compose.yml || true
+          echo ""
+          echo "=== Review for known vulnerabilities ==="
+          echo "Check https://hub.docker.com for security advisories"

@@ -7,10 +7,10 @@
 # The backend HSTS header ensures browsers only use HTTPS once TLS is active.
 # ==================== 基础设施服务 ====================
 
-# MySQL 8.0
+# MySQL 8.0 — pinned to specific patch version for reproducibility
 services:
   mysql:
-    image: mysql:8.0
+    image: mysql:8.0.40
     container_name: junzi-mysql
     restart: unless-stopped
     environment:
@@ -25,16 +25,16 @@ services:
       - mysql_data:/var/lib/mysql
       - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
-      - junzi-network
+      - junzi-backend
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:?DB_PASSWORD must be set}"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # Redis
+  # Redis — pinned to specific version for reproducibility
   redis:
-    image: redis:7-alpine
+    image: redis:7.4-alpine
     container_name: junzi-redis
     restart: unless-stopped
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:?REDIS_PASSWORD must be set in .env file}
@@ -44,7 +44,7 @@ services:
     volumes:
       - redis_data:/data
     networks:
-      - junzi-network
+      - junzi-backend
     healthcheck:
       test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
       interval: 10s
@@ -68,7 +68,7 @@ services:
     volumes:
       - minio_data:/data
     networks:
-      - junzi-network
+      - junzi-backend
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s
@@ -100,6 +100,10 @@ services:
       - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:?MINIO_ACCESS_KEY must be set in .env file}
       - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:?MINIO_SECRET_KEY must be set in .env file}
       - MINIO_BUCKET=${MINIO_BUCKET:-uploads}
+      # MINIO_USE_SSL=false is safe because:
+      #   1. Traffic stays within a Docker isolated bridge network (junzi-backend)
+      #   2. MinIO has no host port exposure — unreachable from outside Docker
+      #   3. Only the backend service can reach MinIO (frontend is on a separate network)
       - MINIO_USE_SSL=false
       - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID:-}
       - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET:-}
@@ -116,7 +120,8 @@ services:
       minio:
         condition: service_healthy
     networks:
-      - junzi-network
+      - junzi-frontend
+      - junzi-backend
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/api/health"]
       interval: 30s
@@ -136,12 +141,20 @@ services:
       - "${FRONTEND_PORT:-80}:80"
     depends_on:
       - backend
+    # Frontend is only on junzi-frontend network — cannot reach MySQL, Redis, or MinIO.
+    # Network segmentation ensures infrastructure services are isolated from the edge.
     networks:
-      - junzi-network
+      - junzi-frontend
 
 # ==================== 网络配置 ====================
+# A05 — Network segmentation: two isolated Docker bridge networks
+#   junzi-frontend: frontend <-> backend only
+#   junzi-backend:  backend <-> mysql, redis, minio only
+# The frontend container cannot reach infrastructure services (MySQL, Redis, MinIO).
 networks:
-  junzi-network:
+  junzi-frontend:
+    driver: bridge
+  junzi-backend:
     driver: bridge
 
 # ==================== 数据卷 ====================
