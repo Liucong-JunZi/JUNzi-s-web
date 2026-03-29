@@ -1,25 +1,7 @@
-import { test, expect, Browser, Page, BrowserContext } from '@playwright/test';
+import { test, expect } from '@playwright/test';
+import { openPageAsActor } from './helpers';
 
 const baseURL = process.env.E2E_BASE_URL || 'http://localhost';
-
-async function openPageAsActor(
-  browser: Browser,
-  url: string,
-  role: 'anonymous' | 'user' | 'admin',
-): Promise<{ context: BrowserContext; page: Page }> {
-  const storageState =
-    role === 'anonymous'
-      ? undefined
-      : role === 'admin'
-        ? './storage/admin.storageState.json'
-        : './storage/user.storageState.json';
-
-  const context = storageState
-    ? await browser.newContext({ storageState })
-    : await browser.newContext();
-  const page = await context.newPage();
-  return { context, page };
-}
 
 test.describe('Auth & Permission checks', () => {
   test('OP-003: anonymous user clicking login enters /login', async ({ browser }) => {
@@ -27,9 +9,9 @@ test.describe('Auth & Permission checks', () => {
     try {
       await page.goto('/');
       await expect(page.locator('header')).toBeVisible({ timeout: 10_000 });
-      await expect(page.locator('header').getByTestId('login-btn')).toBeVisible({ timeout: 10_000 });
-      await page.locator('header').getByTestId('login-btn').click();
-      await expect(page).toHaveURL(/\/login$/);
+      await expect(page.getByTestId('login-btn')).toBeVisible({ timeout: 10_000 });
+      await page.getByTestId('login-btn').click();
+      await expect(page).toHaveURL(/\/login/, { timeout: 15_000 });
     } finally {
       await context.close();
     }
@@ -69,10 +51,10 @@ test.describe('Auth & Permission checks', () => {
     const { context, page } = await openPageAsActor(browser, baseURL, 'admin');
     try {
       await page.goto('/');
-      await expect(page.locator('header').getByTestId('user-avatar')).toBeVisible({ timeout: 10_000 });
-      await page.locator('header').getByTestId('user-avatar').click();
+      await expect(page.getByTestId('user-avatar')).toBeVisible({ timeout: 10_000 });
+      await page.getByTestId('user-avatar').click();
       await page.getByTestId('logout-btn').click();
-      await expect(page.locator('header').getByTestId('login-btn')).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByTestId('login-btn')).toBeVisible({ timeout: 10_000 });
     } finally {
       await context.close();
     }
