@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { authAPI } from '../api';
+import api from '../api';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -16,7 +16,8 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     const restoreSession = async () => {
       if (!isAuthenticated) {
         try {
-          const user = await authAPI.me();
+          const response = await api.get('/auth/me', { _skipAuthRedirect: true } as any);
+          const user = response.data.user || response.data;
           setUser(user);
         } catch {
           // Session invalid or not found
@@ -58,7 +59,8 @@ export function AdminRoute({ children }: AdminRouteProps) {
     const restoreSession = async () => {
       if (!isAuthenticated) {
         try {
-          const me = await authAPI.me();
+          const response = await api.get('/auth/me', { _skipAuthRedirect: true } as any);
+          const me = response.data.user || response.data;
           setUser(me);
         } catch {
           logout();
