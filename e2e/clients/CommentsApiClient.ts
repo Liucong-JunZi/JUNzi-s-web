@@ -16,7 +16,10 @@ export class CommentsApiClient {
 
   async createAsUser(data: { content: string; post_id: number; parent_id?: number }) {
     const { ctx, csrf } = await this.roleContext('user');
-    const res = await ctx.post('/api/comments', { data, headers: { 'X-CSRF-Token': csrf } });
+    const res = await ctx.post('/api/comments', {
+      data: JSON.stringify(data),
+      headers: { 'X-CSRF-Token': csrf, 'Content-Type': 'application/json' },
+    });
     const body = await res.json();
     await ctx.dispose();
     return body;
@@ -33,7 +36,8 @@ export class CommentsApiClient {
   async approveAsAdmin(commentId: number) {
     const { ctx, csrf } = await this.roleContext('admin');
     const res = await ctx.put(`/api/admin/comments/${commentId}/status`, {
-      data: { status: 'approved' }, headers: { 'X-CSRF-Token': csrf },
+      data: JSON.stringify({ status: 'approved' }),
+      headers: { 'X-CSRF-Token': csrf, 'Content-Type': 'application/json' },
     });
     const body = await res.json();
     await ctx.dispose();

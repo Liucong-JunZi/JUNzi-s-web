@@ -50,7 +50,12 @@ test.describe('Admin post CRUD', () => {
     const newTitle = `${data.title} - Updated`;
     await editor.fillTitle(newTitle);
     await editor.selectStatus('published');
-    await editor.clickSave();
+
+    const [saveRes] = await Promise.all([
+      page.waitForResponse('**/api/admin/posts/*'),
+      editor.clickSave(),
+    ]);
+    expect(saveRes.ok()).toBeTruthy();
     await expect(page).toHaveURL(/\/admin\/posts/);
 
     const check = await api.getBySlug(data.slug);

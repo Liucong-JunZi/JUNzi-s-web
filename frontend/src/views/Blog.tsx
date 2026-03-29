@@ -78,9 +78,10 @@ export function Blog() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
+              data-testid="blog-search-input"
             />
           </div>
-          <Button type="submit">Search</Button>
+          <Button type="submit" data-testid="blog-search-btn">Search</Button>
         </form>
         {tag && (
           <Button
@@ -89,6 +90,7 @@ export function Blog() {
               setSearchParams({});
               setSearchQuery('');
             }}
+            data-testid="clear-filter-btn"
           >
             Clear filter: {tag}
           </Button>
@@ -105,7 +107,7 @@ export function Blog() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {posts.map((post) => (
-            <Link key={post.id} to={`/blog/${post.slug}`}>
+            <Link key={post.id} to={`/blog/${post.slug}`} data-testid="post-card">
               <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
                 {post.cover_image && (
                   <img
@@ -152,6 +154,7 @@ export function Blog() {
             variant="outline"
             disabled={page === 1}
             onClick={() => setPage(page - 1)}
+            data-testid="pagination-prev"
           >
             Previous
           </Button>
@@ -162,6 +165,7 @@ export function Blog() {
             variant="outline"
             disabled={page === totalPages}
             onClick={() => setPage(page + 1)}
+            data-testid="pagination-next"
           >
             Next
           </Button>

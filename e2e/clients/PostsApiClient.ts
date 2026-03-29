@@ -21,7 +21,10 @@ export class PostsApiClient {
 
   async create(data: CreatePostData) {
     const { ctx, csrf } = await this.adminContext();
-    const res = await ctx.post('/api/admin/posts', { data, headers: { 'X-CSRF-Token': csrf } });
+    const res = await ctx.post('/api/admin/posts', {
+      data: JSON.stringify(data),
+      headers: { 'X-CSRF-Token': csrf, 'Content-Type': 'application/json' },
+    });
     const body = await res.json();
     await ctx.dispose();
     return body.post || body;

@@ -77,7 +77,7 @@ export function Header() {
         </nav>
 
         <div className="hidden md:flex items-center space-x-4">
-          <Button variant="ghost" size="icon" onClick={toggleTheme}>
+          <Button variant="ghost" size="icon" onClick={toggleTheme} data-testid="theme-toggle-btn">
             {theme === 'light' ? (
               <Sun className="h-5 w-5" />
             ) : theme === 'dark' ? (
@@ -154,7 +154,7 @@ export function Header() {
               </Link>
             ))}
             <div className="flex items-center space-x-4 pt-4 border-t">
-              <Button variant="ghost" size="icon" onClick={toggleTheme}>
+              <Button variant="ghost" size="icon" onClick={toggleTheme} data-testid="theme-toggle-btn">
                 {theme === 'light' ? (
                   <Sun className="h-5 w-5" />
                 ) : theme === 'dark' ? (
@@ -164,11 +164,11 @@ export function Header() {
                 )}
               </Button>
               {isAuthenticated ? (
-                <Button variant="outline" onClick={logout}>
+                <Button variant="outline" onClick={logout} data-testid="logout-btn">
                   Logout
                 </Button>
               ) : (
-                <Button asChild>
+                <Button asChild data-testid="login-btn">
                   <Link to="/login">
                     <GithubIcon className="mr-2 h-4 w-4" />
                     Login

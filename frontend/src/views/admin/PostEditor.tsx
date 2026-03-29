@@ -309,6 +309,7 @@ export function PostEditor() {
                       variant={selectedTags.includes(tag.id) ? 'default' : 'outline'}
                       className="cursor-pointer"
                       onClick={() => toggleTag(tag.id)}
+                      data-testid={`tag-badge-${tag.id}`}
                     >
                       {tag.name}
                     </Badge>

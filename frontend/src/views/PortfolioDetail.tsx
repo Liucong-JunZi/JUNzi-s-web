@@ -106,7 +106,7 @@ export function PortfolioDetail() {
   return (
     <div className="container mx-auto px-4 py-12">
       {/* Back Button */}
-      <Button variant="ghost" asChild className="mb-6">
+      <Button variant="ghost" asChild className="mb-6" data-testid="back-to-portfolio-btn">
         <Link to="/portfolio">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Portfolio
@@ -126,7 +126,7 @@ export function PortfolioDetail() {
 
           <div className="flex flex-wrap items-center gap-4 mb-4">
             {getGithubUrl(project) && (
-              <Button asChild>
+              <Button asChild data-testid="project-code-btn">
                 <a href={getGithubUrl(project)!} target="_blank" rel="noopener noreferrer">
                   <GithubIcon className="mr-2 h-4 w-4" />
                   View Code
@@ -134,7 +134,7 @@ export function PortfolioDetail() {
               </Button>
             )}
             {getDemoUrl(project) && (
-              <Button variant="outline" asChild>
+              <Button variant="outline" asChild data-testid="project-demo-btn">
                 <a href={getDemoUrl(project)!} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="mr-2 h-4 w-4" />
                   Live Demo

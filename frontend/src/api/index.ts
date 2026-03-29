@@ -70,6 +70,11 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
+      // Skip redirect for silent session checks (used by auth store rehydration)
+      if (originalRequest._skipAuthRedirect) {
+        return Promise.reject(error);
+      }
+
       // Don't try to refresh if the refresh endpoint itself failed
       if (originalRequest.url?.includes('/auth/refresh')) {
         handle401Error();

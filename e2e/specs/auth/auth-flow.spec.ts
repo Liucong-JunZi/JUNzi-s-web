@@ -17,8 +17,12 @@ test.describe('Authentication flow', () => {
   });
 
   test('TC-003: logout clears all cookies @p0', async ({ page, context }) => {
+    // Navigate to admin page first (triggers /api/auth/me session restore),
+    // then go to home page where Header will show authenticated state.
+    await page.goto('/admin/posts');
+    await expect(page.getByTestId('admin-posts-page')).toBeVisible();
     await page.goto('/');
-    await expect(page.getByTestId('user-avatar')).toBeVisible();
+    await expect(page.getByTestId('user-avatar')).toBeVisible({ timeout: 10_000 });
     await page.getByTestId('user-avatar').click();
     await page.getByTestId('logout-btn').click();
     await expect(page.getByTestId('login-btn')).toBeVisible({ timeout: 10_000 });

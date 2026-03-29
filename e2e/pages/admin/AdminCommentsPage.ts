@@ -11,7 +11,11 @@ export class AdminCommentsPage {
   }
 
   async approveComment(id: number) {
-    await this.page.getByTestId(`approve-comment-btn-${id}`).click();
+    const [res] = await Promise.all([
+      this.page.waitForResponse(`**/api/admin/comments/${id}/status`),
+      this.page.getByTestId(`approve-comment-btn-${id}`).click(),
+    ]);
+    expect(res.ok()).toBeTruthy();
   }
 
   async rejectComment(id: number) {

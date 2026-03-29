@@ -90,14 +90,14 @@ export function AdminProjects() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="container mx-auto px-4 py-12" data-testid="admin-projects-page">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-4xl font-bold mb-2">Manage Projects</h1>
           <p className="text-muted-foreground">Create, edit, and delete portfolio projects</p>
         </div>
-        <Button asChild>
+        <Button asChild data-testid="new-project-btn">
           <Link to="/admin/projects/new">
             <Plus className="mr-2 h-4 w-4" />
             New Project
@@ -138,12 +138,12 @@ export function AdminProjects() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" asChild>
+                    <Button variant="ghost" size="icon" asChild data-testid={`preview-project-btn-${project.id}`}>
                       <Link to={`/portfolio/${project.id}`} target="_blank">
                         <Eye className="h-4 w-4" />
                       </Link>
                     </Button>
-                    <Button variant="ghost" size="icon" asChild>
+                    <Button variant="ghost" size="icon" asChild data-testid={`edit-project-btn-${project.id}`}>
                       <Link to={`/admin/projects/${project.id}`}>
                         <Edit className="h-4 w-4" />
                       </Link>
@@ -152,6 +152,7 @@ export function AdminProjects() {
                       variant="ghost"
                       size="icon"
                       onClick={() => handleDelete(project.id, project.title)}
+                      data-testid={`delete-project-btn-${project.id}`}
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>

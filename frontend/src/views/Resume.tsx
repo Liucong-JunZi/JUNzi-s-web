@@ -121,7 +121,7 @@ export function Resume() {
           </p>
         </div>
         {resumeItems.length > 0 && (
-          <Button onClick={handleDownload}>
+          <Button onClick={handleDownload} data-testid="resume-download-btn">
             <Download className="mr-2 h-4 w-4" />
             Download
           </Button>

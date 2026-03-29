@@ -16,11 +16,19 @@ test.describe('Public browsing', () => {
 
   test('TC-008: blog page shows posts @p0', async ({ page }) => {
     await page.goto('/blog');
-    await expect(page.getByTestId('blog-page')).toBeVisible();
+    await page.waitForLoadState('networkidle');
+    await expect(page.getByTestId('blog-page')).toBeVisible({ timeout: 15_000 });
+
+    // Handle either empty state or posts present
+    const emptyState = page.getByText('No posts found.');
     const firstLink = page.locator('a[href*="/blog/"]').first();
-    if (await firstLink.isVisible()) {
+
+    if (await emptyState.isVisible()) {
+      // Blog loaded but has no posts -- that's fine for a public page
+      await expect(page.getByText('Blog')).toBeVisible();
+    } else if (await firstLink.isVisible({ timeout: 5_000 }).catch(() => false)) {
       await firstLink.click();
-      await expect(page.getByTestId('post-title')).toBeVisible();
+      await expect(page.getByTestId('post-title')).toBeVisible({ timeout: 10_000 });
     }
   });
 });

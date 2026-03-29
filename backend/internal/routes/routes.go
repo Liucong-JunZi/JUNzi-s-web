@@ -44,8 +44,13 @@ func Setup(cfg *config.Config) *gin.Engine {
 	router.Use(gin.Recovery())
 	router.Use(middleware.CORS())
 
-	// Add rate limiting middleware (100 requests per minute)
-	router.Use(middleware.RateLimiterWithConfig(cache.Client, 100))
+	// Add rate limiting middleware — relaxed in test mode to avoid E2E flakiness
+	// (all Playwright workers share the same IP in Docker network)
+	rateLimit := 100
+	if os.Getenv("TEST_MODE") == "true" {
+		rateLimit = 10000
+	}
+	router.Use(middleware.RateLimiterWithConfig(cache.Client, rateLimit))
 
 	// Static files
 	router.Static("/uploads", "./uploads")
@@ -102,9 +107,13 @@ func Setup(cfg *config.Config) *gin.Engine {
 			api.POST("/auth/test-login", controllers.TestLoginHandler(cfg))
 		}
 
-		// Auth routes — stricter rate limit (10/min)
+		// Auth routes — relaxed rate limit in test mode
+		authRateLimit := 10
+		if os.Getenv("TEST_MODE") == "true" {
+			authRateLimit = 10000
+		}
 		auth := api.Group("/auth")
-		auth.Use(middleware.RateLimiter(cache.Client, 10, time.Minute))
+		auth.Use(middleware.RateLimiter(cache.Client, authRateLimit, time.Minute))
 		{
 			auth.GET("/github", authController.GitHubRedirect)
 			auth.GET("/github/callback", authController.GitHubCallback)
@@ -121,7 +130,11 @@ func Setup(cfg *config.Config) *gin.Engine {
 		protected.Use(middleware.AuthRequired(cfg))
 		{
 			// User routes (authenticated users)
-			protected.POST("/comments", middleware.CSRFProtection(), middleware.RateLimiter(cache.Client, 20, time.Minute), commentController.CreateComment)
+			commentRateLimit := 20
+		if os.Getenv("TEST_MODE") == "true" {
+			commentRateLimit = 10000
+		}
+		protected.POST("/comments", middleware.CSRFProtection(), middleware.RateLimiter(cache.Client, commentRateLimit, time.Minute), commentController.CreateComment)
 
 			// Admin routes
 			admin := protected.Group("/admin")

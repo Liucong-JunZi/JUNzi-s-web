@@ -168,7 +168,7 @@ export function AdminResume() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="container mx-auto px-4 py-12" data-testid="admin-resume-page">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2">Edit Resume</h1>
@@ -184,7 +184,7 @@ export function AdminResume() {
             <div className="flex items-center justify-between">
               <CardTitle>{editingId ? 'Edit Item' : 'Add New Item'}</CardTitle>
               {editingId && (
-                <Button variant="ghost" size="sm" onClick={resetForm}>
+                <Button variant="ghost" size="sm" onClick={resetForm} data-testid="cancel-edit-btn">
                   <X className="h-4 w-4 mr-1" />
                   Cancel
                 </Button>
@@ -201,6 +201,7 @@ export function AdminResume() {
                   value={formData.type}
                   onChange={handleChange}
                   className="w-full mt-1 px-3 py-2 border rounded-md bg-background"
+                  data-testid="resume-type-select"
                 >
                   <option value="work">Work Experience</option>
                   <option value="education">Education</option>
@@ -217,6 +218,7 @@ export function AdminResume() {
                   onChange={handleChange}
                   required
                   placeholder="Software Engineer"
+                  data-testid="resume-title-input"
                 />
               </div>
 
@@ -228,6 +230,7 @@ export function AdminResume() {
                   value={formData.company}
                   onChange={handleChange}
                   placeholder="Company Name"
+                  data-testid="resume-company-input"
                 />
               </div>
 
@@ -239,6 +242,7 @@ export function AdminResume() {
                   value={formData.location}
                   onChange={handleChange}
                   placeholder="San Francisco, CA"
+                  data-testid="resume-location-input"
                 />
               </div>
 
@@ -252,6 +256,7 @@ export function AdminResume() {
                     value={formData.startDate}
                     onChange={handleChange}
                     required
+                    data-testid="resume-start-date-input"
                   />
                 </div>
                 <div>
@@ -262,6 +267,7 @@ export function AdminResume() {
                     type="date"
                     value={formData.endDate}
                     onChange={handleChange}
+                    data-testid="resume-end-date-input"
                   />
                 </div>
               </div>
@@ -275,10 +281,11 @@ export function AdminResume() {
                   onChange={handleChange}
                   rows={6}
                   placeholder="Describe your responsibilities and achievements..."
+                  data-testid="resume-description-input"
                 />
               </div>
 
-              <Button type="submit" disabled={saving} className="w-full">
+              <Button type="submit" disabled={saving} className="w-full" data-testid="resume-save-btn">
                 {saving ? 'Saving...' : editingId ? 'Update Item' : 'Add Item'}
                 {!saving && (editingId ? <Save className="ml-2 h-4 w-4" /> : <Plus className="ml-2 h-4 w-4" />)}
               </Button>
@@ -326,6 +333,7 @@ export function AdminResume() {
                             variant="ghost"
                             size="icon"
                             onClick={() => handleEdit(item)}
+                            data-testid={`edit-resume-btn-${item.id}`}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
@@ -333,6 +341,7 @@ export function AdminResume() {
                             variant="ghost"
                             size="icon"
                             onClick={() => handleDelete(item.id)}
+                            data-testid={`delete-resume-btn-${item.id}`}
                           >
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>

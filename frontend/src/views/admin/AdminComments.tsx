@@ -216,6 +216,7 @@ export function AdminComments() {
                 variant="outline"
                 onClick={() => setPage((p) => p - 1)}
                 disabled={page === 1}
+                data-testid="pagination-prev"
               >
                 Previous
               </Button>
@@ -226,6 +227,7 @@ export function AdminComments() {
                 variant="outline"
                 onClick={() => setPage((p) => p + 1)}
                 disabled={page >= Math.ceil(total / PAGE_SIZE)}
+                data-testid="pagination-next"
               >
                 Next
               </Button>

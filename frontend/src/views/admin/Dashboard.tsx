@@ -146,19 +146,19 @@ export function AdminDashboard() {
               <span>Manage Posts</span>
             </Link>
           </Button>
-          <Button asChild variant="outline" className="h-24">
+          <Button asChild variant="outline" className="h-24" data-testid="manage-projects-action">
             <Link to="/admin/projects" className="flex flex-col gap-2">
               <Briefcase className="h-6 w-6" />
               <span>Manage Projects</span>
             </Link>
           </Button>
-          <Button asChild variant="outline" className="h-24">
+          <Button asChild variant="outline" className="h-24" data-testid="manage-comments-action">
             <Link to="/admin/comments" className="flex flex-col gap-2">
               <MessageCircle className="h-6 w-6" />
               <span>Manage Comments</span>
             </Link>
           </Button>
-          <Button asChild variant="outline" className="h-24">
+          <Button asChild variant="outline" className="h-24" data-testid="edit-resume-action">
             <Link to="/admin/resume" className="flex flex-col gap-2">
               <File className="h-6 w-6" />
               <span>Edit Resume</span>

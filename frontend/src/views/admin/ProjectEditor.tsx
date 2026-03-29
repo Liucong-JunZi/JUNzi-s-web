@@ -173,6 +173,7 @@ export function ProjectEditor() {
                     onChange={handleChange}
                     required
                     placeholder="Enter project title"
+                    data-testid="project-title-input"
                   />
                 </div>
 
@@ -186,6 +187,7 @@ export function ProjectEditor() {
                     required
                     rows={3}
                     placeholder="Brief description of the project"
+                    data-testid="project-description-input"
                   />
                 </div>
 
@@ -197,6 +199,7 @@ export function ProjectEditor() {
                     value={formData.techStack}
                     onChange={handleChange}
                     placeholder="React, TypeScript, Go, PostgreSQL"
+                    data-testid="project-tech-stack-input"
                   />
                 </div>
 
@@ -209,6 +212,7 @@ export function ProjectEditor() {
                     value={formData.demoUrl}
                     onChange={handleChange}
                     placeholder="https://demo.example.com"
+                    data-testid="project-demo-url-input"
                   />
                 </div>
 
@@ -221,6 +225,7 @@ export function ProjectEditor() {
                     value={formData.githubUrl}
                     onChange={handleChange}
                     placeholder="https://github.com/user/repo"
+                    data-testid="project-github-url-input"
                   />
                 </div>
               </CardContent>
@@ -239,6 +244,7 @@ export function ProjectEditor() {
                     value={formData.status}
                     onChange={handleChange}
                     className="w-full mt-1 px-3 py-2 border rounded-md bg-background"
+                    data-testid="project-status-select"
                   >
                     <option value="active">Active</option>
                     <option value="planning">Planning</option>
@@ -257,10 +263,11 @@ export function ProjectEditor() {
                     value={formData.sortOrder}
                     onChange={handleChange}
                     min={0}
+                    data-testid="project-sort-order-input"
                   />
                 </div>
 
-                <Button type="submit" className="w-full" disabled={saving}>
+                <Button type="submit" className="w-full" disabled={saving} data-testid="project-save-btn">
                   <Save className="mr-2 h-4 w-4" />
                   {saving ? 'Saving...' : 'Save Project'}
                 </Button>
@@ -284,6 +291,7 @@ export function ProjectEditor() {
                     onChange={handleImageUpload}
                     className="hidden"
                     id="cover-image"
+                    data-testid="project-cover-image-upload"
                   />
                   <Button
                     type="button"

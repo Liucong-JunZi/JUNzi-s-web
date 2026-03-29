@@ -116,7 +116,7 @@ export function Portfolio() {
                 )}
                 <div className="mt-auto flex gap-2">
                   {getGithubUrl(project) && (
-                    <Button variant="outline" size="sm" asChild>
+                    <Button variant="outline" size="sm" asChild data-testid="project-code-btn">
                       <a href={getGithubUrl(project)!} target="_blank" rel="noopener noreferrer">
                         <GithubIcon className="mr-2 h-4 w-4" />
                         Code
@@ -124,14 +124,14 @@ export function Portfolio() {
                     </Button>
                   )}
                   {getDemoUrl(project) && (
-                    <Button size="sm" asChild>
+                    <Button size="sm" asChild data-testid="project-demo-btn">
                       <a href={getDemoUrl(project)!} target="_blank" rel="noopener noreferrer">
                         <ExternalLink className="mr-2 h-4 w-4" />
                         Demo
                       </a>
                     </Button>
                   )}
-                  <Button variant="ghost" size="sm" asChild className="ml-auto">
+                  <Button variant="ghost" size="sm" asChild className="ml-auto" data-testid="project-details-btn">
                     <Link to={`/portfolio/${project.id}`}>Details</Link>
                   </Button>
                 </div>

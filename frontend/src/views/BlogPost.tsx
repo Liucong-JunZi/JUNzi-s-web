@@ -227,7 +227,7 @@ export function BlogPost() {
             ) : (
               <p className="text-muted-foreground">
                 Please{' '}
-                <Link to="/login" className="text-primary hover:underline">
+                <Link to="/login" className="text-primary hover:underline" data-testid="comment-login-link">
                   login
                 </Link>{' '}
                 to comment.
@@ -252,6 +252,7 @@ export function BlogPost() {
                   variant="outline"
                   onClick={() => fetchComments(commentPage + 1)}
                   disabled={loadingMore}
+                  data-testid="load-more-comments-btn"
                 >
                   {loadingMore ? 'Loading...' : 'Load More Comments'}
                 </Button>
