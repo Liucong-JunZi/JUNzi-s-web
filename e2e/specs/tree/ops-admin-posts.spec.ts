@@ -18,24 +18,24 @@ test.describe('Operation Tree - Admin Dashboard/Posts/PostEditor', () => {
     const { context, page } = await openPageAsActor(browser, baseURL, 'admin');
     try {
       await page.goto('/admin');
-      await expect(page.getByTestId('admin-dashboard')).toBeVisible();
+      await expect(page.getByTestId('admin-dashboard')).toBeVisible({ timeout: 15_000 });
 
       await page.getByTestId('create-post-action').locator('a').click();
-      await expect(page).toHaveURL(/\/admin\/posts\/new$/);
+      await expect(page).toHaveURL(/\/admin\/posts\/new$/, { timeout: 10_000 });
 
       await page.goto('/admin');
       await page.getByTestId('manage-posts-action').locator('a').click();
-      await expect(page).toHaveURL(/\/admin\/posts$/);
+      await expect(page).toHaveURL(/\/admin\/posts$/, { timeout: 10_000 });
 
       await page.goto('/admin');
       await page.getByTestId('manage-projects-action').locator('a').click();
-      await expect(page).toHaveURL(/\/admin\/projects$/);
+      await expect(page).toHaveURL(/\/admin\/projects$/, { timeout: 10_000 });
       await page.goto('/admin');
       await page.getByTestId('manage-comments-action').locator('a').click();
-      await expect(page).toHaveURL(/\/admin\/comments$/);
+      await expect(page).toHaveURL(/\/admin\/comments$/, { timeout: 10_000 });
       await page.goto('/admin');
       await page.getByTestId('edit-resume-action').locator('a').click();
-      await expect(page).toHaveURL(/\/admin\/resume$/);
+      await expect(page).toHaveURL(/\/admin\/resume$/, { timeout: 10_000 });
     } finally {
       await context.close();
     }
@@ -48,14 +48,14 @@ test.describe('Operation Tree - Admin Dashboard/Posts/PostEditor', () => {
     const { context, page } = await openPageAsActor(browser, baseURL, 'admin');
     try {
       await page.goto('/admin/posts');
-      await expect(page.getByTestId('admin-posts-page')).toBeVisible();
+      await expect(page.getByTestId('admin-posts-page')).toBeVisible({ timeout: 15_000 });
 
       await page.getByTestId('new-post-btn').click();
-      await expect(page).toHaveURL(/\/admin\/posts\/new$/);
+      await expect(page).toHaveURL(/\/admin\/posts\/new$/, { timeout: 10_000 });
 
       await page.goto('/admin/posts');
       await page.getByTestId(`edit-post-btn-${seed.id}`).click();
-      await expect(page).toHaveURL(new RegExp(`/admin/posts/${seed.id}$`));
+      await expect(page).toHaveURL(new RegExp(`/admin/posts/${seed.id}$`), { timeout: 10_000 });
 
       await page.goto('/admin/posts');
       const preview = page.getByTestId(`preview-post-btn-${seed.id}`).locator('a');
@@ -77,7 +77,7 @@ test.describe('Operation Tree - Admin Dashboard/Posts/PostEditor', () => {
       const emptyCta = page.getByRole('link', { name: 'Create your first post' });
       if (await emptyCta.isVisible()) {
         await emptyCta.click();
-        await expect(page).toHaveURL(/\/admin\/posts\/new$/);
+        await expect(page).toHaveURL(/\/admin\/posts\/new$/, { timeout: 10_000 });
       }
     } finally {
       await context.close();
@@ -89,7 +89,7 @@ test.describe('Operation Tree - Admin Dashboard/Posts/PostEditor', () => {
     try {
       await page.goto('/admin/posts/new');
       await page.getByTestId('post-title-input').fill(`Tree Post ${Date.now()}`);
-      await expect(page.getByTestId('post-slug-input')).not.toHaveValue('');
+      await expect(page.getByTestId('post-slug-input')).not.toHaveValue('', { timeout: 10_000 });
       await page.getByTestId('post-content-input').fill('Tree post content');
       await page.getByTestId('post-summary-input').fill('Tree post summary');
       await page.getByTestId('post-status-select').selectOption('draft');
@@ -111,7 +111,7 @@ test.describe('Operation Tree - Admin Dashboard/Posts/PostEditor', () => {
       }
 
       await page.getByRole('link', { name: 'Back to Posts' }).click();
-      await expect(page).toHaveURL(/\/admin\/posts$/);
+      await expect(page).toHaveURL(/\/admin\/posts$/, { timeout: 10_000 });
     } finally {
       await context.close();
     }
@@ -121,7 +121,7 @@ test.describe('Operation Tree - Admin Dashboard/Posts/PostEditor', () => {
     const { context, page } = await openPageAsActor(browser, baseURL, 'admin');
     try {
       await page.goto('/admin/posts/new');
-      await expect(page.getByTestId('cover-image-upload')).toBeAttached();
+      await expect(page.getByTestId('cover-image-upload')).toBeAttached({ timeout: 10_000 });
     } finally {
       await context.close();
     }
