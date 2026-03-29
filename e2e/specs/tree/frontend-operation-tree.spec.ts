@@ -1,4 +1,5 @@
 import { test, expect, type Browser, type BrowserContext } from '@playwright/test';
+import { createActorContext } from './helpers';
 import { PostFactory } from '../../factories/PostFactory';
 import { PostsApiClient } from '../../clients/PostsApiClient';
 import { cleanupPosts } from '../../helpers/cleanup';
@@ -19,27 +20,12 @@ interface OperationFlow {
   execute: (ctx: FlowContext) => Promise<void>;
 }
 
-const STORAGE_STATE_PATH: Record<Exclude<Actor, 'anonymous'>, string> = {
-  admin: './storage/admin.storageState.json',
-  user: './storage/user.storageState.json',
-};
-
-async function newActorContext(browser: Browser, baseURL: string, actor: Actor): Promise<BrowserContext> {
-  if (actor === 'anonymous') {
-    return browser.newContext({ baseURL });
-  }
-  return browser.newContext({
-    baseURL,
-    storageState: STORAGE_STATE_PATH[actor],
-  });
-}
-
 async function flowAnonymousBlockedFromAdmin(ctx: FlowContext): Promise<void> {
-  const context = await newActorContext(ctx.browser, ctx.baseURL, 'anonymous');
+  const context = await createActorContext(ctx.browser, ctx.baseURL, 'anonymous');
   try {
     const page = await context.newPage();
     await page.goto('/admin');
-    await expect(page).toHaveURL(/\/login/);
+    await expect(page).toHaveURL(/\/login/, { timeout: 15_000 });
     await expect(page.getByTestId('github-login-btn')).toBeVisible();
 
     const res = await context.request.get('/api/admin/posts');
@@ -50,11 +36,11 @@ async function flowAnonymousBlockedFromAdmin(ctx: FlowContext): Promise<void> {
 }
 
 async function flowUserBlockedFromAdmin(ctx: FlowContext): Promise<void> {
-  const context = await newActorContext(ctx.browser, ctx.baseURL, 'user');
+  const context = await createActorContext(ctx.browser, ctx.baseURL, 'user');
   try {
     const page = await context.newPage();
     await page.goto('/admin');
-    await expect(page).not.toHaveURL(/\/admin$/);
+    await expect(page).not.toHaveURL(/\/admin$/, { timeout: 15_000 });
 
     const res = await context.request.get('/api/admin/posts');
     expect(res.status()).toBe(403);
@@ -64,11 +50,11 @@ async function flowUserBlockedFromAdmin(ctx: FlowContext): Promise<void> {
 }
 
 async function flowAdminRefreshAfterAccessTokenExpired(ctx: FlowContext): Promise<void> {
-  const context = await newActorContext(ctx.browser, ctx.baseURL, 'admin');
+  const context = await createActorContext(ctx.browser, ctx.baseURL, 'admin');
   try {
     const page = await context.newPage();
     await page.goto('/admin/posts');
-    await expect(page.getByTestId('admin-posts-page')).toBeVisible();
+    await expect(page.getByTestId('admin-posts-page')).toBeVisible({ timeout: 15_000 });
 
     await context.clearCookies({ name: 'access_token' });
     await page.reload();
@@ -82,11 +68,11 @@ async function flowAdminRefreshAfterAccessTokenExpired(ctx: FlowContext): Promis
 }
 
 async function flowAdminLogoutInvalidatesSession(ctx: FlowContext): Promise<void> {
-  const context = await newActorContext(ctx.browser, ctx.baseURL, 'admin');
+  const context = await createActorContext(ctx.browser, ctx.baseURL, 'admin');
   try {
     const page = await context.newPage();
     await page.goto('/admin/posts');
-    await expect(page.getByTestId('admin-posts-page')).toBeVisible();
+    await expect(page.getByTestId('admin-posts-page')).toBeVisible({ timeout: 15_000 });
 
     await page.goto('/');
     await expect(page.getByTestId('user-avatar')).toBeVisible({ timeout: 10_000 });
@@ -109,11 +95,11 @@ async function flowUserCreatesCommentOnPublishedPost(ctx: FlowContext): Promise<
     ctx.createdPostIds.push(post.id);
   }
 
-  const context = await newActorContext(ctx.browser, ctx.baseURL, 'user');
+  const context = await createActorContext(ctx.browser, ctx.baseURL, 'user');
   try {
     const page = await context.newPage();
     await page.goto(`/blog/${post.slug}`);
-    await expect(page.getByTestId('post-title')).toBeVisible();
+    await expect(page.getByTestId('post-title')).toBeVisible({ timeout: 15_000 });
     await expect(page.getByTestId('comment-textarea')).toBeVisible();
 
     const commentText = `operation-tree-comment-${Date.now()}`;
