@@ -16,10 +16,10 @@ export function Home() {
           Built with React, TypeScript, and modern web technologies.
         </p>
         <div className="flex justify-center gap-4">
-          <Button asChild size="lg">
+          <Button asChild size="lg" data-testid="home-blog-cta">
             <Link to="/blog">Read Blog</Link>
           </Button>
-          <Button asChild variant="outline" size="lg">
+          <Button asChild variant="outline" size="lg" data-testid="home-portfolio-cta">
             <Link to="/portfolio">View Portfolio</Link>
           </Button>
         </div>
@@ -66,7 +66,7 @@ export function Home() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild variant="ghost" className="w-full">
+            <Button asChild variant="ghost" className="w-full" data-testid="home-resume-cta">
               <Link to="/resume">View Resume</Link>
             </Button>
           </CardContent>

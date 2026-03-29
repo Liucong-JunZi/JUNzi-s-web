@@ -120,7 +120,8 @@ export function AdminProjects() {
       ) : (
         <div className="space-y-4">
           {projects.map((project) => (
-            <Card key={project.id}>
+            <Card key={project.id} data-testid={`project-card-${project.id}`}>
+              <div data-testid={`project-row-${project.id}`}>
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -171,6 +172,7 @@ export function AdminProjects() {
                   </div>
                 )}
               </CardContent>
+              </div>
             </Card>
           ))}
         </div>

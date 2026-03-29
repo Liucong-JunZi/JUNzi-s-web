@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { createActorContext, openPageAsActor, readCsrfToken } from '../tree/helpers';
+import { createActorContext, openPageAsActor, readCsrfToken } from './helpers';
 import { PostsApiClient } from '../../clients/PostsApiClient';
 import { CommentsApiClient } from '../../clients/CommentsApiClient';
 import { PostFactory } from '../../factories/PostFactory';
@@ -93,7 +93,7 @@ test.describe('TPC Admin Management', () => {
       await expect(page.locator('header')).toBeVisible({ timeout: 10_000 });
       await page.goto('/admin/projects');
       await expect(page.getByTestId('admin-projects-page')).toBeVisible({ timeout: 15_000 });
-      await expect(page.getByTestId(`project-row-${projectId}`)).toBeVisible();
+      await expect(page.getByTestId(`edit-project-btn-${projectId}`)).toBeVisible();
       await page.getByTestId(`edit-project-btn-${projectId}`).click();
       await expect(page).toHaveURL(new RegExp(`/admin/projects/${projectId}$`), { timeout: 10_000 });
     } finally {
@@ -127,9 +127,12 @@ test.describe('TPC Admin Management', () => {
       await expect(page.getByTestId('admin-projects-page')).toBeVisible({ timeout: 15_000 });
       const previewBtn = page.getByTestId(`preview-project-btn-${projectId}`);
       if (await previewBtn.isVisible()) {
-        await previewBtn.click();
-        await expect(page).toHaveURL(/\/portfolio\//, { timeout: 10_000 });
-        await page.goBack();
+        const [popup] = await Promise.all([
+          page.waitForEvent('popup'),
+          previewBtn.click(),
+        ]);
+        await expect(popup).toHaveURL(/\/portfolio\//, { timeout: 10_000 });
+        await popup.close();
         await expect(page).toHaveURL(/\/admin\/projects/, { timeout: 10_000 });
       }
     } finally {
@@ -225,7 +228,7 @@ test.describe('TPC Admin Management', () => {
       await page.getByTestId('project-title-input').fill(`TPC-346-A Updated ${Date.now()}`);
       const [saveRes] = await Promise.all([
         page.waitForResponse((r) => r.url().includes(`/api/admin/projects/${idA}`) && r.request().method() === 'PUT'),
-        page.getByTestId('save-project-btn').click(),
+        page.getByTestId('project-save-btn').click(),
       ]);
       expect(saveRes.status()).toBeLessThan(300);
       await expect(page).toHaveURL(/\/admin\/projects$/, { timeout: 10_000 });
@@ -254,7 +257,7 @@ test.describe('TPC Admin Management', () => {
 
       const [saveRes] = await Promise.all([
         page.waitForResponse((r) => r.url().includes('/api/admin/projects') && r.request().method() === 'POST'),
-        page.getByTestId('save-project-btn').click(),
+        page.getByTestId('project-save-btn').click(),
       ]);
       expect(saveRes.status()).toBe(201);
       const body = await saveRes.json();
@@ -288,7 +291,7 @@ test.describe('TPC Admin Management', () => {
 
       const [saveRes] = await Promise.all([
         page.waitForResponse((r) => r.url().includes('/api/admin/projects') && r.request().method() === 'POST'),
-        page.getByTestId('save-project-btn').click(),
+        page.getByTestId('project-save-btn').click(),
       ]);
       expect(saveRes.status()).toBe(201);
       const body = await saveRes.json();
@@ -300,7 +303,7 @@ test.describe('TPC Admin Management', () => {
       await page.getByTestId('project-title-input').fill(`TPC-348 Project Updated ${uid}`);
       const [saveRes2] = await Promise.all([
         page.waitForResponse((r) => r.url().includes('/api/admin/projects') && r.request().method() === 'PUT'),
-        page.getByTestId('save-project-btn').click(),
+        page.getByTestId('project-save-btn').click(),
       ]);
       expect(saveRes2.status()).toBeLessThan(300);
       await expect(page).toHaveURL(/\/admin\/projects$/, { timeout: 10_000 });
@@ -327,7 +330,7 @@ test.describe('TPC Admin Management', () => {
       await expect(page.locator('header')).toBeVisible({ timeout: 10_000 });
       await page.goto('/admin/projects');
       await expect(page.getByTestId('admin-projects-page')).toBeVisible({ timeout: 15_000 });
-      await expect(page.getByTestId(`project-row-${projectId}`)).toBeVisible();
+      await expect(page.getByTestId(`edit-project-btn-${projectId}`)).toBeVisible();
 
       page.once('dialog', (d) => d.accept());
       const [deleteRes] = await Promise.all([
@@ -335,7 +338,7 @@ test.describe('TPC Admin Management', () => {
         page.getByTestId(`delete-project-btn-${projectId}`).click(),
       ]);
       expect(deleteRes.status()).toBeLessThan(300);
-      await expect(page.getByTestId(`project-row-${projectId}`)).not.toBeVisible({ timeout: 10_000 });
+      await expect(page.getByTestId(`edit-project-btn-${projectId}`)).not.toBeVisible({ timeout: 10_000 });
     } finally {
       await context.close();
     }
@@ -359,12 +362,12 @@ test.describe('TPC Admin Management', () => {
       await expect(page.locator('header')).toBeVisible({ timeout: 10_000 });
       await page.goto('/admin/projects');
       await expect(page.getByTestId('admin-projects-page')).toBeVisible({ timeout: 15_000 });
-      await expect(page.getByTestId(`project-row-${projectId}`)).toBeVisible();
+      await expect(page.getByTestId(`edit-project-btn-${projectId}`)).toBeVisible();
 
       page.once('dialog', (d) => d.dismiss());
       await page.getByTestId(`delete-project-btn-${projectId}`).click();
       // Row should still be present after cancel
-      await expect(page.getByTestId(`project-row-${projectId}`)).toBeVisible({ timeout: 5_000 });
+      await expect(page.getByTestId(`edit-project-btn-${projectId}`)).toBeVisible({ timeout: 5_000 });
     } finally {
       await context.close();
     }
@@ -393,7 +396,7 @@ test.describe('TPC Admin Management', () => {
       await page.getByTestId('project-status-select').selectOption('active');
       const [saveRes] = await Promise.all([
         page.waitForResponse((r) => r.url().includes('/api/admin/projects') && r.request().method() === 'POST'),
-        page.getByTestId('save-project-btn').click(),
+        page.getByTestId('project-save-btn').click(),
       ]);
       expect(saveRes.status()).toBe(201);
       const body = await saveRes.json();
@@ -415,7 +418,7 @@ test.describe('TPC Admin Management', () => {
       await page.goto('/admin/projects');
       await expect(page.getByTestId('admin-projects-page')).toBeVisible({ timeout: 15_000 });
 
-      const emptyCta = page.getByRole('link', { name: 'Create your first project' });
+      const emptyCta = page.getByTestId('new-project-btn');
       if (await emptyCta.isVisible()) {
         await emptyCta.click();
       } else {
@@ -429,7 +432,7 @@ test.describe('TPC Admin Management', () => {
       await page.getByTestId('project-status-select').selectOption('active');
       const [saveRes] = await Promise.all([
         page.waitForResponse((r) => r.url().includes('/api/admin/projects') && r.request().method() === 'POST'),
-        page.getByTestId('save-project-btn').click(),
+        page.getByTestId('project-save-btn').click(),
       ]);
       expect(saveRes.status()).toBe(201);
       const body = await saveRes.json();
@@ -461,7 +464,7 @@ test.describe('TPC Admin Management', () => {
       await page.getByTestId('project-title-input').fill(`TPC-353 Edited ${Date.now()}`);
       const [saveRes] = await Promise.all([
         page.waitForResponse((r) => r.url().includes(`/api/admin/projects/${projectId}`) && r.request().method() === 'PUT'),
-        page.getByTestId('save-project-btn').click(),
+        page.getByTestId('project-save-btn').click(),
       ]);
       expect(saveRes.status()).toBeLessThan(300);
       await expect(page).toHaveURL(/\/admin\/projects$/, { timeout: 10_000 });
@@ -478,8 +481,8 @@ test.describe('TPC Admin Management', () => {
       await page.goto('/');
       await expect(page.locator('header')).toBeVisible({ timeout: 10_000 });
       await page.goto('/admin');
-      await expect(page.getByTestId('admin-dashboard-page')).toBeVisible({ timeout: 15_000 });
-      await page.getByTestId('add-project-quick-action').click();
+      await expect(page.getByTestId('admin-dashboard')).toBeVisible({ timeout: 15_000 });
+      await page.getByTestId('create-project-action').getByRole('link', { name: /Go/i }).click();
       await expect(page).toHaveURL(/\/admin\/projects\/new$/, { timeout: 10_000 });
       const uid = Date.now();
       await page.getByTestId('project-title-input').fill(`TPC-354 QuickAction ${uid}`);
@@ -488,7 +491,7 @@ test.describe('TPC Admin Management', () => {
       await page.getByTestId('project-status-select').selectOption('active');
       const [saveRes] = await Promise.all([
         page.waitForResponse((r) => r.url().includes('/api/admin/projects') && r.request().method() === 'POST'),
-        page.getByTestId('save-project-btn').click(),
+        page.getByTestId('project-save-btn').click(),
       ]);
       expect(saveRes.status()).toBe(201);
       const body = await saveRes.json();
@@ -520,15 +523,18 @@ test.describe('TPC Admin Management', () => {
       await expect(page.getByTestId('admin-projects-page')).toBeVisible({ timeout: 15_000 });
       const previewBtn = page.getByTestId(`preview-project-btn-${projectId}`);
       if (await previewBtn.isVisible()) {
-        await previewBtn.click();
-        await expect(page).toHaveURL(/\/portfolio\//, { timeout: 10_000 });
-        const backBtn = page.getByTestId('back-to-portfolio-btn');
+        const [popup] = await Promise.all([
+          page.waitForEvent('popup'),
+          previewBtn.click(),
+        ]);
+        await expect(popup).toHaveURL(/\/portfolio\//, { timeout: 10_000 });
+        const backBtn = popup.getByTestId('back-to-portfolio-btn');
         if (await backBtn.isVisible()) {
           await backBtn.click();
+          await expect(popup).toHaveURL(/\/portfolio$/, { timeout: 10_000 });
         } else {
-          await page.goBack();
+          await popup.close();
         }
-        await expect(page).toHaveURL(/\/portfolio$/, { timeout: 10_000 });
       }
     } finally {
       await context.close();
@@ -914,8 +920,8 @@ test.describe('TPC Admin Management', () => {
       await page.goto('/');
       await expect(page.locator('header')).toBeVisible({ timeout: 10_000 });
       await page.goto('/admin');
-      await expect(page.getByTestId('admin-dashboard-page')).toBeVisible({ timeout: 15_000 });
-      await page.getByTestId('manage-comments-card').click();
+      await expect(page.getByTestId('admin-dashboard')).toBeVisible({ timeout: 15_000 });
+      await page.getByTestId('manage-comments-action').click();
       await expect(page).toHaveURL(/\/admin\/comments/, { timeout: 10_000 });
       await expect(page.getByTestId('admin-comments-page')).toBeVisible({ timeout: 15_000 });
 
@@ -950,8 +956,8 @@ test.describe('TPC Admin Management', () => {
       await page.goto('/');
       await expect(page.locator('header')).toBeVisible({ timeout: 10_000 });
       await page.goto('/admin');
-      await expect(page.getByTestId('admin-dashboard-page')).toBeVisible({ timeout: 15_000 });
-      await page.getByTestId('edit-resume-card').click();
+      await expect(page.getByTestId('admin-dashboard')).toBeVisible({ timeout: 15_000 });
+      await page.getByTestId('edit-resume-action').click();
       await expect(page).toHaveURL(/\/admin\/resume/, { timeout: 10_000 });
       await expect(page.getByTestId('admin-resume-page')).toBeVisible({ timeout: 15_000 });
 
@@ -1041,7 +1047,7 @@ test.describe('TPC Admin Management', () => {
       ]);
       expect(saveRes.status()).toBe(201);
       const body = await saveRes.json();
-      const resumeId = body.item?.id || body.id;
+      const resumeId = body.resume?.id || body.id;
       if (resumeId) createdResumeIds.push(resumeId);
     } finally {
       await context.close();
@@ -1068,7 +1074,7 @@ test.describe('TPC Admin Management', () => {
       });
       expect(createRes.ok()).toBeTruthy();
       const body = await createRes.json();
-      const resumeId = body.item?.id || body.id;
+      const resumeId = body.resume?.id || body.id;
       expect(resumeId).toBeTruthy();
       // Do not push to createdResumeIds — test deletes it itself
 
@@ -1076,7 +1082,7 @@ test.describe('TPC Admin Management', () => {
       await expect(page.locator('header')).toBeVisible({ timeout: 10_000 });
       await page.goto('/admin/resume');
       await expect(page.getByTestId('admin-resume-page')).toBeVisible({ timeout: 15_000 });
-      await expect(page.getByTestId(`resume-row-${resumeId}`)).toBeVisible();
+      await expect(page.getByTestId(`edit-resume-btn-${resumeId}`)).toBeVisible();
 
       page.once('dialog', (d) => d.accept());
       const [deleteRes] = await Promise.all([
@@ -1084,7 +1090,7 @@ test.describe('TPC Admin Management', () => {
         page.getByTestId(`delete-resume-btn-${resumeId}`).click(),
       ]);
       expect(deleteRes.status()).toBeLessThan(300);
-      await expect(page.getByTestId(`resume-row-${resumeId}`)).not.toBeVisible({ timeout: 10_000 });
+      await expect(page.getByTestId(`edit-resume-btn-${resumeId}`)).not.toBeVisible({ timeout: 10_000 });
     } finally {
       await context.close();
     }
@@ -1099,8 +1105,8 @@ test.describe('TPC Admin Management', () => {
       await page.goto('/');
       await expect(page.locator('header')).toBeVisible({ timeout: 10_000 });
       await page.goto('/admin');
-      await expect(page.getByTestId('admin-dashboard-page')).toBeVisible({ timeout: 15_000 });
-      await page.getByTestId('edit-resume-quick-action').click();
+      await expect(page.getByTestId('admin-dashboard')).toBeVisible({ timeout: 15_000 });
+      await page.getByTestId('edit-resume-action').click();
       await expect(page).toHaveURL(/\/admin\/resume/, { timeout: 10_000 });
       await expect(page.getByTestId('admin-resume-page')).toBeVisible({ timeout: 15_000 });
 
@@ -1141,7 +1147,7 @@ test.describe('TPC Admin Management', () => {
       });
       expect(createRes.ok()).toBeTruthy();
       const body = await createRes.json();
-      resumeId = body.item?.id || body.id;
+      resumeId = body.resume?.id || body.id;
       if (resumeId) createdResumeIds.push(resumeId);
 
       await page.goto('/');
@@ -1193,8 +1199,11 @@ test.describe('TPC Admin Management', () => {
       ]);
       expect(saveRes.status()).toBe(201);
       const body = await saveRes.json();
-      const resumeId = body.item?.id || body.id;
+      const resumeId = body.resume?.id || body.id;
       expect(resumeId).toBeTruthy();
+
+      // Wait for the new item to appear in the list
+      await expect(page.getByTestId(`edit-resume-btn-${resumeId}`)).toBeVisible({ timeout: 10_000 });
 
       // Edit then cancel
       await page.getByTestId(`edit-resume-btn-${resumeId}`).click();
@@ -1214,7 +1223,7 @@ test.describe('TPC Admin Management', () => {
       // Delete
       page.once('dialog', (d) => d.accept());
       await page.getByTestId(`delete-resume-btn-${resumeId}`).click();
-      await expect(page.getByTestId(`resume-row-${resumeId}`)).not.toBeVisible({ timeout: 10_000 });
+      await expect(page.getByTestId(`edit-resume-btn-${resumeId}`)).not.toBeVisible({ timeout: 10_000 });
     } finally {
       await context.close();
     }
@@ -1277,14 +1286,14 @@ test.describe('TPC Admin Management', () => {
       await expect(page.locator('header')).toBeVisible({ timeout: 10_000 });
       await page.goto('/admin/projects');
       await expect(page.getByTestId('admin-projects-page')).toBeVisible({ timeout: 15_000 });
-      await expect(page.getByTestId(`project-row-${projectId}`)).toBeVisible();
+      await expect(page.getByTestId(`edit-project-btn-${projectId}`)).toBeVisible();
 
       page.once('dialog', (d) => d.accept());
       await page.getByTestId(`delete-project-btn-${projectId}`).click();
-      await expect(page.getByTestId(`project-row-${projectId}`)).not.toBeVisible({ timeout: 10_000 });
+      await expect(page.getByTestId(`edit-project-btn-${projectId}`)).not.toBeVisible({ timeout: 10_000 });
 
       // If empty state appears, click CTA
-      const emptyCta = page.getByRole('link', { name: 'Create your first project' });
+      const emptyCta = page.getByTestId('new-project-btn');
       if (await emptyCta.isVisible({ timeout: 3_000 }).catch(() => false)) {
         await emptyCta.click();
         await expect(page).toHaveURL(/\/admin\/projects\/new$/, { timeout: 10_000 });
@@ -1323,7 +1332,7 @@ test.describe('TPC Admin Management', () => {
 
       const [saveRes] = await Promise.all([
         page.waitForResponse((r) => r.url().includes('/api/admin/projects') && r.request().method() === 'POST'),
-        page.getByTestId('save-project-btn').click(),
+        page.getByTestId('project-save-btn').click(),
       ]);
       expect(saveRes.status()).toBe(201);
       const body = await saveRes.json();
@@ -1343,16 +1352,16 @@ test.describe('TPC Admin Management', () => {
       await page.goto('/');
       await expect(page.locator('header')).toBeVisible({ timeout: 10_000 });
       await page.goto('/admin');
-      await expect(page.getByTestId('admin-dashboard-page')).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByTestId('admin-dashboard')).toBeVisible({ timeout: 15_000 });
 
-      await page.getByTestId('manage-projects-card').click();
+      await page.getByTestId('manage-projects-action').click();
       await expect(page).toHaveURL(/\/admin\/projects/, { timeout: 10_000 });
       await expect(page.getByTestId('admin-projects-page')).toBeVisible({ timeout: 15_000 });
 
       // Navigate back to dashboard then to comments
       await page.goto('/admin');
-      await expect(page.getByTestId('admin-dashboard-page')).toBeVisible({ timeout: 15_000 });
-      await page.getByTestId('manage-comments-card').click();
+      await expect(page.getByTestId('admin-dashboard')).toBeVisible({ timeout: 15_000 });
+      await page.getByTestId('manage-comments-action').click();
       await expect(page).toHaveURL(/\/admin\/comments/, { timeout: 10_000 });
       await expect(page.getByTestId('admin-comments-page')).toBeVisible({ timeout: 15_000 });
     } finally {
@@ -1408,7 +1417,7 @@ test.describe('TPC Admin Management', () => {
       ]);
       expect(saveRes.status()).toBe(201);
       const body = await saveRes.json();
-      const resumeId = body.item?.id || body.id;
+      const resumeId = body.resume?.id || body.id;
       expect(resumeId).toBeTruthy();
 
       // Delete the item
@@ -1418,7 +1427,7 @@ test.describe('TPC Admin Management', () => {
         page.getByTestId(`delete-resume-btn-${resumeId}`).click(),
       ]);
       expect(deleteRes.status()).toBeLessThan(300);
-      await expect(page.getByTestId(`resume-row-${resumeId}`)).not.toBeVisible({ timeout: 10_000 });
+      await expect(page.getByTestId(`edit-resume-btn-${resumeId}`)).not.toBeVisible({ timeout: 10_000 });
     } finally {
       await context.close();
     }
@@ -1436,7 +1445,7 @@ test.describe('TPC Admin Management', () => {
       await expect(page.getByTestId('project-editor-page')).toBeVisible({ timeout: 15_000 });
 
       // Attempt to save empty form (should produce error)
-      const saveBtn = page.getByTestId('save-project-btn');
+      const saveBtn = page.getByTestId('project-save-btn');
       await saveBtn.click();
       // Check for an error indicator or that the URL did not change
       const errorMsg = page.getByTestId('project-save-error');
@@ -1513,7 +1522,7 @@ test.describe('TPC Admin Management', () => {
       ]);
       expect(saveRes.status()).toBe(201);
       const body = await saveRes.json();
-      const resumeId = body.item?.id || body.id;
+      const resumeId = body.resume?.id || body.id;
       expect(resumeId).toBeTruthy();
       createdResumeIds.push(resumeId);
 

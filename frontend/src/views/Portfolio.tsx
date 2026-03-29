@@ -87,7 +87,7 @@ export function Portfolio() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project) => (
-            <Card key={project.id} className="flex flex-col hover:shadow-lg transition-shadow">
+            <Card key={project.id} className="flex flex-col hover:shadow-lg transition-shadow" data-testid="project-card">
               {getCoverImage(project) && (
                 <img
                   src={getCoverImage(project)!}

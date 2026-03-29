@@ -313,6 +313,7 @@ export function AdminResume() {
                       className={`border rounded-lg p-4 ${
                         editingId === item.id ? 'border-primary bg-primary/5' : ''
                       }`}
+                      data-testid={`resume-item-${item.id}`}
                     >
                       <div className="flex items-start justify-between">
                         <div>

@@ -132,6 +132,7 @@ export function Header() {
           size="icon"
           className="md:hidden"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
+          data-testid="mobile-menu-btn"
         >
           {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </Button>
@@ -139,7 +140,7 @@ export function Header() {
 
       {/* Mobile Navigation */}
       {isMenuOpen && (
-        <div className="md:hidden border-t">
+        <div className="md:hidden border-t" data-testid="mobile-menu">
           <div className="container mx-auto px-4 py-4 space-y-4">
             {navLinks.map((link) => (
               <Link

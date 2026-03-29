@@ -145,11 +145,11 @@ export function ProjectEditor() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="container mx-auto px-4 py-12" data-testid="project-editor-page">
       {/* Header */}
       <div className="mb-8">
         <Button variant="ghost" asChild className="mb-4">
-          <Link to="/admin/projects">
+          <Link to="/admin/projects" data-testid="back-to-projects-btn">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Projects
           </Link>

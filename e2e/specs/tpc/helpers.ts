@@ -42,14 +42,3 @@ export async function readCsrfToken(context: BrowserContext, baseURL: string): P
   expect(token.length).toBeGreaterThan(0);
   return token;
 }
-
-export async function expectExternalAnchor(
-  page: Page,
-  locatorTestId: string,
-  expectedPrefix: string
-): Promise<void> {
-  const anchor = page.getByTestId(locatorTestId).locator('a');
-  await expect(anchor).toBeVisible();
-  await expect(anchor).toHaveAttribute('href', new RegExp(`^${expectedPrefix}`));
-  await expect(anchor).toHaveAttribute('target', '_blank');
-}

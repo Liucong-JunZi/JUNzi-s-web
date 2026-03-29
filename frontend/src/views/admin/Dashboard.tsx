@@ -66,6 +66,15 @@ export function AdminDashboard() {
     },
   ];
 
+  const getActionTestId = (title: string): string | undefined => {
+    switch (title) {
+      case 'Create Post': return 'create-post-action';
+      case 'Add Project': return 'create-project-action';
+      case 'Edit Resume': return 'edit-resume-quick-action';
+      default: return undefined;
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-12" data-testid="admin-dashboard">
       {/* Header */}
@@ -116,7 +125,7 @@ export function AdminDashboard() {
         <h2 className="text-2xl font-bold mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {quickActions.map((action) => (
-            <Card key={action.title} className="hover:shadow-lg transition-shadow" data-testid={action.title === 'Create Post' ? 'create-post-action' : undefined}>
+            <Card key={action.title} className="hover:shadow-lg transition-shadow" data-testid={getActionTestId(action.title)}>
               <CardContent className="pt-6">
                 <div className="flex items-start gap-4">
                   <div className="p-2 bg-primary/10 rounded-lg">
