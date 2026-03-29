@@ -90,8 +90,13 @@ test.describe('Operation Tree - Public Navigation', () => {
   });
 
   test('OP-009 OP-010 OP-011: mobile menu expand-collapse and mobile login button', async ({ browser }) => {
+    // Pass both storageState AND viewport in the same newContext call.
+    // Playwright 1.58.2 has a bug where project-level storageState can leak
+    // into browser.newContext(); passing both together ensures the anonymous
+    // override sticks and the viewport is set before any navigation.
     const context = await browser.newContext({
       baseURL,
+      storageState: { cookies: [], origins: [] },
       viewport: { width: 390, height: 844 },
     });
     const page = await context.newPage();

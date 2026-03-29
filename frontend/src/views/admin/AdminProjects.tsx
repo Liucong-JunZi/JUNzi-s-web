@@ -97,8 +97,8 @@ export function AdminProjects() {
           <h1 className="text-4xl font-bold mb-2">Manage Projects</h1>
           <p className="text-muted-foreground">Create, edit, and delete portfolio projects</p>
         </div>
-        <Button asChild data-testid="new-project-btn">
-          <Link to="/admin/projects/new">
+        <Button asChild>
+          <Link to="/admin/projects/new" data-testid="new-project-btn">
             <Plus className="mr-2 h-4 w-4" />
             New Project
           </Link>
@@ -138,13 +138,13 @@ export function AdminProjects() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" asChild data-testid={`preview-project-btn-${project.id}`}>
-                      <Link to={`/portfolio/${project.id}`} target="_blank">
+                    <Button variant="ghost" size="icon" asChild>
+                      <Link to={`/portfolio/${project.id}`} target="_blank" data-testid={`preview-project-btn-${project.id}`}>
                         <Eye className="h-4 w-4" />
                       </Link>
                     </Button>
-                    <Button variant="ghost" size="icon" asChild data-testid={`edit-project-btn-${project.id}`}>
-                      <Link to={`/admin/projects/${project.id}`}>
+                    <Button variant="ghost" size="icon" asChild>
+                      <Link to={`/admin/projects/${project.id}`} data-testid={`edit-project-btn-${project.id}`}>
                         <Edit className="h-4 w-4" />
                       </Link>
                     </Button>

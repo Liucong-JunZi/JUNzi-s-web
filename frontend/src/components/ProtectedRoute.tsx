@@ -8,7 +8,7 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading, setUser, setLoading, logout } = useAuthStore();
+  const { isAuthenticated, isLoading, setUser, setLoading } = useAuthStore();
   const location = useLocation();
 
   useEffect(() => {
@@ -20,15 +20,17 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
           const user = response.data.user || response.data;
           setUser(user);
         } catch {
-          // Session invalid or not found
-          logout();
+          // Session invalid or not found — user is already unauthenticated.
+          // Do NOT call logout() here: that would fire api.post('/auth/logout')
+          // without _skipAuthRedirect, triggering the 401 interceptor chain
+          // and a hard window.location.href redirect that races with React Router.
         }
       }
       setLoading(false);
     };
 
     restoreSession();
-  }, [isAuthenticated, setUser, setLoading, logout]);
+  }, [isAuthenticated, setUser, setLoading]);
 
   // Show loading state while checking session
   if (isLoading) {
@@ -52,7 +54,7 @@ interface AdminRouteProps {
 }
 
 export function AdminRoute({ children }: AdminRouteProps) {
-  const { isAuthenticated, isLoading, user, setUser, setLoading, logout } = useAuthStore();
+  const { isAuthenticated, isLoading, user, setUser, setLoading } = useAuthStore();
   const location = useLocation();
 
   useEffect(() => {
@@ -63,14 +65,15 @@ export function AdminRoute({ children }: AdminRouteProps) {
           const me = response.data.user || response.data;
           setUser(me);
         } catch {
-          logout();
+          // Session invalid — user stays unauthenticated.
+          // Avoid logout() to prevent 401 interceptor hard-redirect chain.
         }
       }
       setLoading(false);
     };
 
     restoreSession();
-  }, [isAuthenticated, setUser, setLoading, logout]);
+  }, [isAuthenticated, setUser, setLoading]);
 
   if (isLoading) {
     return (

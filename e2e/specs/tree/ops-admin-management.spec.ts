@@ -43,6 +43,8 @@ test.describe('Operation Tree - Admin Comments/Projects/Resume', () => {
 
     const { context, page } = await openPageAsActor(browser, baseURL, 'admin');
     try {
+      await page.goto('/');
+      await expect(page.locator('header')).toBeVisible({ timeout: 10_000 });
       await page.goto('/admin/comments');
       await expect(page.getByTestId('admin-comments-page')).toBeVisible();
 
@@ -101,6 +103,8 @@ test.describe('Operation Tree - Admin Comments/Projects/Resume', () => {
       const projectId = createBody.project?.id || createBody.id;
       createdProjectIds.push(projectId);
 
+      await page.goto('/');
+      await expect(page.locator('header')).toBeVisible({ timeout: 10_000 });
       await page.goto('/admin/projects');
       await expect(page.getByTestId('admin-projects-page')).toBeVisible({ timeout: 15_000 });
       await page.getByTestId('new-project-btn').click();
@@ -111,7 +115,7 @@ test.describe('Operation Tree - Admin Comments/Projects/Resume', () => {
       await expect(page).toHaveURL(new RegExp(`/admin/projects/${projectId}$`), { timeout: 10_000 });
 
       await page.goto('/admin/projects');
-      const preview = page.getByTestId(`preview-project-btn-${projectId}`).locator('a');
+      const preview = page.getByTestId(`preview-project-btn-${projectId}`);
       await expect(preview).toHaveAttribute('href', new RegExp(`/portfolio/${projectId}$`));
 
       page.once('dialog', (d) => d.accept());
@@ -130,6 +134,8 @@ test.describe('Operation Tree - Admin Comments/Projects/Resume', () => {
   test('OP-901 OP-902 OP-903 OP-904 OP-905 OP-906: project editor field operations', async ({ browser }) => {
     const { context, page } = await openPageAsActor(browser, baseURL, 'admin');
     try {
+      await page.goto('/');
+      await expect(page.locator('header')).toBeVisible({ timeout: 10_000 });
       await page.goto('/admin/projects/new');
       await page.getByTestId('project-title-input').fill(`ProjectEditor ${Date.now()}`);
       await page.getByTestId('project-description-input').fill('description');
@@ -161,6 +167,8 @@ test.describe('Operation Tree - Admin Comments/Projects/Resume', () => {
   test('OP-1001 OP-1002 OP-1003 OP-1004: admin resume create/edit/delete/cancel', async ({ browser }) => {
     const { context, page } = await openPageAsActor(browser, baseURL, 'admin');
     try {
+      await page.goto('/');
+      await expect(page.locator('header')).toBeVisible({ timeout: 10_000 });
       await page.goto('/admin/resume');
       await expect(page.getByTestId('admin-resume-page')).toBeVisible({ timeout: 15_000 });
 

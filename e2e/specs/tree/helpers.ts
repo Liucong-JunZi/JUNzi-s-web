@@ -7,10 +7,12 @@ export async function createActorContext(
   baseURL: string,
   role: ActorRole
 ): Promise<BrowserContext> {
-  const context = await browser.newContext({ baseURL });
   if (role === 'anonymous') {
+    const context = await browser.newContext({ baseURL, storageState: { cookies: [], origins: [] } });
     return context;
   }
+
+  const context = await browser.newContext({ baseURL });
 
   const loginRes = await context.request.post('/api/auth/test-login', {
     headers: { 'Content-Type': 'application/json' },

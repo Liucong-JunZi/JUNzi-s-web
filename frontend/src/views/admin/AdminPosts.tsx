@@ -66,8 +66,8 @@ export function AdminPosts() {
           <h1 className="text-4xl font-bold mb-2">Manage Posts</h1>
           <p className="text-muted-foreground">Create, edit, and delete blog posts</p>
         </div>
-        <Button asChild data-testid="new-post-btn">
-          <Link to="/admin/posts/new">
+        <Button asChild>
+          <Link to="/admin/posts/new" data-testid="new-post-btn">
             <Plus className="mr-2 h-4 w-4" />
             New Post
           </Link>
@@ -108,13 +108,13 @@ export function AdminPosts() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" asChild data-testid={`preview-post-btn-${post.id}`}>
-                      <Link to={`/blog/${post.slug}`} target="_blank">
+                    <Button variant="ghost" size="icon" asChild>
+                      <Link to={`/blog/${post.slug}`} target="_blank" data-testid={`preview-post-btn-${post.id}`}>
                         <Eye className="h-4 w-4" />
                       </Link>
                     </Button>
-                    <Button variant="ghost" size="icon" asChild data-testid={`edit-post-btn-${post.id}`}>
-                      <Link to={`/admin/posts/${post.id}`}>
+                    <Button variant="ghost" size="icon" asChild>
+                      <Link to={`/admin/posts/${post.id}`} data-testid={`edit-post-btn-${post.id}`}>
                         <Edit className="h-4 w-4" />
                       </Link>
                     </Button>

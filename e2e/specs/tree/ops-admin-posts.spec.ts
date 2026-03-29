@@ -22,21 +22,21 @@ test.describe('Operation Tree - Admin Dashboard/Posts/PostEditor', () => {
       await page.goto('/admin');
       await expect(page.getByTestId('admin-dashboard')).toBeVisible({ timeout: 15_000 });
 
-      await page.getByTestId('create-post-action').locator('a').click();
+      await page.getByTestId('create-post-action').getByRole('link').click();
       await expect(page).toHaveURL(/\/admin\/posts\/new$/, { timeout: 10_000 });
 
       await page.goto('/admin');
-      await page.getByTestId('manage-posts-action').locator('a').click();
+      await page.getByTestId('manage-posts-action').click();
       await expect(page).toHaveURL(/\/admin\/posts$/, { timeout: 10_000 });
 
       await page.goto('/admin');
-      await page.getByTestId('manage-projects-action').locator('a').click();
+      await page.getByTestId('manage-projects-action').click();
       await expect(page).toHaveURL(/\/admin\/projects$/, { timeout: 10_000 });
       await page.goto('/admin');
-      await page.getByTestId('manage-comments-action').locator('a').click();
+      await page.getByTestId('manage-comments-action').click();
       await expect(page).toHaveURL(/\/admin\/comments$/, { timeout: 10_000 });
       await page.goto('/admin');
-      await page.getByTestId('edit-resume-action').locator('a').click();
+      await page.getByTestId('edit-resume-action').click();
       await expect(page).toHaveURL(/\/admin\/resume$/, { timeout: 10_000 });
     } finally {
       await context.close();
@@ -62,7 +62,7 @@ test.describe('Operation Tree - Admin Dashboard/Posts/PostEditor', () => {
       await expect(page).toHaveURL(new RegExp(`/admin/posts/${seed.id}$`), { timeout: 10_000 });
 
       await page.goto('/admin/posts');
-      const preview = page.getByTestId(`preview-post-btn-${seed.id}`).locator('a');
+      const preview = page.getByTestId(`preview-post-btn-${seed.id}`);
       await expect(preview).toHaveAttribute('href', new RegExp(`/blog/${seed.slug}$`));
 
       await page.goto('/admin/posts');

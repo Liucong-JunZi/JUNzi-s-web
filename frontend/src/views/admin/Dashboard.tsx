@@ -140,26 +140,26 @@ export function AdminDashboard() {
       <div>
         <h2 className="text-2xl font-bold mb-4">Manage Content</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Button asChild variant="outline" className="h-24" data-testid="manage-posts-action">
-            <Link to="/admin/posts" className="flex flex-col gap-2">
+          <Button asChild variant="outline" className="h-24">
+            <Link to="/admin/posts" className="flex flex-col gap-2" data-testid="manage-posts-action">
               <FileText className="h-6 w-6" />
               <span>Manage Posts</span>
             </Link>
           </Button>
-          <Button asChild variant="outline" className="h-24" data-testid="manage-projects-action">
-            <Link to="/admin/projects" className="flex flex-col gap-2">
+          <Button asChild variant="outline" className="h-24">
+            <Link to="/admin/projects" className="flex flex-col gap-2" data-testid="manage-projects-action">
               <Briefcase className="h-6 w-6" />
               <span>Manage Projects</span>
             </Link>
           </Button>
-          <Button asChild variant="outline" className="h-24" data-testid="manage-comments-action">
-            <Link to="/admin/comments" className="flex flex-col gap-2">
+          <Button asChild variant="outline" className="h-24">
+            <Link to="/admin/comments" className="flex flex-col gap-2" data-testid="manage-comments-action">
               <MessageCircle className="h-6 w-6" />
               <span>Manage Comments</span>
             </Link>
           </Button>
-          <Button asChild variant="outline" className="h-24" data-testid="edit-resume-action">
-            <Link to="/admin/resume" className="flex flex-col gap-2">
+          <Button asChild variant="outline" className="h-24">
+            <Link to="/admin/resume" className="flex flex-col gap-2" data-testid="edit-resume-action">
               <File className="h-6 w-6" />
               <span>Edit Resume</span>
             </Link>

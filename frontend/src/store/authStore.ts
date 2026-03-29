@@ -35,7 +35,7 @@ export const useAuthStore = create<AuthStore>()(
       },
       logout: async () => {
         try {
-          await api.post('/auth/logout');
+          await api.post('/auth/logout', {}, { _skipAuthRedirect: true } as any);
         } catch {
           // Still clear local state even if backend call fails
         }

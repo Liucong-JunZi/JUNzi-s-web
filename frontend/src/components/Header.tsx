@@ -108,8 +108,8 @@ export function Header() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {user?.role === 'admin' && (
-                  <DropdownMenuItem asChild data-testid="dashboard-link">
-                    <Link to="/admin">Dashboard</Link>
+                  <DropdownMenuItem asChild>
+                    <Link to="/admin" data-testid="dashboard-link">Dashboard</Link>
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
@@ -117,8 +117,8 @@ export function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button asChild data-testid="login-btn">
-              <Link to="/login">
+            <Button asChild>
+              <Link to="/login" data-testid="login-btn">
                 <GithubIcon className="mr-2 h-4 w-4" />
                 Login
               </Link>
@@ -168,8 +168,8 @@ export function Header() {
                   Logout
                 </Button>
               ) : (
-                <Button asChild data-testid="login-btn">
-                  <Link to="/login">
+                <Button asChild>
+                  <Link to="/login" data-testid="login-btn">
                     <GithubIcon className="mr-2 h-4 w-4" />
                     Login
                   </Link>
