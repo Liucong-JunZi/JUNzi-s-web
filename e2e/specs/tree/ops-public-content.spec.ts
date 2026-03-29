@@ -95,11 +95,15 @@ test.describe('Operation Tree - Public Content', () => {
 
     const anon = await openPageAsActor(browser, baseURL, 'anonymous');
     try {
-      await anon.page.goto(`/blog/${post.slug}`);
+      await Promise.all([
+        anon.page.waitForResponse((res) => res.url().includes(`/api/posts/${post.slug}`) && res.status() === 200),
+        anon.page.goto(`/blog/${post.slug}`),
+      ]);
       await expect(anon.page.getByTestId('like-btn')).toBeVisible();
       await anon.page.getByTestId('like-btn').click();
       await expect(anon.page.getByTestId('comments-section')).toBeVisible();
-      await expect(anon.page.getByTestId('comment-login-link')).toBeVisible();
+      // Wait for React to render the conditional login link (depends on auth state settling)
+      await expect(anon.page.getByTestId('comment-login-link')).toBeVisible({ timeout: 10000 });
       await anon.page.getByTestId('comment-login-link').click();
       await expect(anon.page).toHaveURL(/\/login$/);
     } finally {
@@ -108,8 +112,11 @@ test.describe('Operation Tree - Public Content', () => {
 
     const user = await openPageAsActor(browser, baseURL, 'user');
     try {
-      await user.page.goto(`/blog/${post.slug}`);
-      await expect(user.page.getByTestId('comment-textarea')).toBeVisible();
+      await Promise.all([
+        user.page.waitForResponse((res) => res.url().includes(`/api/posts/${post.slug}`) && res.status() === 200),
+        user.page.goto(`/blog/${post.slug}`),
+      ]);
+      await expect(user.page.getByTestId('comment-textarea')).toBeVisible({ timeout: 10000 });
       await user.page.getByTestId('comment-textarea').fill(`public-content-comment-${Date.now()}`);
       const [commentRes] = await Promise.all([
         user.page.waitForResponse((res) => res.url().includes('/api/comments') && res.request().method() === 'POST'),
@@ -141,16 +148,22 @@ test.describe('Operation Tree - Public Content', () => {
       });
       createdProjectIds.push(projectId);
 
-      await page.goto('/portfolio');
+      await Promise.all([
+        page.waitForResponse((res) => res.url().includes('/api/projects') && res.status() === 200),
+        page.goto('/portfolio'),
+      ]);
       const details = page.getByTestId('project-details-btn').first();
-      await expect(details).toBeVisible();
+      await expect(details).toBeVisible({ timeout: 10000 });
       await details.click();
       await expect(page).toHaveURL(/\/portfolio\/\d+$/);
+      // Wait for the project detail API to complete before checking code/demo buttons
+      await page.waitForResponse((res) => res.url().match(/\/api\/projects\/\d+/) && res.status() === 200);
 
       const codeBtn = page.getByTestId('project-code-btn');
       const demoBtn = page.getByTestId('project-demo-btn');
-      await expect(codeBtn.locator('a')).toHaveAttribute('href', /github\.com/);
-      await expect(demoBtn.locator('a')).toHaveAttribute('href', /example\.com\/demo/);
+      // With asChild, the testid is on the <a> element itself (no nested <a>)
+      await expect(codeBtn).toHaveAttribute('href', /github\.com/);
+      await expect(demoBtn).toHaveAttribute('href', /example\.com\/demo/);
 
       await page.getByTestId('back-to-portfolio-btn').click();
       await expect(page).toHaveURL(/\/portfolio$/);
