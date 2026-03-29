@@ -60,8 +60,11 @@ async function flowAdminRefreshAfterAccessTokenExpired(ctx: FlowContext): Promis
     await page.reload();
     await expect(page.getByTestId('admin-posts-page')).toBeVisible({ timeout: 15_000 });
 
-    const me = await context.request.get('/api/auth/me');
-    expect(me.ok()).toBeTruthy();
+    const meRes = await page.evaluate(async () => {
+      const res = await fetch('/api/auth/me');
+      return { ok: res.ok, status: res.status };
+    });
+    expect(meRes.ok).toBeTruthy();
   } finally {
     await context.close();
   }
@@ -154,6 +157,8 @@ const FRONTEND_OPERATION_FLOWS: ReadonlyArray<OperationFlow> = [
     execute: flowUserCreatesCommentOnPublishedPost,
   },
 ];
+
+test.describe.configure({ mode: 'serial' });
 
 test.describe('Frontend operation tree', () => {
   const baseURL = process.env.E2E_BASE_URL || 'http://localhost';

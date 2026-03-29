@@ -114,10 +114,11 @@ test.describe('Operation Tree - Public Navigation', () => {
       // After navigation, the mobile menu re-closes. Re-open it and wait for login-btn.
       await expect(page.locator('header button.md\\:hidden')).toBeVisible({ timeout: 10_000 });
       await page.locator('header button.md\\:hidden').click();
-      // Use unscoped selector for login-btn; the mobile menu login-btn is inside <header>
-      // but the auth store may still be resolving.
-      await expect(page.getByTestId('login-btn')).toBeVisible({ timeout: 15_000 });
-      await page.getByTestId('login-btn').click();
+      // Scope login-btn to the mobile menu area; the desktop login-btn is
+      // hidden at this viewport (390px) so we target the one inside md:hidden.
+      const mobileLoginBtn = page.locator('header .md\\:hidden [data-testid="login-btn"]');
+      await expect(mobileLoginBtn).toBeVisible({ timeout: 15_000 });
+      await mobileLoginBtn.click();
       await expect(page).toHaveURL(/\/login$/, { timeout: 10_000 });
     } finally {
       await context.close();
