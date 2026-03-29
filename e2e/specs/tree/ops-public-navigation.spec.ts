@@ -8,13 +8,18 @@ test.describe('Operation Tree - Public Navigation', () => {
     const { context, page } = await openPageAsActor(browser, baseURL, 'anonymous');
     try {
       await page.goto('/');
+      // Wait for the SPA to hydrate and the header to render
+      await expect(page.locator('header')).toBeVisible({ timeout: 15_000 });
       await page.locator('header').getByRole('link', { name: 'Blog' }).click();
       await expect(page).toHaveURL(/\/blog$/, { timeout: 10_000 });
       await page.locator('header').getByRole('link', { name: 'Portfolio' }).click();
       await expect(page).toHaveURL(/\/portfolio$/, { timeout: 10_000 });
       await page.locator('header').getByRole('link', { name: 'Resume' }).click();
       await expect(page).toHaveURL(/\/resume$/, { timeout: 10_000 });
-      await page.locator('header').getByTestId('login-btn').click();
+      // Use unscoped selector: login-btn lives inside a nested div within <header>,
+      // and the auth store may still be resolving the /auth/me call.
+      await expect(page.getByTestId('login-btn')).toBeVisible({ timeout: 15_000 });
+      await page.getByTestId('login-btn').click();
       await expect(page).toHaveURL(/\/login$/, { timeout: 10_000 });
     } finally {
       await context.close();
@@ -76,7 +81,9 @@ test.describe('Operation Tree - Public Navigation', () => {
       await expect(avatar2).toBeVisible({ timeout: 10_000 });
       await avatar2.click();
       await page.getByTestId('logout-btn').click();
-      await expect(page.locator('header').getByTestId('login-btn')).toBeVisible({ timeout: 10_000 });
+      // Use unscoped selector: after logout the store flips to unauthenticated
+      // and the login-btn re-renders in the desktop nav.
+      await expect(page.getByTestId('login-btn')).toBeVisible({ timeout: 15_000 });
     } finally {
       await context.close();
     }
@@ -90,6 +97,8 @@ test.describe('Operation Tree - Public Navigation', () => {
     const page = await context.newPage();
     try {
       await page.goto('/');
+      // Wait for the SPA to hydrate and the header to render
+      await expect(page.locator('header')).toBeVisible({ timeout: 15_000 });
       const menuBtn = page.locator('header button.md\\:hidden');
       await expect(menuBtn).toBeVisible({ timeout: 10_000 });
       await menuBtn.click();
@@ -97,9 +106,13 @@ test.describe('Operation Tree - Public Navigation', () => {
       await expect(mobileBlogLink).toBeVisible({ timeout: 10_000 });
       await mobileBlogLink.click();
       await expect(page).toHaveURL(/\/blog$/, { timeout: 10_000 });
-      await menuBtn.click();
-      await expect(page.locator('header').getByTestId('login-btn')).toBeVisible({ timeout: 10_000 });
-      await page.locator('header').getByTestId('login-btn').click();
+      // After navigation, the mobile menu re-closes. Re-open it and wait for login-btn.
+      await expect(page.locator('header button.md\\:hidden')).toBeVisible({ timeout: 10_000 });
+      await page.locator('header button.md\\:hidden').click();
+      // Use unscoped selector for login-btn; the mobile menu login-btn is inside <header>
+      // but the auth store may still be resolving.
+      await expect(page.getByTestId('login-btn')).toBeVisible({ timeout: 15_000 });
+      await page.getByTestId('login-btn').click();
       await expect(page).toHaveURL(/\/login$/, { timeout: 10_000 });
     } finally {
       await context.close();
