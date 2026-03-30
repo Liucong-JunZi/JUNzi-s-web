@@ -56,6 +56,21 @@ test.describe('TPC Admin Management', () => {
     // TPC_102: T81 → T94 via SP12  (manage projects → new project)
     const { context, page } = await openPageAsActor(browser, baseURL, 'admin');
     try {
+      const csrf = await readCsrfToken(context, baseURL);
+      const createRes = await context.request.post('/api/admin/projects', {
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
+        data: JSON.stringify({
+          title: `TPC-341 Project ${Date.now()}`,
+          description: 'tpc test',
+          tech_stack: 'Go',
+          status: 'active',
+          sort_order: 99,
+        }),
+      });
+      expect(createRes.ok()).toBeTruthy();
+      const body = await createRes.json();
+      createdProjectIds.push(body.project?.id || body.id);
+
       await page.goto('/');
       await expect(page.locator('header')).toBeVisible({ timeout: 10_000 });
       await page.goto('/admin/projects');
