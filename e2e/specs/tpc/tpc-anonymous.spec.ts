@@ -29,31 +29,33 @@ test.describe('TPC Anonymous', () => {
     }
   });
 
-  // OP-102 | PATH_2 | Page load → blog → read post → like post
+  // OP-102 | PATH_2 | Page load → blog → read post → like blocked (anonymous)
   // TPC pairs: 36, 3, 56, 66
-  test('OP-102: page load → blog → read post → like post', async ({ browser }) => {
-    const { context, page } = await openPageAsActor(browser, baseURL, 'anonymous');
+  test('OP-102: page load → blog → read post → like blocked (anonymous)', async ({ browser }) => {
+    const context = await browser.newContext({
+      baseURL,
+      storageState: { cookies: [], origins: [] },
+    });
+    const page = await context.newPage();
     try {
-      await page.goto('/');
-      await expect(page).toHaveURL(/\/$/, { timeout: 15_000 });
-      await expect(page.locator('header')).toBeVisible({ timeout: 15_000 });
-      // T48: click Blog in nav → SP1
-      await page.locator('header').getByRole('link', { name: 'Blog' }).click();
-      await expect(page).toHaveURL(/\/blog$/, { timeout: 10_000 });
+      await page.goto('/blog');
       await expect(page.getByTestId('blog-page')).toBeVisible({ timeout: 10_000 });
-      // T65: click post card → SP2
-      const postCard = page.locator('[data-testid="post-card"]').first();
-      await expect(postCard).toBeVisible({ timeout: 10_000 });
-      await postCard.click();
-      await expect(page).toHaveURL(/\/blog\/[^/]+$/, { timeout: 10_000 });
-      // T74: click like button → SC6 (anonymous user: like may succeed or fail with 401)
+      await page.getByTestId('post-card').first().click();
+      await expect(page.getByTestId('post-title')).toBeVisible({ timeout: 10_000 });
+
       const likeBtn = page.getByTestId('like-btn');
       await expect(likeBtn).toBeVisible({ timeout: 10_000 });
+      // Capture current like count
       const beforeText = await likeBtn.textContent();
       const beforeCount = parseInt(beforeText!.match(/\d+/)![0]);
+
       await likeBtn.click();
-      // Anonymous like may fail (401) so count stays the same, or succeed and increment
-      await expect(likeBtn).toContainText(`${beforeCount}`, { timeout: 10_000 });
+      // Anonymous should see "Login Required" toast
+      await expect(page.getByText('Login Required')).toBeVisible({ timeout: 10_000 });
+      // Like count should NOT change
+      const afterText = await likeBtn.textContent();
+      const afterCount = parseInt(afterText!.match(/\d+/)![0]);
+      expect(afterCount).toBe(beforeCount);
     } finally {
       await context.close();
     }
@@ -446,18 +448,18 @@ test.describe('TPC Anonymous', () => {
     }
   });
 
-  // OP-117 | PATH_17 | CSRF missing → 403 → browse public
+  // OP-117 | PATH_17 | CSRF-less like → 401 → browse public
   // TPC pairs: 10
-  test('OP-117: CSRF missing returns 403, public browsing still works', async ({ browser }) => {
+  test('OP-117: like without auth returns 401, public browsing still works', async ({ browser }) => {
     const { context, page } = await openPageAsActor(browser, baseURL, 'anonymous');
     try {
-      // T24: POST without CSRF → 403
+      // T24: POST without auth/CSRF → 401 (auth required) or 403 (CSRF)
       const res = await context.request.post('/api/posts/fake-slug/like', {
         headers: { 'Content-Type': 'application/json' },
         data: '{}',
         maxRedirects: 0,
       });
-      expect([403, 401, 400, 404, 429]).toContain(res.status());
+      expect([401, 403]).toContain(res.status());
       // T2: public page still accessible after failed API call
       await page.goto('/blog');
       await expect(page).toHaveURL(/\/blog$/, { timeout: 10_000 });

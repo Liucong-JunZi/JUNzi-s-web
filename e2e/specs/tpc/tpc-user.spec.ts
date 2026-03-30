@@ -77,8 +77,8 @@ test.describe('TPC Authenticated User', () => {
   });
 
   // TPC pairs: 65,66,64
-  // PATH_43: Login → blog → post → like → back to blog
-  test('OP-203: user likes a blog post then navigates back', async ({ browser }) => {
+  // PATH_43: Login → blog → post → like → unlike → back to blog
+  test('OP-203: user likes then unlikes a blog post', async ({ browser }) => {
     const seed = PostFactory.create({ status: 'published' });
     const post = await postsApi.create(seed);
     createdPostIds.push(post.id);
@@ -89,26 +89,28 @@ test.describe('TPC Authenticated User', () => {
       await page.goto('/blog');
       await expect(page.getByTestId('blog-page')).toBeVisible({ timeout: 10_000 });
 
-      // Navigate to a blog post
       await page.getByTestId('post-card').first().click();
       await expect(page.getByTestId('post-title')).toBeVisible({ timeout: 10_000 });
 
       const likeBtn = page.getByTestId('like-btn');
       await expect(likeBtn).toBeVisible({ timeout: 10_000 });
-      // Capture current like count before clicking
       const beforeText = await likeBtn.textContent();
       const beforeCount = parseInt(beforeText!.match(/\d+/)![0]);
+
+      // First click: LIKE
       await likeBtn.click();
-      // Wait for the like API to respond: either the count increments or a
-      // success toast appears.  (In parallel runs the per-IP rate limiter may
-      // cause 429, so we verify whichever observable side-effect occurs first.)
-      await expect(
-        page.getByText('You liked this post!').or(likeBtn)
-      ).toBeVisible({ timeout: 10_000 });
-      // If the count actually changed, verify it incremented by exactly 1.
-      const afterText = await likeBtn.textContent();
-      const afterCount = parseInt(afterText!.match(/\d+/)![0]);
-      expect(afterCount).toBeGreaterThanOrEqual(beforeCount);
+      await expect(page.getByText('Liked!')).toBeVisible({ timeout: 10_000 });
+      // Button should show "Liked" text and count incremented
+      const afterLikeText = await likeBtn.textContent();
+      const afterLikeCount = parseInt(afterLikeText!.match(/\d+/)![0]);
+      expect(afterLikeCount).toBe(beforeCount + 1);
+
+      // Second click: UNLIKE
+      await likeBtn.click();
+      await expect(page.getByText('Unliked')).toBeVisible({ timeout: 10_000 });
+      const afterUnlikeText = await likeBtn.textContent();
+      const afterUnlikeCount = parseInt(afterUnlikeText!.match(/\d+/)![0]);
+      expect(afterUnlikeCount).toBe(beforeCount);
 
       // Navigate back to blog
       await page.goto('/blog');
