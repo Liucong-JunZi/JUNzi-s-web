@@ -138,6 +138,49 @@ func AuthRequired(cfg *config.Config) gin.HandlerFunc {
 	}
 }
 
+// OptionalAuth extracts the user from the JWT token if present, but does not
+// abort the request if the token is missing or invalid.
+func OptionalAuth(cfg *config.Config) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var tokenString string
+		cookieToken, err := c.Cookie("access_token")
+		if err == nil && cookieToken != "" {
+			tokenString = cookieToken
+		} else {
+			authHeader := c.GetHeader("Authorization")
+			if strings.HasPrefix(authHeader, "Bearer ") {
+				tokenString = authHeader[7:]
+			}
+		}
+		if tokenString == "" {
+			c.Next()
+			return
+		}
+		token, err := jwt.ParseWithClaims(tokenString, &jwt.MapClaims{}, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			}
+			return []byte(cfg.JWT.Secret), nil
+		})
+		if err != nil || !token.Valid {
+			c.Next()
+			return
+		}
+		if claims, ok := token.Claims.(*jwt.MapClaims); ok {
+			if userIDFloat, ok := (*claims)["user_id"].(float64); ok {
+				userID := uint(userIDFloat)
+				// Load user from DB to verify they still exist
+				var user models.User
+				if err := database.DB.First(&user, userID).Error; err == nil {
+					c.Set("userID", userID)
+					c.Set("user", &user)
+				}
+			}
+		}
+		c.Next()
+	}
+}
+
 func AdminRequired() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		role, exists := c.Get("userRole")

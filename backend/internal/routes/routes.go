@@ -77,7 +77,7 @@ func Setup(cfg *config.Config) *gin.Engine {
 		// Public routes
 		// Posts
 		api.GET("/posts", postController.ListPosts)
-		api.GET("/posts/:slug", postController.GetPostBySlug)
+		api.GET("/posts/:slug", middleware.OptionalAuth(cfg), postController.GetPostBySlug)
 
 		// Projects
 		api.GET("/projects", projectController.ListProjects)
