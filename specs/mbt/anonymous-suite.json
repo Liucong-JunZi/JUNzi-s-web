@@ -1,0 +1,547 @@
+{
+  "name": "Anonymous User Tests",
+  "description": "TPC test suite for anonymous",
+  "testCases": [
+    {
+      "id": "TC_login_login",
+      "name": "User Login → User Login",
+      "description": "Test User authenticates via GitHub OAuth followed by User authenticates via GitHub OAuth",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "login"
+        },
+        {
+          "type": "login"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "login",
+        "login",
+        "anonymous"
+      ]
+    },
+    {
+      "id": "TC_login_view_post",
+      "name": "User Login → View Post",
+      "description": "Test User authenticates via GitHub OAuth followed by Navigate to and view a blog post",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "login"
+        },
+        {
+          "type": "view_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "login",
+        "view_post",
+        "anonymous"
+      ]
+    },
+    {
+      "id": "TC_login_view_profile",
+      "name": "User Login → View Profile",
+      "description": "Test User authenticates via GitHub OAuth followed by View user profile",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "login"
+        },
+        {
+          "type": "view_profile"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "login",
+        "view_profile",
+        "anonymous"
+      ]
+    },
+    {
+      "id": "TC_login_navigate",
+      "name": "User Login → Navigate",
+      "description": "Test User authenticates via GitHub OAuth followed by Navigate between pages",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "login"
+        },
+        {
+          "type": "navigate"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "login",
+        "navigate",
+        "anonymous"
+      ]
+    },
+    {
+      "id": "TC_view_post_login",
+      "name": "View Post → User Login",
+      "description": "Test Navigate to and view a blog post followed by User authenticates via GitHub OAuth",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_post"
+        },
+        {
+          "type": "login"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "view_post",
+        "login",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_profile_login",
+      "name": "View Profile → User Login",
+      "description": "Test View user profile followed by User authenticates via GitHub OAuth",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_profile"
+        },
+        {
+          "type": "login"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "view_profile",
+        "login",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_navigate_login",
+      "name": "Navigate → User Login",
+      "description": "Test Navigate between pages followed by User authenticates via GitHub OAuth",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "navigate"
+        },
+        {
+          "type": "login"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "navigate",
+        "login",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_post_view_post",
+      "name": "View Post → View Post",
+      "description": "Test Navigate to and view a blog post followed by Navigate to and view a blog post",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_post"
+        },
+        {
+          "type": "view_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "view_post",
+        "view_post",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_post_view_profile",
+      "name": "View Post → View Profile",
+      "description": "Test Navigate to and view a blog post followed by View user profile",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_post"
+        },
+        {
+          "type": "view_profile"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "view_post",
+        "view_profile",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_post_navigate",
+      "name": "View Post → Navigate",
+      "description": "Test Navigate to and view a blog post followed by Navigate between pages",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_post"
+        },
+        {
+          "type": "navigate"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "view_post",
+        "navigate",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_profile_view_post",
+      "name": "View Profile → View Post",
+      "description": "Test View user profile followed by Navigate to and view a blog post",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_profile"
+        },
+        {
+          "type": "view_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "view_profile",
+        "view_post",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_profile_view_profile",
+      "name": "View Profile → View Profile",
+      "description": "Test View user profile followed by View user profile",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_profile"
+        },
+        {
+          "type": "view_profile"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "view_profile",
+        "view_profile",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_profile_navigate",
+      "name": "View Profile → Navigate",
+      "description": "Test View user profile followed by Navigate between pages",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_profile"
+        },
+        {
+          "type": "navigate"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "view_profile",
+        "navigate",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_navigate_view_post",
+      "name": "Navigate → View Post",
+      "description": "Test Navigate between pages followed by Navigate to and view a blog post",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "navigate"
+        },
+        {
+          "type": "view_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "navigate",
+        "view_post",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_navigate_view_profile",
+      "name": "Navigate → View Profile",
+      "description": "Test Navigate between pages followed by View user profile",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "navigate"
+        },
+        {
+          "type": "view_profile"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "navigate",
+        "view_profile",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_navigate_navigate",
+      "name": "Navigate → Navigate",
+      "description": "Test Navigate between pages followed by Navigate between pages",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "navigate"
+        },
+        {
+          "type": "navigate"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "navigate",
+        "navigate",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    }
+  ],
+  "coverage": {
+    "transitions": 4,
+    "transitionPairs": 16,
+    "states": 0
+  }
+}
