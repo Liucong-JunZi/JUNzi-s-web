@@ -1,0 +1,166 @@
+{
+  "nav": {
+    "home": "Home",
+    "blog": "Blog",
+    "portfolio": "Portfolio",
+    "resume": "Resume",
+    "login": "Login",
+    "dashboard": "Dashboard",
+    "logout": "Log out"
+  },
+  "home": {
+    "hero": {
+      "title": "Welcome to JUNzi",
+      "description": "A personal website featuring blog posts, portfolio projects, and professional resume. Built with React, TypeScript, and modern web technologies."
+    },
+    "cta": {
+      "readBlog": "Read Blog",
+      "viewPortfolio": "View Portfolio"
+    },
+    "features": {
+      "blog": {
+        "title": "Blog",
+        "description": "Technical articles, tutorials, and thoughts on software development."
+      },
+      "portfolio": {
+        "title": "Portfolio",
+        "description": "Showcase of projects and applications I've built and contributed to."
+      },
+      "resume": {
+        "title": "Resume",
+        "description": "Professional experience, skills, and educational background."
+      }
+    },
+    "about": {
+      "title": "About This Site",
+      "description": "This is a personal website built with modern web technologies including React 18, TypeScript, Vite, Tailwind CSS, and shadcn/ui components on the frontend, paired with a Go backend using the Gin framework. The site features a full-featured blog with markdown support, project portfolio, resume section, comment system, admin dashboard, and GitHub OAuth authentication."
+    }
+  },
+  "footer": {
+    "brand": "JUNzi",
+    "description": "Personal website with blog, portfolio, and resume features.",
+    "quickLinks": "Quick Links",
+    "categories": "Categories",
+    "technology": "Technology",
+    "programming": "Programming",
+    "design": "Design",
+    "life": "Life",
+    "connect": "Connect",
+    "copyright": "© {{year}} JUNzi. All rights reserved."
+  },
+  "blog": {
+    "title": "Blog",
+    "description": "Thoughts, tutorials, and insights on software development and technology.",
+    "searchPlaceholder": "Search articles...",
+    "search": "Search",
+    "clearFilter": "Clear filter: {{tag}}",
+    "noPosts": "No posts found.",
+    "loading": "Loading...",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {{current}} of {{total}}"
+  },
+  "blogPost": {
+    "back": "Back to Blog",
+    "notFound": "Post not found",
+    "like": "Like",
+    "liked": "Liked",
+    "comments": "Comments ({{count}})",
+    "commentPlaceholder": "Write a comment...",
+    "submitComment": "Post Comment",
+    "loginRequired": "Please login to comment.",
+    "noComments": "No comments yet. Be the first to comment!",
+    "loadMore": "Load More Comments",
+    "loginRequiredToast": "Login Required",
+    "commentSubmitted": "Comment Submitted",
+    "error": "Error"
+  },
+  "portfolio": {
+    "title": "Portfolio",
+    "description": "A showcase of projects I've built and contributed to.",
+    "loading": "Loading...",
+    "noProjects": "No projects found.",
+    "planning": "Planning",
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "archived": "Archived",
+    "code": "Code",
+    "demo": "Demo",
+    "details": "Details"
+  },
+  "portfolioDetail": {
+    "back": "Back to Portfolio",
+    "notFound": "Project not found",
+    "viewCode": "View Code",
+    "liveDemo": "Live Demo"
+  },
+  "resume": {
+    "title": "Resume",
+    "description": "Professional experience, education, and projects.",
+    "download": "Download",
+    "workExperience": "Work Experience",
+    "education": "Education",
+    "project": "Project",
+    "present": "Present",
+    "noContent": "No resume content available yet.",
+    "loading": "Loading..."
+  },
+  "login": {
+    "title": "Welcome Back",
+    "description": "Sign in to your account to access all features",
+    "continueWithGithub": "Continue with GitHub",
+    "terms": "By signing in, you agree to our Terms of Service and Privacy Policy.",
+    "noAccount": "Don't have a GitHub account? Sign up for free",
+    "loggingIn": "Logging in..."
+  },
+  "notFound": {
+    "code": "404",
+    "title": "Page Not Found",
+    "description": "The page you're looking for doesn't exist or has been moved.",
+    "goHome": "Go Home",
+    "goBack": "Go Back"
+  },
+  "authCallback": {
+    "loading": "Completing login...",
+    "error": "Login failed. Please try again.",
+    "redirecting": "Redirecting to login..."
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Dashboard",
+      "welcome": "Welcome back, {{username}}!",
+      "totalPosts": "Total Posts",
+      "totalProjects": "Total Projects",
+      "totalComments": "Total Comments",
+      "createPost": "Create Post",
+      "addProject": "Add Project",
+      "editResume": "Edit Resume",
+      "writePost": "Write a new blog post",
+      "addProjectDesc": "Add a new portfolio project",
+      "updateResume": "Update your resume",
+      "managePosts": "Manage Posts",
+      "manageProjects": "Manage Projects",
+      "manageComments": "Manage Comments"
+    }
+  },
+  "common": {
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous"
+  },
+  "language": {
+    "switch": "Switch Language",
+    "en": "English",
+    "zh": "中文"
+  }
+}
