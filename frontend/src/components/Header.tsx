@@ -1,6 +1,8 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
-import { Menu, X, Sun, Moon, User as UserIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import i18n from '../i18n';
+import { Menu, X, Sun, Moon, User as UserIcon, Languages } from 'lucide-react';
 import { Button } from './ui/button';
 import { useAuthStore } from '../store/authStore';
 import { useThemeStore } from '../store/themeStore';
@@ -24,17 +26,23 @@ function GithubIcon({ className }: { className?: string }) {
 }
 
 export function Header() {
+  const { t } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const { user, isAuthenticated, logout } = useAuthStore();
   const { theme, setTheme } = useThemeStore();
 
   const navLinks = [
-    { to: '/', label: 'Home' },
-    { to: '/blog', label: 'Blog' },
-    { to: '/portfolio', label: 'Portfolio' },
-    { to: '/resume', label: 'Resume' },
+    { to: '/', label: t('nav.home') },
+    { to: '/blog', label: t('nav.blog') },
+    { to: '/portfolio', label: t('nav.portfolio') },
+    { to: '/resume', label: t('nav.resume') },
   ];
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'en' ? 'zh' : 'en';
+    i18n.changeLanguage(newLang);
+  };
 
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
@@ -87,6 +95,10 @@ export function Header() {
             )}
           </Button>
 
+          <Button variant="ghost" size="icon" onClick={toggleLanguage} data-testid="language-toggle-btn">
+            <Languages className="h-5 w-5" />
+          </Button>
+
           {isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -109,18 +121,18 @@ export function Header() {
                 <DropdownMenuSeparator />
                 {user?.role === 'admin' && (
                   <DropdownMenuItem asChild>
-                    <Link to="/admin" data-testid="dashboard-link">Dashboard</Link>
+                    <Link to="/admin" data-testid="dashboard-link">{t('nav.dashboard')}</Link>
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout} data-testid="logout-btn">Log out</DropdownMenuItem>
+                <DropdownMenuItem onClick={logout} data-testid="logout-btn">{t('nav.logout')}</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <Button asChild>
               <Link to="/login" data-testid="login-btn">
                 <GithubIcon className="mr-2 h-4 w-4" />
-                Login
+                {t('nav.login')}
               </Link>
             </Button>
           )}
@@ -166,13 +178,13 @@ export function Header() {
               </Button>
               {isAuthenticated ? (
                 <Button variant="outline" onClick={logout} data-testid="logout-btn">
-                  Logout
+                  {t('nav.logout')}
                 </Button>
               ) : (
                 <Button asChild>
                   <Link to="/login" data-testid="login-btn">
                     <GithubIcon className="mr-2 h-4 w-4" />
-                    Login
+                    {t('nav.login')}
                   </Link>
                 </Button>
               )}

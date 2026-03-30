@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -27,6 +28,7 @@ function LinkedinIcon({ className }: { className?: string }) {
 }
 
 export function Footer() {
+  const { t } = useTranslation();
   const currentYear = new Date().getFullYear();
 
   return (
@@ -36,35 +38,35 @@ export function Footer() {
           {/* Brand */}
           <div className="space-y-4">
             <Link to="/" className="text-2xl font-bold">
-              JUNzi
+              {t('footer.brand')}
             </Link>
             <p className="text-sm text-muted-foreground">
-              Personal website with blog, portfolio, and resume features.
+              {t('footer.description')}
             </p>
           </div>
 
           {/* Quick Links */}
           <div className="space-y-4">
-            <h3 className="font-semibold">Quick Links</h3>
+            <h3 className="font-semibold">{t('footer.quickLinks')}</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link to="/" className="text-muted-foreground hover:text-primary">
-                  Home
+                  {t('nav.home')}
                 </Link>
               </li>
               <li>
                 <Link to="/blog" className="text-muted-foreground hover:text-primary">
-                  Blog
+                  {t('nav.blog')}
                 </Link>
               </li>
               <li>
                 <Link to="/portfolio" className="text-muted-foreground hover:text-primary">
-                  Portfolio
+                  {t('nav.portfolio')}
                 </Link>
               </li>
               <li>
                 <Link to="/resume" className="text-muted-foreground hover:text-primary">
-                  Resume
+                  {t('nav.resume')}
                 </Link>
               </li>
             </ul>
@@ -72,26 +74,26 @@ export function Footer() {
 
           {/* Categories */}
           <div className="space-y-4">
-            <h3 className="font-semibold">Categories</h3>
+            <h3 className="font-semibold">{t('footer.categories')}</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link to="/blog?tag=technology" className="text-muted-foreground hover:text-primary">
-                  Technology
+                  {t('footer.technology')}
                 </Link>
               </li>
               <li>
                 <Link to="/blog?tag=programming" className="text-muted-foreground hover:text-primary">
-                  Programming
+                  {t('footer.programming')}
                 </Link>
               </li>
               <li>
                 <Link to="/blog?tag=design" className="text-muted-foreground hover:text-primary">
-                  Design
+                  {t('footer.design')}
                 </Link>
               </li>
               <li>
                 <Link to="/blog?tag=life" className="text-muted-foreground hover:text-primary">
-                  Life
+                  {t('footer.life')}
                 </Link>
               </li>
             </ul>
@@ -99,7 +101,7 @@ export function Footer() {
 
           {/* Social Links */}
           <div className="space-y-4">
-            <h3 className="font-semibold">Connect</h3>
+            <h3 className="font-semibold">{t('footer.connect')}</h3>
             <div className="flex space-x-4">
               <a
                 href="https://github.com"
@@ -136,7 +138,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
-          <p>&copy; {currentYear} JUNzi. All rights reserved.</p>
+          <p>&copy; {currentYear} {t('footer.brand')}. {t('footer.copyright')}</p>
         </div>
       </div>
     </footer>
