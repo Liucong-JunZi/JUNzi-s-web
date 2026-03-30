@@ -13,14 +13,17 @@ test.describe('TPC Anonymous', () => {
     try {
       // T12: fresh page load → rehydration starts
       await page.goto('/');
+      await expect(page).toHaveURL(/\/$/, { timeout: 15_000 });
       await expect(page.locator('header')).toBeVisible({ timeout: 15_000 });
       // T13: no session → stays anonymous, public pages accessible
       // T2: browse public page
       await page.locator('header').getByRole('link', { name: 'Blog' }).click();
       await expect(page).toHaveURL(/\/blog$/, { timeout: 10_000 });
+      await expect(page.getByTestId('blog-page')).toBeVisible({ timeout: 10_000 });
       // T3: visit /admin → redirect to /login
       await page.goto('/admin');
       await expect(page).toHaveURL(/\/login$/, { timeout: 10_000 });
+      await expect(page.getByTestId('github-login-btn')).toBeVisible({ timeout: 10_000 });
     } finally {
       await context.close();
     }
@@ -32,19 +35,25 @@ test.describe('TPC Anonymous', () => {
     const { context, page } = await openPageAsActor(browser, baseURL, 'anonymous');
     try {
       await page.goto('/');
+      await expect(page).toHaveURL(/\/$/, { timeout: 15_000 });
       await expect(page.locator('header')).toBeVisible({ timeout: 15_000 });
       // T48: click Blog in nav → SP1
       await page.locator('header').getByRole('link', { name: 'Blog' }).click();
       await expect(page).toHaveURL(/\/blog$/, { timeout: 10_000 });
+      await expect(page.getByTestId('blog-page')).toBeVisible({ timeout: 10_000 });
       // T65: click post card → SP2
       const postCard = page.locator('[data-testid="post-card"]').first();
       await expect(postCard).toBeVisible({ timeout: 10_000 });
       await postCard.click();
       await expect(page).toHaveURL(/\/blog\/[^/]+$/, { timeout: 10_000 });
-      // T74: click like button → SC6
+      // T74: click like button → SC6 (anonymous user: like may succeed or fail with 401)
       const likeBtn = page.getByTestId('like-btn');
       await expect(likeBtn).toBeVisible({ timeout: 10_000 });
+      const beforeText = await likeBtn.textContent();
+      const beforeCount = parseInt(beforeText!.match(/\d+/)![0]);
       await likeBtn.click();
+      // Anonymous like may fail (401) so count stays the same, or succeed and increment
+      await expect(likeBtn).toContainText(`${beforeCount}`, { timeout: 10_000 });
     } finally {
       await context.close();
     }
@@ -52,19 +61,26 @@ test.describe('TPC Anonymous', () => {
 
   // OP-103 | PATH_3 | Blog search → tag filter → clear tag → clear search
   // TPC pairs: 57, 62, 58, 63
-  test('OP-103: blog search → tag filter → clear tag → clear search', async ({ browser }) => {
+  test('OP-103: blog search → tag filter → clear search → clear filter', async ({ browser }) => {
     const { context, page } = await openPageAsActor(browser, baseURL, 'anonymous');
     try {
       await page.goto('/blog');
+      await expect(page).toHaveURL(/\/blog$/, { timeout: 15_000 });
       await expect(page.locator('header')).toBeVisible({ timeout: 15_000 });
+      // capture initial post card count
+      const initialCards = page.locator('[data-testid="post-card"]');
+      const initialCount = await initialCards.count();
       // T67: submit search → SB2
       const searchInput = page.getByTestId('blog-search-input');
       await expect(searchInput).toBeVisible({ timeout: 10_000 });
       await searchInput.fill('test');
       await searchInput.press('Enter');
-      // T66: blog listing has no tag-badge elements; tags only in PostEditor
-      // Verify search results loaded (post cards may or may not appear)
+      // Search triggers an API call; the frontend does not update the URL with ?q=
       await expect(page.getByTestId('blog-page')).toBeVisible({ timeout: 10_000 });
+      // Wait for the search results to load (results may change)
+      await page.waitForTimeout(500);
+      const afterSearchCount = await initialCards.count();
+      expect(afterSearchCount).toBeLessThanOrEqual(initialCount);
       // T70: clear search by manually clearing the input
       await searchInput.fill('');
       await searchInput.press('Enter');
@@ -72,6 +88,10 @@ test.describe('TPC Anonymous', () => {
       const clearFilter = page.getByTestId('clear-filter-btn');
       if (await clearFilter.isVisible()) {
         await clearFilter.click();
+        // Rule 4: Assert URL no longer has filter params and card count restored
+        await expect(page).toHaveURL(/\/blog(\?.*)?$/);
+        const afterClearCount = await initialCards.count();
+        expect(afterClearCount).toBeGreaterThanOrEqual(afterSearchCount);
       }
     } finally {
       await context.close();
@@ -83,6 +103,8 @@ test.describe('TPC Anonymous', () => {
     const { context, page } = await openPageAsActor(browser, baseURL, 'anonymous');
     try {
       await page.goto('/blog');
+      await expect(page).toHaveURL(/\/blog$/, { timeout: 15_000 });
+      await expect(page.getByTestId('blog-page')).toBeVisible({ timeout: 15_000 });
       // T65: click post card → SP2
       const postCard = page.locator('[data-testid="post-card"]').first();
       await expect(postCard).toBeVisible({ timeout: 10_000 });
@@ -91,12 +113,19 @@ test.describe('TPC Anonymous', () => {
       // T71: click Back to Blog → SP1
       await page.getByRole('link', { name: /back to blog/i }).click();
       await expect(page).toHaveURL(/\/blog$/, { timeout: 10_000 });
+      await expect(page.getByTestId('blog-page')).toBeVisible({ timeout: 10_000 });
       // T68: click Next pagination → SB4
       const nextBtn = page.getByTestId('pagination-next');
       const hasNext = await nextBtn.isVisible();
       if (hasNext) {
+        // capture first post title before paginating
+        const firstTitleBefore = await page.locator('[data-testid="post-card"]').first().textContent();
         await nextBtn.click();
+        // Rule 5: Assert URL contains page param and different cards shown
         await expect(page).toHaveURL(/[?&]page=/, { timeout: 10_000 });
+        await expect(page.getByTestId('blog-page')).toBeVisible({ timeout: 10_000 });
+        const firstTitleAfter = await page.locator('[data-testid="post-card"]').first().textContent();
+        expect(firstTitleAfter).not.toBe(firstTitleBefore);
       }
     } finally {
       await context.close();
@@ -109,14 +138,20 @@ test.describe('TPC Anonymous', () => {
     const { context, page } = await openPageAsActor(browser, baseURL, 'anonymous');
     try {
       await page.goto('/portfolio');
+      await expect(page).toHaveURL(/\/portfolio$/, { timeout: 15_000 });
+      // Portfolio page loaded -- verify by heading visibility
+      await expect(page.getByRole('heading', { name: 'Portfolio' })).toBeVisible({ timeout: 15_000 });
       // T75: click project card Details → SP4
       const detailsBtn = page.getByTestId('project-details-btn').first();
       await expect(detailsBtn).toBeVisible({ timeout: 10_000 });
       await detailsBtn.click();
       await expect(page).toHaveURL(/\/portfolio\/[^/]+$/, { timeout: 10_000 });
+      // Project detail page loaded -- verify back button is visible
+      await expect(page.getByTestId('back-to-portfolio-btn')).toBeVisible({ timeout: 10_000 });
       // T76: click Back → SP3
-      await page.getByRole('link', { name: /back/i }).first().click();
+      await page.getByTestId('back-to-portfolio-btn').click();
       await expect(page).toHaveURL(/\/portfolio$/, { timeout: 10_000 });
+      await expect(page.getByRole('heading', { name: 'Portfolio' })).toBeVisible({ timeout: 15_000 });
     } finally {
       await context.close();
     }
@@ -128,18 +163,22 @@ test.describe('TPC Anonymous', () => {
     const { context, page } = await openPageAsActor(browser, baseURL, 'anonymous');
     try {
       await page.goto('/');
+      await expect(page).toHaveURL(/\/$/, { timeout: 15_000 });
       await expect(page.locator('header')).toBeVisible({ timeout: 15_000 });
       // T63: click Portfolio CTA button → SP3
       await page.getByRole('link', { name: 'View Portfolio' }).click();
       await expect(page).toHaveURL(/\/portfolio$/, { timeout: 10_000 });
+      await expect(page.getByRole('heading', { name: 'Portfolio' })).toBeVisible({ timeout: 10_000 });
       // T75: click project Details → SP4
       const detailsBtn = page.getByTestId('project-details-btn').first();
       await expect(detailsBtn).toBeVisible({ timeout: 10_000 });
       await detailsBtn.click();
       await expect(page).toHaveURL(/\/portfolio\/[^/]+$/, { timeout: 10_000 });
+      await expect(page.getByTestId('back-to-portfolio-btn')).toBeVisible({ timeout: 10_000 });
       // T76: back → SP3
-      await page.getByRole('link', { name: /back/i }).first().click();
+      await page.getByTestId('back-to-portfolio-btn').click();
       await expect(page).toHaveURL(/\/portfolio$/, { timeout: 10_000 });
+      await expect(page.getByRole('heading', { name: 'Portfolio' })).toBeVisible({ timeout: 10_000 });
     } finally {
       await context.close();
     }
@@ -151,13 +190,17 @@ test.describe('TPC Anonymous', () => {
     const { context, page } = await openPageAsActor(browser, baseURL, 'anonymous');
     try {
       await page.goto('/');
+      await expect(page).toHaveURL(/\/$/, { timeout: 15_000 });
       await expect(page.locator('header')).toBeVisible({ timeout: 15_000 });
       // T64: click View Resume ghost button → SP5
       await page.getByRole('link', { name: 'View Resume' }).click();
       await expect(page).toHaveURL(/\/resume$/, { timeout: 10_000 });
+      await expect(page.getByRole('heading', { name: 'Resume', exact: true })).toBeVisible({ timeout: 10_000 });
       // T146: click Download Resume button → stays on SP5
       const downloadBtn = page.getByTestId('resume-download-btn');
       await expect(downloadBtn).toBeVisible({ timeout: 10_000 });
+      // Verify we're still on the resume page after seeing download button
+      await expect(page).toHaveURL(/\/resume$/);
     } finally {
       await context.close();
     }
@@ -168,12 +211,17 @@ test.describe('TPC Anonymous', () => {
     const { context, page } = await openPageAsActor(browser, baseURL, 'anonymous');
     try {
       await page.goto('/');
+      await expect(page).toHaveURL(/\/$/, { timeout: 15_000 });
+      await expect(page.locator('header')).toBeVisible({ timeout: 15_000 });
       // T50: click Resume in nav → SP5
       await page.locator('header').getByRole('link', { name: 'Resume' }).click();
       await expect(page).toHaveURL(/\/resume$/, { timeout: 10_000 });
+      await expect(page.getByRole('heading', { name: 'Resume', exact: true })).toBeVisible({ timeout: 10_000 });
       // T146: download resume button present
       const downloadBtn = page.getByTestId('resume-download-btn');
       await expect(downloadBtn).toBeVisible({ timeout: 10_000 });
+      // Assert page stayed on resume after seeing download button
+      await expect(page).toHaveURL(/\/resume$/);
     } finally {
       await context.close();
     }
@@ -186,12 +234,16 @@ test.describe('TPC Anonymous', () => {
     try {
       // T150: navigate unknown route → SP17
       await page.goto('/this-route-does-not-exist-xyz');
+      // Rule 8: Assert 404 message is shown (use first() to avoid strict mode with multiple matches)
+      await expect(page.getByText(/not found|404/i).first()).toBeVisible({ timeout: 10_000 });
       // T77: click Go Home → SP0
       await page.getByRole('link', { name: /go home/i }).click();
       await expect(page).toHaveURL(/\/$/, { timeout: 10_000 });
+      await expect(page.locator('header')).toBeVisible({ timeout: 10_000 });
       // T48: nav to blog
       await page.locator('header').getByRole('link', { name: 'Blog' }).click();
       await expect(page).toHaveURL(/\/blog$/, { timeout: 10_000 });
+      await expect(page.getByTestId('blog-page')).toBeVisible({ timeout: 10_000 });
     } finally {
       await context.close();
     }
@@ -204,11 +256,15 @@ test.describe('TPC Anonymous', () => {
     try {
       await page.goto('/blog');
       await expect(page).toHaveURL(/\/blog$/, { timeout: 10_000 });
+      await expect(page.getByTestId('blog-page')).toBeVisible({ timeout: 10_000 });
       // T150: navigate unknown route → SP17
       await page.goto('/another-nonexistent-path-abc');
+      // Rule 8: Assert 404 message is shown (use first() to avoid strict mode with multiple matches)
+      await expect(page.getByText(/not found|404/i).first()).toBeVisible({ timeout: 10_000 });
       // T78: click Go Back → SP1
       await page.getByRole('button', { name: /go back/i }).click();
       await expect(page).toHaveURL(/\/blog$/, { timeout: 10_000 });
+      await expect(page.getByTestId('blog-page')).toBeVisible({ timeout: 10_000 });
     } finally {
       await context.close();
     }
@@ -222,6 +278,7 @@ test.describe('TPC Anonymous', () => {
     try {
       await page.setViewportSize({ width: 375, height: 812 });
       await page.goto('/');
+      await expect(page).toHaveURL(/\/$/, { timeout: 15_000 });
       await expect(page.locator('header')).toBeVisible({ timeout: 15_000 });
       // T54: click hamburger → SM2
       const hamburger = page.locator('header button.md\\:hidden');
@@ -229,6 +286,10 @@ test.describe('TPC Anonymous', () => {
       await hamburger.click();
       const mobileNav = page.locator('header div.md\\:hidden.border-t');
       await expect(mobileNav).toBeVisible({ timeout: 5_000 });
+      // Rule 6: Assert menu links are visible inside mobile nav
+      await expect(mobileNav.getByRole('link', { name: 'Blog' })).toBeVisible({ timeout: 5_000 });
+      await expect(mobileNav.getByRole('link', { name: 'Portfolio' })).toBeVisible({ timeout: 5_000 });
+      await expect(mobileNav.getByRole('link', { name: 'Resume' })).toBeVisible({ timeout: 5_000 });
       // T55: click same button (now shows X icon) → SM1
       await hamburger.click();
       await expect(mobileNav).not.toBeVisible({ timeout: 5_000 });
@@ -244,13 +305,21 @@ test.describe('TPC Anonymous', () => {
     try {
       await page.setViewportSize({ width: 375, height: 812 });
       await page.goto('/');
+      await expect(page).toHaveURL(/\/$/, { timeout: 15_000 });
       await expect(page.locator('header')).toBeVisible({ timeout: 15_000 });
       // T54: open mobile menu
-      await page.locator('header button.md\\:hidden').click();
-      await expect(page.locator('header div.md\\:hidden.border-t')).toBeVisible({ timeout: 5_000 });
+      const hamburger = page.locator('header button.md\\:hidden');
+      await hamburger.click();
+      const mobileNav = page.locator('header div.md\\:hidden.border-t');
+      await expect(mobileNav).toBeVisible({ timeout: 5_000 });
+      // Rule 6: Assert Blog link visible in mobile menu
+      await expect(mobileNav.getByRole('link', { name: 'Blog' })).toBeVisible({ timeout: 5_000 });
       // T57: tap Blog in mobile nav → SP1
-      await page.locator('header div.md\\:hidden.border-t').getByRole('link', { name: 'Blog' }).click();
+      await mobileNav.getByRole('link', { name: 'Blog' }).click();
+      // Rule 6: Assert mobile menu is closed after navigation
+      await expect(mobileNav).not.toBeVisible({ timeout: 5_000 });
       await expect(page).toHaveURL(/\/blog$/, { timeout: 10_000 });
+      await expect(page.getByTestId('blog-page')).toBeVisible({ timeout: 10_000 });
       // T65: click post card → SP2
       const postCard = page.locator('[data-testid="post-card"]').first();
       await expect(postCard).toBeVisible({ timeout: 10_000 });
@@ -259,6 +328,10 @@ test.describe('TPC Anonymous', () => {
       // T73: login-to-comment link visible
       const loginPrompt = page.getByTestId('comment-login-link');
       await expect(loginPrompt).toBeVisible({ timeout: 10_000 });
+      // Rule 7: Click login prompt → redirects to login with GitHub button
+      await loginPrompt.click();
+      await expect(page).toHaveURL(/\/login$/, { timeout: 10_000 });
+      await expect(page.getByTestId('github-login-btn')).toBeVisible({ timeout: 10_000 });
     } finally {
       await ctx.close();
     }
@@ -272,13 +345,21 @@ test.describe('TPC Anonymous', () => {
     try {
       await page.setViewportSize({ width: 375, height: 812 });
       await page.goto('/');
+      await expect(page).toHaveURL(/\/$/, { timeout: 15_000 });
       await expect(page.locator('header')).toBeVisible({ timeout: 15_000 });
       // T54: open mobile menu
-      await page.locator('header button.md\\:hidden').click();
-      await expect(page.locator('header div.md\\:hidden.border-t')).toBeVisible({ timeout: 5_000 });
+      const hamburger = page.locator('header button.md\\:hidden');
+      await hamburger.click();
+      const mobileNav = page.locator('header div.md\\:hidden.border-t');
+      await expect(mobileNav).toBeVisible({ timeout: 5_000 });
+      // Rule 6: Assert Portfolio link visible in mobile menu
+      await expect(mobileNav.getByRole('link', { name: 'Portfolio' })).toBeVisible({ timeout: 5_000 });
       // T58: tap Portfolio → SP3
-      await page.locator('header div.md\\:hidden.border-t').getByRole('link', { name: 'Portfolio' }).click();
+      await mobileNav.getByRole('link', { name: 'Portfolio' }).click();
+      // Rule 6: Assert mobile menu closed after navigation
+      await expect(mobileNav).not.toBeVisible({ timeout: 5_000 });
       await expect(page).toHaveURL(/\/portfolio$/, { timeout: 10_000 });
+      await expect(page.getByRole('heading', { name: 'Portfolio' })).toBeVisible({ timeout: 10_000 });
     } finally {
       await ctx.close();
     }
@@ -292,13 +373,21 @@ test.describe('TPC Anonymous', () => {
     try {
       await page.setViewportSize({ width: 375, height: 812 });
       await page.goto('/');
+      await expect(page).toHaveURL(/\/$/, { timeout: 15_000 });
       await expect(page.locator('header')).toBeVisible({ timeout: 15_000 });
       // T54: open mobile menu
-      await page.locator('header button.md\\:hidden').click();
-      await expect(page.locator('header div.md\\:hidden.border-t')).toBeVisible({ timeout: 5_000 });
+      const hamburger = page.locator('header button.md\\:hidden');
+      await hamburger.click();
+      const mobileNav = page.locator('header div.md\\:hidden.border-t');
+      await expect(mobileNav).toBeVisible({ timeout: 5_000 });
+      // Rule 6: Assert Resume link visible in mobile menu
+      await expect(mobileNav.getByRole('link', { name: 'Resume' })).toBeVisible({ timeout: 5_000 });
       // T59: tap Resume → SP5
-      await page.locator('header div.md\\:hidden.border-t').getByRole('link', { name: 'Resume' }).click();
+      await mobileNav.getByRole('link', { name: 'Resume' }).click();
+      // Rule 6: Assert mobile menu closed after navigation
+      await expect(mobileNav).not.toBeVisible({ timeout: 5_000 });
       await expect(page).toHaveURL(/\/resume$/, { timeout: 10_000 });
+      await expect(page.getByRole('heading', { name: 'Resume', exact: true })).toBeVisible({ timeout: 10_000 });
     } finally {
       await ctx.close();
     }
@@ -311,14 +400,19 @@ test.describe('TPC Anonymous', () => {
     try {
       await page.setViewportSize({ width: 375, height: 812 });
       await page.goto('/');
+      await expect(page).toHaveURL(/\/$/, { timeout: 15_000 });
       await expect(page.locator('header')).toBeVisible({ timeout: 15_000 });
       // T54: open mobile menu
-      await page.locator('header button.md\\:hidden').click();
-      await expect(page.locator('header div.md\\:hidden.border-t')).toBeVisible({ timeout: 5_000 });
+      const hamburger = page.locator('header button.md\\:hidden');
+      await hamburger.click();
+      const mobileNav = page.locator('header div.md\\:hidden.border-t');
+      await expect(mobileNav).toBeVisible({ timeout: 5_000 });
+      // Rule 6: Assert Login link visible in mobile menu
+      await expect(mobileNav.getByRole('link', { name: 'Login' })).toBeVisible({ timeout: 5_000 });
       // T60: tap Login → SP6
-      await page.locator('header div.md\\:hidden.border-t').getByRole('link', { name: 'Login' }).click();
+      await mobileNav.getByRole('link', { name: 'Login' }).click();
       await expect(page).toHaveURL(/\/login$/, { timeout: 10_000 });
-      // T6: GitHub OAuth button visible (T44: OAuth denied — verified by button presence)
+      // Rule 7: Assert login page shows GitHub OAuth button
       const githubBtn = page.getByTestId('github-login-btn');
       await expect(githubBtn).toBeVisible({ timeout: 10_000 });
       // T1: /login page mounted, no session → stays on login
@@ -335,7 +429,9 @@ test.describe('TPC Anonymous', () => {
     try {
       // T51: click Login btn → SP6
       await page.goto('/');
+      await expect(page).toHaveURL(/\/$/, { timeout: 15_000 });
       await expect(page.getByTestId('login-btn')).toBeVisible({ timeout: 15_000 });
+      // Rule 7: Click login → assert redirect to /login with GitHub button
       await page.getByTestId('login-btn').click();
       await expect(page).toHaveURL(/\/login$/, { timeout: 10_000 });
       // T6: GitHub button present → initiates OAuth (T43)
@@ -343,6 +439,8 @@ test.describe('TPC Anonymous', () => {
       await expect(githubBtn).toBeVisible({ timeout: 10_000 });
       // Verify the button triggers GitHub OAuth via onClick (renders as <button>, not <a>)
       await expect(githubBtn).toHaveText(/github/i);
+      // Assert we remain on login page (no session, no redirect away)
+      await expect(page).toHaveURL(/\/login$/);
     } finally {
       await context.close();
     }
@@ -360,9 +458,10 @@ test.describe('TPC Anonymous', () => {
         maxRedirects: 0,
       });
       expect([403, 401, 400, 404, 429]).toContain(res.status());
-      // T2: public page still accessible
+      // T2: public page still accessible after failed API call
       await page.goto('/blog');
       await expect(page).toHaveURL(/\/blog$/, { timeout: 10_000 });
+      await expect(page.getByTestId('blog-page')).toBeVisible({ timeout: 10_000 });
     } finally {
       await context.close();
     }
@@ -375,11 +474,14 @@ test.describe('TPC Anonymous', () => {
       // POST /auth/logout as anonymous → expect 401 or similar (already logged out)
       const res = await context.request.post('/api/auth/logout', { maxRedirects: 0 });
       expect([400, 401, 403, 404, 200]).toContain(res.status());
-      // T2: public browsing still works
+      // T2: public browsing still works after failed logout
       await page.goto('/');
+      await expect(page).toHaveURL(/\/$/, { timeout: 15_000 });
       await expect(page.locator('header')).toBeVisible({ timeout: 15_000 });
+      // Rule 1: Navigate to blog and verify page loaded with container
       await page.locator('header').getByRole('link', { name: 'Blog' }).click();
       await expect(page).toHaveURL(/\/blog$/, { timeout: 10_000 });
+      await expect(page.getByTestId('blog-page')).toBeVisible({ timeout: 10_000 });
     } finally {
       await context.close();
     }
@@ -396,9 +498,10 @@ test.describe('TPC Anonymous', () => {
         maxRedirects: 0,
       });
       expect([401, 403]).toContain(res.status());
-      // T2: public page still accessible
+      // T2: public page still accessible after failed auth check
       await page.goto('/resume');
       await expect(page).toHaveURL(/\/resume$/, { timeout: 10_000 });
+      await expect(page.getByRole('heading', { name: 'Resume', exact: true })).toBeVisible({ timeout: 10_000 });
     } finally {
       await context.close();
     }
@@ -412,16 +515,24 @@ test.describe('TPC Anonymous', () => {
     try {
       await page.setViewportSize({ width: 375, height: 812 });
       await page.goto('/blog');
+      await expect(page).toHaveURL(/\/blog$/, { timeout: 15_000 });
       await expect(page.locator('header')).toBeVisible({ timeout: 15_000 });
       // T54: open mobile menu
-      await page.locator('header button.md\\:hidden').click();
-      await expect(page.locator('header div.md\\:hidden.border-t')).toBeVisible({ timeout: 5_000 });
+      const hamburger = page.locator('header button.md\\:hidden');
+      await hamburger.click();
+      const mobileNav = page.locator('header div.md\\:hidden.border-t');
+      await expect(mobileNav).toBeVisible({ timeout: 5_000 });
+      // Rule 6: Assert Home link visible in mobile menu
+      await expect(mobileNav.getByRole('link', { name: 'Home' })).toBeVisible({ timeout: 5_000 });
       // T56: tap Home in mobile nav → SP0
-      await page.locator('header div.md\\:hidden.border-t').getByRole('link', { name: 'Home' }).click();
+      await mobileNav.getByRole('link', { name: 'Home' }).click();
+      // Rule 6: Assert mobile menu closed after navigation
+      await expect(mobileNav).not.toBeVisible({ timeout: 5_000 });
       await expect(page).toHaveURL(/\/$/, { timeout: 10_000 });
       // T62: click Blog CTA button on home → SP1
       await page.getByRole('link', { name: 'Read Blog' }).click();
       await expect(page).toHaveURL(/\/blog$/, { timeout: 10_000 });
+      await expect(page.getByTestId('blog-page')).toBeVisible({ timeout: 10_000 });
       // T65: click post card → SP2
       const postCard = page.locator('[data-testid="post-card"]').first();
       await expect(postCard).toBeVisible({ timeout: 10_000 });
@@ -430,13 +541,9 @@ test.describe('TPC Anonymous', () => {
       // T71: back to blog
       await page.getByRole('link', { name: /back to blog/i }).click();
       await expect(page).toHaveURL(/\/blog$/, { timeout: 10_000 });
+      await expect(page.getByTestId('blog-page')).toBeVisible({ timeout: 10_000 });
     } finally {
       await ctx.close();
     }
   });
 });
-
-
-
-
-

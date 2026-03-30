@@ -94,8 +94,8 @@ export function BlogPost() {
       setCommentText('');
       fetchComments();
       toast({
-        title: 'Success',
-        description: 'Comment added successfully!',
+        title: 'Comment Submitted',
+        description: 'Your comment is pending review and will appear once approved.',
       });
     } catch (error) {
       toast({

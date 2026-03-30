@@ -96,9 +96,9 @@ export function AdminPosts() {
                     <div className="flex items-center gap-2 mb-2">
                       <CardTitle className="text-xl" data-testid="post-title">{post.title}</CardTitle>
                       {post.status === 'published' ? (
-                        <Badge variant="default" data-testid="post-status">Published</Badge>
+                        <Badge variant="default" data-testid={`post-status-${post.id}`}>Published</Badge>
                       ) : (
-                        <Badge variant="secondary" data-testid="post-status">Draft</Badge>
+                        <Badge variant="secondary" data-testid={`post-status-${post.id}`}>Draft</Badge>
                       )}
                     </div>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">

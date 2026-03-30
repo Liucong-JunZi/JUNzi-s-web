@@ -282,7 +282,7 @@ export function PostEditor() {
                     type="file"
                     accept="image/*"
                     onChange={handleImageUpload}
-                    className="hidden"
+                    className="sr-only"
                     id="cover-image"
                     data-testid="cover-image-upload"
                   />
