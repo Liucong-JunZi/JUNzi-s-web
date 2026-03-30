@@ -19,8 +19,8 @@ export async function extractLikeCount(likeBtn: Locator): Promise<number> {
  * - Heart SVG has fill-red-500 class
  */
 export async function assertLikedState(likeBtn: Locator, expectedCount: number): Promise<void> {
+  await expect(likeBtn).toContainText('Liked');   // retry-capable
   const text = await likeBtn.textContent();
-  expect(text).toContain('Liked');
   const count = parseInt(text!.match(/\d+/)![0], 10);
   expect(count).toBe(expectedCount);
   // Heart icon (SVG inside button) should have fill
@@ -35,9 +35,9 @@ export async function assertLikedState(likeBtn: Locator, expectedCount: number):
  * - Heart SVG does NOT have fill-red-500 class
  */
 export async function assertUnlikedState(likeBtn: Locator, expectedCount: number): Promise<void> {
+  await expect(likeBtn).not.toContainText('Liked');  // retry-capable
+  await expect(likeBtn).toContainText('Like');
   const text = await likeBtn.textContent();
-  expect(text).toContain('Like');
-  expect(text).not.toContain('Liked');
   const count = parseInt(text!.match(/\d+/)![0], 10);
   expect(count).toBe(expectedCount);
   // Heart icon should NOT have fill
@@ -48,12 +48,11 @@ export async function assertUnlikedState(likeBtn: Locator, expectedCount: number
 /**
  * Capture the full like state as a snapshot.
  */
-export async function captureLikeState(page: Page): Promise<{
+export async function captureLikeState(likeBtn: Locator): Promise<{
   liked: boolean;
   count: number;
   btnText: string;
 }> {
-  const likeBtn = page.getByTestId('like-btn');
   const btnText = (await likeBtn.textContent()) ?? '';
   const count = parseInt(btnText.match(/\d+/)![0], 10);
   const liked = btnText.startsWith('Liked');
