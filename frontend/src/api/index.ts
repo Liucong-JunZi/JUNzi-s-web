@@ -222,7 +222,7 @@ export const postsAPI = {
     await api.delete(`/admin/posts/${id}`);
   },
 
-  like: async (id: number): Promise<{ like_count: number }> => {
+  like: async (id: number): Promise<{ like_count: number; liked: boolean }> => {
     const response = await api.post(`/posts/${id}/like`);
     return response.data;
   },
