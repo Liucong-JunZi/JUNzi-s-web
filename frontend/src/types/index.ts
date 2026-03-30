@@ -22,6 +22,7 @@ export interface Post {
   status: 'draft' | 'published';
   view_count: number;
   like_count: number;
+  liked?: boolean;
   author_id?: number;
   category_id?: number;
 }

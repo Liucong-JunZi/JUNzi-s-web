@@ -20,6 +20,7 @@ export function BlogPost() {
   const [commentPage, setCommentPage] = useState(1);
   const [commentTotal, setCommentTotal] = useState(0);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [liked, setLiked] = useState(false);
   const { isAuthenticated } = useAuthStore();
   const { toast } = useToast();
 
@@ -35,6 +36,7 @@ export function BlogPost() {
     try {
       const data = await postsAPI.getBySlug(slug!);
       setPost(data);
+      setLiked(data.liked || false);
     } catch (error) {
       console.error('Failed to fetch post:', error);
     } finally {
@@ -69,17 +71,35 @@ export function BlogPost() {
 
   const handleLike = async () => {
     if (!post) return;
+    if (!isAuthenticated) {
+      toast({
+        title: 'Login Required',
+        description: 'Please login to like this post',
+        variant: 'destructive',
+      });
+      return;
+    }
+    // Optimistic update
+    const wasLiked = liked;
+    const prevCount = post.like_count;
+    setLiked(!wasLiked);
+    setPost({ ...post, like_count: wasLiked ? prevCount - 1 : prevCount + 1 });
+
     try {
       const result = await postsAPI.like(post.id);
+      setLiked(result.liked);
       setPost({ ...post, like_count: result.like_count });
       toast({
-        title: 'Success',
-        description: 'You liked this post!',
+        title: result.liked ? 'Liked!' : 'Unliked',
+        description: result.liked ? 'You liked this post!' : 'You unliked this post',
       });
     } catch (error) {
+      // Revert optimistic update
+      setLiked(wasLiked);
+      setPost({ ...post, like_count: prevCount });
       toast({
         title: 'Error',
-        description: 'Failed to like post',
+        description: 'Failed to update like',
         variant: 'destructive',
       });
     }
@@ -192,9 +212,9 @@ export function BlogPost() {
 
         {/* Actions */}
         <div className="flex items-center gap-4 py-4 border-t">
-          <Button variant="outline" onClick={handleLike} data-testid="like-btn">
-            <Heart className="mr-2 h-4 w-4" />
-            Like ({post.like_count})
+          <Button variant={liked ? "default" : "outline"} onClick={handleLike} data-testid="like-btn">
+            <Heart className={`mr-2 h-4 w-4 ${liked ? "fill-red-500 text-red-500" : ""}`} />
+            {liked ? 'Liked' : 'Like'} ({post.like_count})
           </Button>
           <div className="flex items-center text-muted-foreground">
             <MessageCircle className="mr-2 h-4 w-4" />
