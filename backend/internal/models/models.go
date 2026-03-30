@@ -8,7 +8,7 @@ import (
 
 type User struct {
 	ID            uint           `json:"id" gorm:"primaryKey"`
-	GitHubID      string         `json:"github_id" gorm:"column:github_id;uniqueIndex"`
+	GitHubID      string         `json:"github_id" gorm:"column:github_id;type:varchar(255);uniqueIndex"`
 	Username      string         `json:"username"`
 	Email         string         `json:"email"`
 	AvatarURL     string         `json:"avatar_url" gorm:"column:avatar_url"`
@@ -22,7 +22,7 @@ type User struct {
 type Post struct {
 	ID          uint           `json:"id" gorm:"primaryKey"`
 	Title       string         `json:"title" gorm:"size:200"`
-	Slug        string         `json:"slug" gorm:"uniqueIndex"`
+	Slug        string         `json:"slug" gorm:"size:200;uniqueIndex"`
 	Content     string         `json:"content" gorm:"type:text"`
 	Summary     string         `json:"summary" gorm:"size:500"`
 	CoverImage  string         `json:"cover_image"`
@@ -42,7 +42,7 @@ type Post struct {
 type Category struct {
 	ID        uint           `json:"id" gorm:"primaryKey"`
 	Name      string         `json:"name" gorm:"size:50;uniqueIndex"`
-	Slug      string         `json:"slug" gorm:"uniqueIndex"`
+	Slug      string         `json:"slug" gorm:"size:50;uniqueIndex"`
 	Posts     []Post         `json:"posts" gorm:"foreignKey:CategoryID"`
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
@@ -52,7 +52,7 @@ type Category struct {
 type Tag struct {
 	ID        uint           `json:"id" gorm:"primaryKey"`
 	Name      string         `json:"name" gorm:"size:50;uniqueIndex"`
-	Slug      string         `json:"slug" gorm:"uniqueIndex"`
+	Slug      string         `json:"slug" gorm:"size:50;uniqueIndex"`
 	Posts     []Post         `json:"posts" gorm:"many2many:post_tags;"`
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
@@ -107,7 +107,7 @@ type Comment struct {
 
 type Setting struct {
 	ID        uint      `json:"id" gorm:"primaryKey"`
-	Key       string    `json:"key" gorm:"uniqueIndex"`
+	Key       string    `json:"key" gorm:"size:255;uniqueIndex"`
 	Value     string    `json:"value" gorm:"type:text"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
