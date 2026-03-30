@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import '../i18n';
 import { resumeAPI } from '../api';
 import type { ResumeItem } from '../types';
 import { SafeMarkdown } from '../components/SafeMarkdown';
@@ -7,6 +9,7 @@ import { Badge } from '../components/ui/badge';
 import { Download, Briefcase, GraduationCap, FolderKanban, MapPin } from 'lucide-react';
 
 export function Resume() {
+  const { t } = useTranslation();
   const [resumeItems, setResumeItems] = useState<ResumeItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -48,12 +51,7 @@ export function Resume() {
   };
 
   const getTypeLabel = (type: string) => {
-    const labels: Record<string, string> = {
-      work: 'Work Experience',
-      education: 'Education',
-      project: 'Project',
-    };
-    return labels[type] || type;
+    return t(`resume.${type === 'work' ? 'workExperience' : type}`) || type;
   };
 
   const getTypeColor = (type: string) => {
@@ -105,7 +103,7 @@ export function Resume() {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-12">
-        <div className="text-center">Loading...</div>
+        <div className="text-center">{t('common.loading')}</div>
       </div>
     );
   }
@@ -115,15 +113,15 @@ export function Resume() {
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold mb-4">Resume</h1>
+          <h1 className="text-4xl font-bold mb-4">{t('resume.title')}</h1>
           <p className="text-muted-foreground">
-            Professional experience, education, and projects.
+            {t('resume.description')}
           </p>
         </div>
         {resumeItems.length > 0 && (
           <Button onClick={handleDownload} data-testid="resume-download-btn">
             <Download className="mr-2 h-4 w-4" />
-            Download
+            {t('resume.download')}
           </Button>
         )}
       </div>
@@ -157,7 +155,7 @@ export function Resume() {
                         </div>
                         <Badge variant="outline">
                           {formatDate(item.start_date)}
-                          {item.end_date ? ` - ${formatDate(item.end_date)}` : ' - Present'}
+                          {item.end_date ? ` - ${formatDate(item.end_date)}` : ` - ${t('common.present')}`}
                         </Badge>
                       </div>
 
@@ -182,7 +180,7 @@ export function Resume() {
       ) : (
         <div className="text-center py-12">
           <Briefcase className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-          <p className="text-muted-foreground">No resume content available yet.</p>
+          <p className="text-muted-foreground">{t('resume.noResumeContent')}</p>
         </div>
       )}
     </div>

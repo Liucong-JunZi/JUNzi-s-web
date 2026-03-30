@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import '../i18n';
 import { postsAPI } from '../api';
 import type { Post } from '../types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
@@ -9,6 +11,7 @@ import { Button } from '../components/ui/button';
 import { Search, Calendar } from 'lucide-react';
 
 export function Blog() {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,9 +64,9 @@ export function Blog() {
     <div className="container mx-auto px-4 py-12" data-testid="blog-page">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-4">Blog</h1>
+        <h1 className="text-4xl font-bold mb-4">{t('blog.title')}</h1>
         <p className="text-muted-foreground">
-          Thoughts, tutorials, and insights on software development and technology.
+          {t('blog.description')}
         </p>
       </div>
 
@@ -74,14 +77,14 @@ export function Blog() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search articles..."
+              placeholder={t('blog.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
               data-testid="blog-search-input"
             />
           </div>
-          <Button type="submit" data-testid="blog-search-btn">Search</Button>
+          <Button type="submit" data-testid="blog-search-btn">{t('blog.searchBtn')}</Button>
         </form>
         {tag && (
           <Button
@@ -92,17 +95,17 @@ export function Blog() {
             }}
             data-testid="clear-filter-btn"
           >
-            Clear filter: {tag}
+            {t('blog.clearFilter')}: {tag}
           </Button>
         )}
       </div>
 
       {/* Posts Grid */}
       {loading ? (
-        <div className="text-center py-12">Loading...</div>
+        <div className="text-center py-12">{t('common.loading')}</div>
       ) : posts.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">No posts found.</p>
+          <p className="text-muted-foreground">{t('blog.noPostsFound')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -136,8 +139,8 @@ export function Blog() {
                       <span>{formatDate(post.created_at)}</span>
                     </div>
                     <div className="flex items-center gap-4">
-                      <span>{post.view_count} views</span>
-                      <span>{post.like_count} likes</span>
+                      <span>{post.view_count} {t('common.views')}</span>
+                      <span>{post.like_count} {t('common.likes')}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -156,10 +159,10 @@ export function Blog() {
             onClick={() => setPage(page - 1)}
             data-testid="pagination-prev"
           >
-            Previous
+            {t('common.previous')}
           </Button>
           <div className="flex items-center px-4">
-            Page {page} of {totalPages}
+            {t('blog.pageOf', { page, total: totalPages })}
           </div>
           <Button
             variant="outline"
@@ -167,7 +170,7 @@ export function Blog() {
             onClick={() => setPage(page + 1)}
             data-testid="pagination-next"
           >
-            Next
+            {t('common.next')}
           </Button>
         </div>
       )}

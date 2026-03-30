@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import '../i18n';
 import { projectsAPI } from '../api';
 import type { Project } from '../types';
 import { Badge } from '../components/ui/badge';
@@ -16,6 +18,7 @@ function GithubIcon({ className }: { className?: string }) {
 }
 
 export function PortfolioDetail() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
@@ -58,14 +61,7 @@ export function PortfolioDetail() {
   };
 
   const getStatusLabel = (status: string) => {
-    const statusMap: Record<string, string> = {
-      active: 'Active',
-      planning: 'Planning',
-      in_progress: 'In Progress',
-      completed: 'Completed',
-      archived: 'Archived',
-    };
-    return statusMap[status] || status;
+    return t(`portfolio.${status}`) || status;
   };
 
   const getStatusColor = (status: string) => {
@@ -82,7 +78,7 @@ export function PortfolioDetail() {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-12">
-        <div className="text-center">Loading...</div>
+        <div className="text-center">{t('common.loading')}</div>
       </div>
     );
   }
@@ -91,11 +87,11 @@ export function PortfolioDetail() {
     return (
       <div className="container mx-auto px-4 py-12">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Project not found</h1>
+          <h1 className="text-2xl font-bold mb-4">{t('portfolio.projectNotFound')}</h1>
           <Button asChild>
             <Link to="/portfolio">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Portfolio
+              {t('portfolio.backToPortfolio')}
             </Link>
           </Button>
         </div>
@@ -109,7 +105,7 @@ export function PortfolioDetail() {
       <Button variant="ghost" asChild className="mb-6">
         <Link to="/portfolio" data-testid="back-to-portfolio-btn">
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Portfolio
+          {t('portfolio.backToPortfolio')}
         </Link>
       </Button>
 
@@ -129,7 +125,7 @@ export function PortfolioDetail() {
               <Button asChild>
                 <a href={getGithubUrl(project)!} target="_blank" rel="noopener noreferrer" data-testid="project-code-btn">
                   <GithubIcon className="mr-2 h-4 w-4" />
-                  View Code
+                  {t('portfolio.viewCode')}
                 </a>
               </Button>
             )}
@@ -137,7 +133,7 @@ export function PortfolioDetail() {
               <Button variant="outline" asChild>
                 <a href={getDemoUrl(project)!} target="_blank" rel="noopener noreferrer" data-testid="project-demo-btn">
                   <ExternalLink className="mr-2 h-4 w-4" />
-                  Live Demo
+                  {t('portfolio.liveDemo')}
                 </a>
               </Button>
             )}
