@@ -1,15 +1,81 @@
 {
   "name": "Anonymous User Tests",
-  "description": "TPC test suite for anonymous",
+  "description": "TPC test suite for S_ANON",
   "testCases": [
     {
-      "id": "TC_login_login",
-      "name": "User Login → User Login",
-      "description": "Test User authenticates via GitHub OAuth followed by User authenticates via GitHub OAuth",
-      "actor": "anonymous",
+      "id": "TC_T_NAV_T_LOGIN",
+      "name": "Navigate → Login",
+      "description": "Test Navigate to a page followed by User logs in via GitHub OAuth",
+      "actor": "S_ANON",
       "initialState": {
-        "actor": "anonymous",
-        "page": "home",
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "nav"
+        },
+        {
+          "type": "login"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "nav",
+        "login",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_T_LOGIN_T_NAV",
+      "name": "Login → Navigate",
+      "description": "Test User logs in via GitHub OAuth followed by Navigate to a page",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "login"
+        },
+        {
+          "type": "nav"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "login",
+        "nav",
+        "anonymous"
+      ]
+    },
+    {
+      "id": "TC_T_LOGIN_T_LOGIN",
+      "name": "Login → Login",
+      "description": "Test User logs in via GitHub OAuth followed by User logs in via GitHub OAuth",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
         "isAuthenticated": false
       },
       "transitions": [
@@ -24,7 +90,7 @@
         {
           "type": "state_invariant",
           "target": "header",
-          "expected": "anonymous"
+          "expected": "S_ANON"
         }
       ],
       "priority": "high",
@@ -35,13 +101,13 @@
       ]
     },
     {
-      "id": "TC_login_view_post",
-      "name": "User Login → View Post",
-      "description": "Test User authenticates via GitHub OAuth followed by Navigate to and view a blog post",
-      "actor": "anonymous",
+      "id": "TC_T_LOGIN_T_LIKE_DENIED",
+      "name": "Login → Like Denied",
+      "description": "Test User logs in via GitHub OAuth followed by Anonymous user cannot like",
+      "actor": "S_ANON",
       "initialState": {
-        "actor": "anonymous",
-        "page": "home",
+        "actor": "S_ANON",
+        "page": "P_HOME",
         "isAuthenticated": false
       },
       "transitions": [
@@ -49,31 +115,31 @@
           "type": "login"
         },
         {
-          "type": "view_post"
+          "type": "like_denied"
         }
       ],
       "assertions": [
         {
           "type": "state_invariant",
           "target": "header",
-          "expected": "anonymous"
+          "expected": "S_ANON"
         }
       ],
       "priority": "high",
       "tags": [
         "login",
-        "view_post",
+        "like_denied",
         "anonymous"
       ]
     },
     {
-      "id": "TC_login_view_profile",
-      "name": "User Login → View Profile",
-      "description": "Test User authenticates via GitHub OAuth followed by View user profile",
-      "actor": "anonymous",
+      "id": "TC_T_LOGIN_T_COMMENT_DENIED",
+      "name": "Login → Comment Denied",
+      "description": "Test User logs in via GitHub OAuth followed by Anonymous user cannot comment",
+      "actor": "S_ANON",
       "initialState": {
-        "actor": "anonymous",
-        "page": "home",
+        "actor": "S_ANON",
+        "page": "P_HOME",
         "isAuthenticated": false
       },
       "transitions": [
@@ -81,31 +147,31 @@
           "type": "login"
         },
         {
-          "type": "view_profile"
+          "type": "comment_denied"
         }
       ],
       "assertions": [
         {
           "type": "state_invariant",
           "target": "header",
-          "expected": "anonymous"
+          "expected": "S_ANON"
         }
       ],
       "priority": "high",
       "tags": [
         "login",
-        "view_profile",
+        "comment_denied",
         "anonymous"
       ]
     },
     {
-      "id": "TC_login_navigate",
-      "name": "User Login → Navigate",
-      "description": "Test User authenticates via GitHub OAuth followed by Navigate between pages",
-      "actor": "anonymous",
+      "id": "TC_T_LOGIN_T_LOAD_MORE",
+      "name": "Login → Load More Comments",
+      "description": "Test User logs in via GitHub OAuth followed by Load next page of comments",
+      "actor": "S_ANON",
       "initialState": {
-        "actor": "anonymous",
-        "page": "home",
+        "actor": "S_ANON",
+        "page": "P_HOME",
         "isAuthenticated": false
       },
       "transitions": [
@@ -113,36 +179,132 @@
           "type": "login"
         },
         {
-          "type": "navigate"
+          "type": "load_more_comments"
         }
       ],
       "assertions": [
         {
           "type": "state_invariant",
           "target": "header",
-          "expected": "anonymous"
+          "expected": "S_ANON"
         }
       ],
       "priority": "high",
       "tags": [
         "login",
-        "navigate",
+        "load_more_comments",
         "anonymous"
       ]
     },
     {
-      "id": "TC_view_post_login",
-      "name": "View Post → User Login",
-      "description": "Test Navigate to and view a blog post followed by User authenticates via GitHub OAuth",
-      "actor": "anonymous",
+      "id": "TC_T_LOGIN_T_403_ERROR",
+      "name": "Login → 403 Forbidden",
+      "description": "Test User logs in via GitHub OAuth followed by Access denied to resource",
+      "actor": "S_ANON",
       "initialState": {
-        "actor": "anonymous",
-        "page": "home",
+        "actor": "S_ANON",
+        "page": "P_HOME",
         "isAuthenticated": false
       },
       "transitions": [
         {
-          "type": "view_post"
+          "type": "login"
+        },
+        {
+          "type": "403_error"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "login",
+        "403_error",
+        "anonymous"
+      ]
+    },
+    {
+      "id": "TC_T_LOGIN_T_404_ERROR",
+      "name": "Login → 404 Not Found",
+      "description": "Test User logs in via GitHub OAuth followed by Resource not found",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "login"
+        },
+        {
+          "type": "404_error"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "login",
+        "404_error",
+        "anonymous"
+      ]
+    },
+    {
+      "id": "TC_T_LOGIN_T_RELOAD",
+      "name": "Login → Page Reload",
+      "description": "Test User logs in via GitHub OAuth followed by Reload current page",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "login"
+        },
+        {
+          "type": "reload"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "login",
+        "reload",
+        "anonymous"
+      ]
+    },
+    {
+      "id": "TC_T_LIKE_DENIED_T_LOGIN",
+      "name": "Like Denied → Login",
+      "description": "Test Anonymous user cannot like followed by User logs in via GitHub OAuth",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "like_denied"
         },
         {
           "type": "login"
@@ -152,31 +314,29 @@
         {
           "type": "state_invariant",
           "target": "header",
-          "expected": "anonymous"
+          "expected": "S_ANON"
         }
       ],
       "priority": "high",
       "tags": [
-        "view_post",
+        "like_denied",
         "login",
-        "anonymous",
-        "user",
-        "admin"
+        "anonymous"
       ]
     },
     {
-      "id": "TC_view_profile_login",
-      "name": "View Profile → User Login",
-      "description": "Test View user profile followed by User authenticates via GitHub OAuth",
-      "actor": "anonymous",
+      "id": "TC_T_COMMENT_DENIED_T_LOGIN",
+      "name": "Comment Denied → Login",
+      "description": "Test Anonymous user cannot comment followed by User logs in via GitHub OAuth",
+      "actor": "S_ANON",
       "initialState": {
-        "actor": "anonymous",
-        "page": "home",
+        "actor": "S_ANON",
+        "page": "P_HOME",
         "isAuthenticated": false
       },
       "transitions": [
         {
-          "type": "view_profile"
+          "type": "comment_denied"
         },
         {
           "type": "login"
@@ -186,31 +346,29 @@
         {
           "type": "state_invariant",
           "target": "header",
-          "expected": "anonymous"
+          "expected": "S_ANON"
         }
       ],
       "priority": "high",
       "tags": [
-        "view_profile",
+        "comment_denied",
         "login",
-        "anonymous",
-        "user",
-        "admin"
+        "anonymous"
       ]
     },
     {
-      "id": "TC_navigate_login",
-      "name": "Navigate → User Login",
-      "description": "Test Navigate between pages followed by User authenticates via GitHub OAuth",
-      "actor": "anonymous",
+      "id": "TC_T_LOAD_MORE_T_LOGIN",
+      "name": "Load More Comments → Login",
+      "description": "Test Load next page of comments followed by User logs in via GitHub OAuth",
+      "actor": "S_ANON",
       "initialState": {
-        "actor": "anonymous",
-        "page": "home",
+        "actor": "S_ANON",
+        "page": "P_HOME",
         "isAuthenticated": false
       },
       "transitions": [
         {
-          "type": "navigate"
+          "type": "load_more_comments"
         },
         {
           "type": "login"
@@ -220,12 +378,12 @@
         {
           "type": "state_invariant",
           "target": "header",
-          "expected": "anonymous"
+          "expected": "S_ANON"
         }
       ],
       "priority": "high",
       "tags": [
-        "navigate",
+        "load_more_comments",
         "login",
         "anonymous",
         "user",
@@ -233,306 +391,1732 @@
       ]
     },
     {
-      "id": "TC_view_post_view_post",
-      "name": "View Post → View Post",
-      "description": "Test Navigate to and view a blog post followed by Navigate to and view a blog post",
-      "actor": "anonymous",
+      "id": "TC_T_403_ERROR_T_LOGIN",
+      "name": "403 Forbidden → Login",
+      "description": "Test Access denied to resource followed by User logs in via GitHub OAuth",
+      "actor": "S_ANON",
       "initialState": {
-        "actor": "anonymous",
-        "page": "home",
+        "actor": "S_ANON",
+        "page": "P_HOME",
         "isAuthenticated": false
       },
       "transitions": [
         {
-          "type": "view_post"
+          "type": "403_error"
         },
         {
-          "type": "view_post"
+          "type": "login"
         }
       ],
       "assertions": [
         {
           "type": "state_invariant",
           "target": "header",
-          "expected": "anonymous"
+          "expected": "S_ANON"
         }
       ],
-      "priority": "low",
+      "priority": "high",
       "tags": [
-        "view_post",
-        "view_post",
+        "403_error",
+        "login",
         "anonymous",
-        "user",
-        "admin"
+        "user"
       ]
     },
     {
-      "id": "TC_view_post_view_profile",
-      "name": "View Post → View Profile",
-      "description": "Test Navigate to and view a blog post followed by View user profile",
-      "actor": "anonymous",
+      "id": "TC_T_404_ERROR_T_LOGIN",
+      "name": "404 Not Found → Login",
+      "description": "Test Resource not found followed by User logs in via GitHub OAuth",
+      "actor": "S_ANON",
       "initialState": {
-        "actor": "anonymous",
-        "page": "home",
+        "actor": "S_ANON",
+        "page": "P_HOME",
         "isAuthenticated": false
       },
       "transitions": [
         {
-          "type": "view_post"
+          "type": "404_error"
         },
         {
-          "type": "view_profile"
+          "type": "login"
         }
       ],
       "assertions": [
         {
           "type": "state_invariant",
           "target": "header",
-          "expected": "anonymous"
+          "expected": "S_ANON"
         }
       ],
-      "priority": "low",
+      "priority": "high",
       "tags": [
-        "view_post",
-        "view_profile",
+        "404_error",
+        "login",
         "anonymous",
         "user",
         "admin"
       ]
     },
     {
-      "id": "TC_view_post_navigate",
-      "name": "View Post → Navigate",
-      "description": "Test Navigate to and view a blog post followed by Navigate between pages",
-      "actor": "anonymous",
+      "id": "TC_T_RELOAD_T_LOGIN",
+      "name": "Page Reload → Login",
+      "description": "Test Reload current page followed by User logs in via GitHub OAuth",
+      "actor": "S_ANON",
       "initialState": {
-        "actor": "anonymous",
-        "page": "home",
+        "actor": "S_ANON",
+        "page": "P_HOME",
         "isAuthenticated": false
       },
       "transitions": [
         {
-          "type": "view_post"
+          "type": "reload"
         },
         {
-          "type": "navigate"
+          "type": "login"
         }
       ],
       "assertions": [
         {
           "type": "state_invariant",
           "target": "header",
-          "expected": "anonymous"
+          "expected": "S_ANON"
         }
       ],
-      "priority": "low",
+      "priority": "high",
       "tags": [
-        "view_post",
-        "navigate",
+        "reload",
+        "login",
         "anonymous",
         "user",
         "admin"
       ]
     },
     {
-      "id": "TC_view_profile_view_post",
-      "name": "View Profile → View Post",
-      "description": "Test View user profile followed by Navigate to and view a blog post",
-      "actor": "anonymous",
-      "initialState": {
-        "actor": "anonymous",
-        "page": "home",
-        "isAuthenticated": false
-      },
-      "transitions": [
-        {
-          "type": "view_profile"
-        },
-        {
-          "type": "view_post"
-        }
-      ],
-      "assertions": [
-        {
-          "type": "state_invariant",
-          "target": "header",
-          "expected": "anonymous"
-        }
-      ],
-      "priority": "low",
-      "tags": [
-        "view_profile",
-        "view_post",
-        "anonymous",
-        "user",
-        "admin"
-      ]
-    },
-    {
-      "id": "TC_view_profile_view_profile",
-      "name": "View Profile → View Profile",
-      "description": "Test View user profile followed by View user profile",
-      "actor": "anonymous",
-      "initialState": {
-        "actor": "anonymous",
-        "page": "home",
-        "isAuthenticated": false
-      },
-      "transitions": [
-        {
-          "type": "view_profile"
-        },
-        {
-          "type": "view_profile"
-        }
-      ],
-      "assertions": [
-        {
-          "type": "state_invariant",
-          "target": "header",
-          "expected": "anonymous"
-        }
-      ],
-      "priority": "low",
-      "tags": [
-        "view_profile",
-        "view_profile",
-        "anonymous",
-        "user",
-        "admin"
-      ]
-    },
-    {
-      "id": "TC_view_profile_navigate",
-      "name": "View Profile → Navigate",
-      "description": "Test View user profile followed by Navigate between pages",
-      "actor": "anonymous",
-      "initialState": {
-        "actor": "anonymous",
-        "page": "home",
-        "isAuthenticated": false
-      },
-      "transitions": [
-        {
-          "type": "view_profile"
-        },
-        {
-          "type": "navigate"
-        }
-      ],
-      "assertions": [
-        {
-          "type": "state_invariant",
-          "target": "header",
-          "expected": "anonymous"
-        }
-      ],
-      "priority": "low",
-      "tags": [
-        "view_profile",
-        "navigate",
-        "anonymous",
-        "user",
-        "admin"
-      ]
-    },
-    {
-      "id": "TC_navigate_view_post",
-      "name": "Navigate → View Post",
-      "description": "Test Navigate between pages followed by Navigate to and view a blog post",
-      "actor": "anonymous",
-      "initialState": {
-        "actor": "anonymous",
-        "page": "home",
-        "isAuthenticated": false
-      },
-      "transitions": [
-        {
-          "type": "navigate"
-        },
-        {
-          "type": "view_post"
-        }
-      ],
-      "assertions": [
-        {
-          "type": "state_invariant",
-          "target": "header",
-          "expected": "anonymous"
-        }
-      ],
-      "priority": "low",
-      "tags": [
-        "navigate",
-        "view_post",
-        "anonymous",
-        "user",
-        "admin"
-      ]
-    },
-    {
-      "id": "TC_navigate_view_profile",
-      "name": "Navigate → View Profile",
-      "description": "Test Navigate between pages followed by View user profile",
-      "actor": "anonymous",
-      "initialState": {
-        "actor": "anonymous",
-        "page": "home",
-        "isAuthenticated": false
-      },
-      "transitions": [
-        {
-          "type": "navigate"
-        },
-        {
-          "type": "view_profile"
-        }
-      ],
-      "assertions": [
-        {
-          "type": "state_invariant",
-          "target": "header",
-          "expected": "anonymous"
-        }
-      ],
-      "priority": "low",
-      "tags": [
-        "navigate",
-        "view_profile",
-        "anonymous",
-        "user",
-        "admin"
-      ]
-    },
-    {
-      "id": "TC_navigate_navigate",
+      "id": "TC_T_NAV_T_NAV",
       "name": "Navigate → Navigate",
-      "description": "Test Navigate between pages followed by Navigate between pages",
-      "actor": "anonymous",
+      "description": "Test Navigate to a page followed by Navigate to a page",
+      "actor": "S_ANON",
       "initialState": {
-        "actor": "anonymous",
-        "page": "home",
+        "actor": "S_ANON",
+        "page": "P_HOME",
         "isAuthenticated": false
       },
       "transitions": [
         {
-          "type": "navigate"
+          "type": "nav"
         },
         {
-          "type": "navigate"
+          "type": "nav"
         }
       ],
       "assertions": [
         {
           "type": "state_invariant",
           "target": "header",
-          "expected": "anonymous"
+          "expected": "S_ANON"
         }
       ],
       "priority": "low",
       "tags": [
-        "navigate",
-        "navigate",
+        "nav",
+        "nav",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_T_NAV_T_LIKE_DENIED",
+      "name": "Navigate → Like Denied",
+      "description": "Test Navigate to a page followed by Anonymous user cannot like",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "nav"
+        },
+        {
+          "type": "like_denied"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "nav",
+        "like_denied",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_T_NAV_T_COMMENT_DENIED",
+      "name": "Navigate → Comment Denied",
+      "description": "Test Navigate to a page followed by Anonymous user cannot comment",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "nav"
+        },
+        {
+          "type": "comment_denied"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "nav",
+        "comment_denied",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_T_NAV_T_LOAD_MORE",
+      "name": "Navigate → Load More Comments",
+      "description": "Test Navigate to a page followed by Load next page of comments",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "nav"
+        },
+        {
+          "type": "load_more_comments"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "nav",
+        "load_more_comments",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_T_NAV_T_403_ERROR",
+      "name": "Navigate → 403 Forbidden",
+      "description": "Test Navigate to a page followed by Access denied to resource",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "nav"
+        },
+        {
+          "type": "403_error"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "nav",
+        "403_error",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_T_NAV_T_404_ERROR",
+      "name": "Navigate → 404 Not Found",
+      "description": "Test Navigate to a page followed by Resource not found",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "nav"
+        },
+        {
+          "type": "404_error"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "nav",
+        "404_error",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_T_NAV_T_RELOAD",
+      "name": "Navigate → Page Reload",
+      "description": "Test Navigate to a page followed by Reload current page",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "nav"
+        },
+        {
+          "type": "reload"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "nav",
+        "reload",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_T_LIKE_DENIED_T_NAV",
+      "name": "Like Denied → Navigate",
+      "description": "Test Anonymous user cannot like followed by Navigate to a page",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "like_denied"
+        },
+        {
+          "type": "nav"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "like_denied",
+        "nav",
+        "anonymous"
+      ]
+    },
+    {
+      "id": "TC_T_LIKE_DENIED_T_LIKE_DENIED",
+      "name": "Like Denied → Like Denied",
+      "description": "Test Anonymous user cannot like followed by Anonymous user cannot like",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "like_denied"
+        },
+        {
+          "type": "like_denied"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "like_denied",
+        "like_denied",
+        "anonymous"
+      ]
+    },
+    {
+      "id": "TC_T_LIKE_DENIED_T_COMMENT_DENIED",
+      "name": "Like Denied → Comment Denied",
+      "description": "Test Anonymous user cannot like followed by Anonymous user cannot comment",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "like_denied"
+        },
+        {
+          "type": "comment_denied"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "like_denied",
+        "comment_denied",
+        "anonymous"
+      ]
+    },
+    {
+      "id": "TC_T_LIKE_DENIED_T_LOAD_MORE",
+      "name": "Like Denied → Load More Comments",
+      "description": "Test Anonymous user cannot like followed by Load next page of comments",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "like_denied"
+        },
+        {
+          "type": "load_more_comments"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "like_denied",
+        "load_more_comments",
+        "anonymous"
+      ]
+    },
+    {
+      "id": "TC_T_LIKE_DENIED_T_403_ERROR",
+      "name": "Like Denied → 403 Forbidden",
+      "description": "Test Anonymous user cannot like followed by Access denied to resource",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "like_denied"
+        },
+        {
+          "type": "403_error"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "like_denied",
+        "403_error",
+        "anonymous"
+      ]
+    },
+    {
+      "id": "TC_T_LIKE_DENIED_T_404_ERROR",
+      "name": "Like Denied → 404 Not Found",
+      "description": "Test Anonymous user cannot like followed by Resource not found",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "like_denied"
+        },
+        {
+          "type": "404_error"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "like_denied",
+        "404_error",
+        "anonymous"
+      ]
+    },
+    {
+      "id": "TC_T_LIKE_DENIED_T_RELOAD",
+      "name": "Like Denied → Page Reload",
+      "description": "Test Anonymous user cannot like followed by Reload current page",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "like_denied"
+        },
+        {
+          "type": "reload"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "like_denied",
+        "reload",
+        "anonymous"
+      ]
+    },
+    {
+      "id": "TC_T_COMMENT_DENIED_T_NAV",
+      "name": "Comment Denied → Navigate",
+      "description": "Test Anonymous user cannot comment followed by Navigate to a page",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "comment_denied"
+        },
+        {
+          "type": "nav"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "comment_denied",
+        "nav",
+        "anonymous"
+      ]
+    },
+    {
+      "id": "TC_T_COMMENT_DENIED_T_LIKE_DENIED",
+      "name": "Comment Denied → Like Denied",
+      "description": "Test Anonymous user cannot comment followed by Anonymous user cannot like",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "comment_denied"
+        },
+        {
+          "type": "like_denied"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "comment_denied",
+        "like_denied",
+        "anonymous"
+      ]
+    },
+    {
+      "id": "TC_T_COMMENT_DENIED_T_COMMENT_DENIED",
+      "name": "Comment Denied → Comment Denied",
+      "description": "Test Anonymous user cannot comment followed by Anonymous user cannot comment",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "comment_denied"
+        },
+        {
+          "type": "comment_denied"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "comment_denied",
+        "comment_denied",
+        "anonymous"
+      ]
+    },
+    {
+      "id": "TC_T_COMMENT_DENIED_T_LOAD_MORE",
+      "name": "Comment Denied → Load More Comments",
+      "description": "Test Anonymous user cannot comment followed by Load next page of comments",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "comment_denied"
+        },
+        {
+          "type": "load_more_comments"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "comment_denied",
+        "load_more_comments",
+        "anonymous"
+      ]
+    },
+    {
+      "id": "TC_T_COMMENT_DENIED_T_403_ERROR",
+      "name": "Comment Denied → 403 Forbidden",
+      "description": "Test Anonymous user cannot comment followed by Access denied to resource",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "comment_denied"
+        },
+        {
+          "type": "403_error"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "comment_denied",
+        "403_error",
+        "anonymous"
+      ]
+    },
+    {
+      "id": "TC_T_COMMENT_DENIED_T_404_ERROR",
+      "name": "Comment Denied → 404 Not Found",
+      "description": "Test Anonymous user cannot comment followed by Resource not found",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "comment_denied"
+        },
+        {
+          "type": "404_error"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "comment_denied",
+        "404_error",
+        "anonymous"
+      ]
+    },
+    {
+      "id": "TC_T_COMMENT_DENIED_T_RELOAD",
+      "name": "Comment Denied → Page Reload",
+      "description": "Test Anonymous user cannot comment followed by Reload current page",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "comment_denied"
+        },
+        {
+          "type": "reload"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "comment_denied",
+        "reload",
+        "anonymous"
+      ]
+    },
+    {
+      "id": "TC_T_LOAD_MORE_T_NAV",
+      "name": "Load More Comments → Navigate",
+      "description": "Test Load next page of comments followed by Navigate to a page",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "load_more_comments"
+        },
+        {
+          "type": "nav"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "load_more_comments",
+        "nav",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_T_LOAD_MORE_T_LIKE_DENIED",
+      "name": "Load More Comments → Like Denied",
+      "description": "Test Load next page of comments followed by Anonymous user cannot like",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "load_more_comments"
+        },
+        {
+          "type": "like_denied"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "load_more_comments",
+        "like_denied",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_T_LOAD_MORE_T_COMMENT_DENIED",
+      "name": "Load More Comments → Comment Denied",
+      "description": "Test Load next page of comments followed by Anonymous user cannot comment",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "load_more_comments"
+        },
+        {
+          "type": "comment_denied"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "load_more_comments",
+        "comment_denied",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_T_LOAD_MORE_T_LOAD_MORE",
+      "name": "Load More Comments → Load More Comments",
+      "description": "Test Load next page of comments followed by Load next page of comments",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "load_more_comments"
+        },
+        {
+          "type": "load_more_comments"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "load_more_comments",
+        "load_more_comments",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_T_LOAD_MORE_T_403_ERROR",
+      "name": "Load More Comments → 403 Forbidden",
+      "description": "Test Load next page of comments followed by Access denied to resource",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "load_more_comments"
+        },
+        {
+          "type": "403_error"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "load_more_comments",
+        "403_error",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_T_LOAD_MORE_T_404_ERROR",
+      "name": "Load More Comments → 404 Not Found",
+      "description": "Test Load next page of comments followed by Resource not found",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "load_more_comments"
+        },
+        {
+          "type": "404_error"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "load_more_comments",
+        "404_error",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_T_LOAD_MORE_T_RELOAD",
+      "name": "Load More Comments → Page Reload",
+      "description": "Test Load next page of comments followed by Reload current page",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "load_more_comments"
+        },
+        {
+          "type": "reload"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "load_more_comments",
+        "reload",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_T_403_ERROR_T_NAV",
+      "name": "403 Forbidden → Navigate",
+      "description": "Test Access denied to resource followed by Navigate to a page",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "403_error"
+        },
+        {
+          "type": "nav"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "403_error",
+        "nav",
+        "anonymous",
+        "user"
+      ]
+    },
+    {
+      "id": "TC_T_403_ERROR_T_LIKE_DENIED",
+      "name": "403 Forbidden → Like Denied",
+      "description": "Test Access denied to resource followed by Anonymous user cannot like",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "403_error"
+        },
+        {
+          "type": "like_denied"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "403_error",
+        "like_denied",
+        "anonymous",
+        "user"
+      ]
+    },
+    {
+      "id": "TC_T_403_ERROR_T_COMMENT_DENIED",
+      "name": "403 Forbidden → Comment Denied",
+      "description": "Test Access denied to resource followed by Anonymous user cannot comment",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "403_error"
+        },
+        {
+          "type": "comment_denied"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "403_error",
+        "comment_denied",
+        "anonymous",
+        "user"
+      ]
+    },
+    {
+      "id": "TC_T_403_ERROR_T_LOAD_MORE",
+      "name": "403 Forbidden → Load More Comments",
+      "description": "Test Access denied to resource followed by Load next page of comments",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "403_error"
+        },
+        {
+          "type": "load_more_comments"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "403_error",
+        "load_more_comments",
+        "anonymous",
+        "user"
+      ]
+    },
+    {
+      "id": "TC_T_403_ERROR_T_403_ERROR",
+      "name": "403 Forbidden → 403 Forbidden",
+      "description": "Test Access denied to resource followed by Access denied to resource",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "403_error"
+        },
+        {
+          "type": "403_error"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "403_error",
+        "403_error",
+        "anonymous",
+        "user"
+      ]
+    },
+    {
+      "id": "TC_T_403_ERROR_T_404_ERROR",
+      "name": "403 Forbidden → 404 Not Found",
+      "description": "Test Access denied to resource followed by Resource not found",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "403_error"
+        },
+        {
+          "type": "404_error"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "403_error",
+        "404_error",
+        "anonymous",
+        "user"
+      ]
+    },
+    {
+      "id": "TC_T_403_ERROR_T_RELOAD",
+      "name": "403 Forbidden → Page Reload",
+      "description": "Test Access denied to resource followed by Reload current page",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "403_error"
+        },
+        {
+          "type": "reload"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "403_error",
+        "reload",
+        "anonymous",
+        "user"
+      ]
+    },
+    {
+      "id": "TC_T_404_ERROR_T_NAV",
+      "name": "404 Not Found → Navigate",
+      "description": "Test Resource not found followed by Navigate to a page",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "404_error"
+        },
+        {
+          "type": "nav"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "404_error",
+        "nav",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_T_404_ERROR_T_LIKE_DENIED",
+      "name": "404 Not Found → Like Denied",
+      "description": "Test Resource not found followed by Anonymous user cannot like",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "404_error"
+        },
+        {
+          "type": "like_denied"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "404_error",
+        "like_denied",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_T_404_ERROR_T_COMMENT_DENIED",
+      "name": "404 Not Found → Comment Denied",
+      "description": "Test Resource not found followed by Anonymous user cannot comment",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "404_error"
+        },
+        {
+          "type": "comment_denied"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "404_error",
+        "comment_denied",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_T_404_ERROR_T_LOAD_MORE",
+      "name": "404 Not Found → Load More Comments",
+      "description": "Test Resource not found followed by Load next page of comments",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "404_error"
+        },
+        {
+          "type": "load_more_comments"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "404_error",
+        "load_more_comments",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_T_404_ERROR_T_403_ERROR",
+      "name": "404 Not Found → 403 Forbidden",
+      "description": "Test Resource not found followed by Access denied to resource",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "404_error"
+        },
+        {
+          "type": "403_error"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "404_error",
+        "403_error",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_T_404_ERROR_T_404_ERROR",
+      "name": "404 Not Found → 404 Not Found",
+      "description": "Test Resource not found followed by Resource not found",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "404_error"
+        },
+        {
+          "type": "404_error"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "404_error",
+        "404_error",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_T_404_ERROR_T_RELOAD",
+      "name": "404 Not Found → Page Reload",
+      "description": "Test Resource not found followed by Reload current page",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "404_error"
+        },
+        {
+          "type": "reload"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "404_error",
+        "reload",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_T_RELOAD_T_NAV",
+      "name": "Page Reload → Navigate",
+      "description": "Test Reload current page followed by Navigate to a page",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "reload"
+        },
+        {
+          "type": "nav"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "reload",
+        "nav",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_T_RELOAD_T_LIKE_DENIED",
+      "name": "Page Reload → Like Denied",
+      "description": "Test Reload current page followed by Anonymous user cannot like",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "reload"
+        },
+        {
+          "type": "like_denied"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "reload",
+        "like_denied",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_T_RELOAD_T_COMMENT_DENIED",
+      "name": "Page Reload → Comment Denied",
+      "description": "Test Reload current page followed by Anonymous user cannot comment",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "reload"
+        },
+        {
+          "type": "comment_denied"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "reload",
+        "comment_denied",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_T_RELOAD_T_LOAD_MORE",
+      "name": "Page Reload → Load More Comments",
+      "description": "Test Reload current page followed by Load next page of comments",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "reload"
+        },
+        {
+          "type": "load_more_comments"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "reload",
+        "load_more_comments",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_T_RELOAD_T_403_ERROR",
+      "name": "Page Reload → 403 Forbidden",
+      "description": "Test Reload current page followed by Access denied to resource",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "reload"
+        },
+        {
+          "type": "403_error"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "reload",
+        "403_error",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_T_RELOAD_T_404_ERROR",
+      "name": "Page Reload → 404 Not Found",
+      "description": "Test Reload current page followed by Resource not found",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "reload"
+        },
+        {
+          "type": "404_error"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "reload",
+        "404_error",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_T_RELOAD_T_RELOAD",
+      "name": "Page Reload → Page Reload",
+      "description": "Test Reload current page followed by Reload current page",
+      "actor": "S_ANON",
+      "initialState": {
+        "actor": "S_ANON",
+        "page": "P_HOME",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "reload"
+        },
+        {
+          "type": "reload"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "S_ANON"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "reload",
+        "reload",
         "anonymous",
         "user",
         "admin"
@@ -540,8 +2124,8 @@
     }
   ],
   "coverage": {
-    "transitions": 4,
-    "transitionPairs": 16,
+    "transitions": 8,
+    "transitionPairs": 64,
     "states": 0
   }
 }

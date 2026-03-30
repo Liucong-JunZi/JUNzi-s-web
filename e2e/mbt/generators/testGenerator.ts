@@ -78,7 +78,7 @@ function generateAssertions(pair: TransitionPair): TestCase['assertions'] {
     expected: pair.t1.allowedActors[0],
   });
   
-  if (pair.t1.type === TransitionType.LIKE || pair.t2.type === TransitionType.LIKE) {
+  if (pair.t1.type === 'like' || pair.t2.type === 'like') {
     assertions.push({
       type: 'ui_element',
       target: '[data-testid="like-btn"]',
@@ -86,7 +86,7 @@ function generateAssertions(pair: TransitionPair): TestCase['assertions'] {
     });
   }
   
-  if (pair.t1.type === TransitionType.SUBMIT_COMMENT || pair.t2.type === TransitionType.SUBMIT_COMMENT) {
+  if (pair.t1.type === 'submit_comment' || pair.t2.type === 'submit_comment') {
     assertions.push({
       type: 'ui_element',
       target: '[data-testid="comments-section"]',
@@ -99,17 +99,17 @@ function generateAssertions(pair: TransitionPair): TestCase['assertions'] {
 
 function calculatePriority(pair: TransitionPair): 'high' | 'medium' | 'low' {
   const highPriorityTypes = [
-    TransitionType.LOGIN,
-    TransitionType.LOGOUT,
-    TransitionType.LIKE,
-    TransitionType.UNLIKE,
-    TransitionType.CREATE_POST,
-    TransitionType.DELETE_POST,
+    'login',
+    'logout',
+    'like',
+    'unlike',
+    'create_post',
+    'delete_post',
   ];
   const mediumPriorityTypes = [
-    TransitionType.SUBMIT_COMMENT,
-    TransitionType.APPROVE_COMMENT,
-    TransitionType.REJECT_COMMENT,
+    'submit_comment',
+    'approve_comment',
+    'reject_comment',
   ];
   
   const t1High = highPriorityTypes.includes(pair.t1.type);

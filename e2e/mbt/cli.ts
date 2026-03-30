@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 
-import { generateTPCReport, exportPairsAsJSON } from './generators/tpcGenerator';
-import { generateTestSuite, exportAsPlaywrightTests } from './generators/testGenerator';
-import { ActorStates } from './models/stateMachine';
-import * as fs from 'fs';
-import * as path from 'path';
+const { generateTPCReport, exportPairsAsJSON } = require('./generators/tpcGenerator');
+const { generateTestSuite, exportAsPlaywrightTests } = require('./generators/testGenerator');
+const { ActorStates } = require('./models/stateMachine');
+const fs = require('fs');
+const path = require('path');
 
 const OUTPUT_DIR = path.join(__dirname, '../../specs/mbt');
 
 async function main() {
-  console.log('🔧 MBT Test Generator\n');
+  console.log('MBT Test Generator\n');
   
-  console.log('📊 Generating TPC Report...');
+  console.log('Generating TPC Report...');
   const report = generateTPCReport();
   console.log(`   Total pairs: ${report.totalPairs}`);
   console.log(`   Valid pairs: ${report.validPairs}`);
@@ -21,9 +21,9 @@ async function main() {
   const pairsFile = path.join(OUTPUT_DIR, 'tpc-pairs.json');
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
   fs.writeFileSync(pairsFile, pairsJson);
-  console.log(`   ✓ Saved to ${pairsFile}`);
+  console.log(`   Saved to ${pairsFile}`);
   
-  console.log('\n📝 Generating Test Suites...');
+  console.log('\nGenerating Test Suites...');
   
   const actors = [
     { actor: ActorStates.ANONYMOUS, name: 'Anonymous User Tests' },
@@ -39,14 +39,14 @@ async function main() {
     
     const suiteFile = path.join(OUTPUT_DIR, `${actor.toLowerCase()}-suite.json`);
     fs.writeFileSync(suiteFile, JSON.stringify(suite, null, 2));
-    console.log(`   ✓ ${actor}: ${suite.testCases.length} tests`);
+    console.log(`   ${actor}: ${suite.testCases.length} tests`);
     
     const testFile = path.join(OUTPUT_DIR, `${actor.toLowerCase()}.spec.ts`);
     const testCode = exportAsPlaywrightTests(suite.testCases);
     fs.writeFileSync(testFile, testCode);
   }
   
-  console.log(`\n✅ Generated ${totalTests} test cases`);
+  console.log(`\nGenerated ${totalTests} test cases`);
   console.log(`   Output: ${OUTPUT_DIR}`);
 }
 

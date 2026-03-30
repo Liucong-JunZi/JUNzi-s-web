@@ -7,10 +7,14 @@
     "test:smoke": "npx playwright test --grep @p0",
     "test:regression": "npx playwright test --grep \"@p0|@p1\"",
     "test:ui": "npx playwright test --ui",
-    "report": "npx playwright show-report"
+    "report": "npx playwright show-report",
+    "generate": "npx tsx mbt/cli.ts",
+    "lint:i18n": "npx tsx mbt/i18n/cli.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.52.0",
+    "@types/node": "^25.5.0",
+    "tsx": "^4.19.0",
     "typescript": "^6.0.2"
   }
 }
