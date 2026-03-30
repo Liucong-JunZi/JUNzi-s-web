@@ -167,7 +167,7 @@ export function Header() {
               </Link>
             ))}
             <div className="flex items-center space-x-4 pt-4 border-t">
-              <Button variant="ghost" size="icon" onClick={toggleTheme} data-testid="theme-toggle-btn">
+              <Button variant="ghost" size="icon" onClick={toggleTheme} data-testid="theme-toggle-btn-mobile">
                 {theme === 'light' ? (
                   <Sun className="h-5 w-5" />
                 ) : theme === 'dark' ? (
@@ -175,6 +175,9 @@ export function Header() {
                 ) : (
                   <Sun className="h-5 w-5" />
                 )}
+              </Button>
+              <Button variant="ghost" size="icon" onClick={toggleLanguage} data-testid="language-toggle-btn-mobile">
+                <Languages className="h-5 w-5" />
               </Button>
               {isAuthenticated ? (
                 <Button variant="outline" onClick={logout} data-testid="logout-btn">
