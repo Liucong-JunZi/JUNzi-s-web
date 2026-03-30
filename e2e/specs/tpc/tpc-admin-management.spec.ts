@@ -4,7 +4,7 @@ import { PostsApiClient } from '../../clients/PostsApiClient';
 import { CommentsApiClient } from '../../clients/CommentsApiClient';
 import { PostFactory } from '../../factories/PostFactory';
 import { CommentFactory } from '../../factories/CommentFactory';
-import { cleanupPosts, cleanupComment } from '../../helpers/cleanup';
+import { cleanupPosts, cleanupComment, cleanupProjects, cleanupResumes } from '../../helpers/cleanup';
 
 const baseURL = process.env.BASE_URL ?? 'http://localhost';
 
@@ -18,32 +18,11 @@ test.describe('TPC Admin Management', () => {
   const createdResumeIds: number[] = [];
   const createdCommentIds: number[] = [];
 
-  test.afterAll(async ({ browser }) => {
-    // Cleanup posts and comments via API clients
+  test.afterAll(async () => {
     await cleanupPosts(createdPostIds);
     await Promise.all(createdCommentIds.map((id) => cleanupComment(id)));
-
-    // Cleanup projects and resume items via admin API
-    const { context } = await openPageAsActor(browser, baseURL, 'admin');
-    try {
-      const csrf = await readCsrfToken(context, baseURL);
-      for (const id of createdProjectIds) {
-        await context.request
-          .delete(`/api/admin/projects/${id}`, {
-            headers: { 'X-CSRF-Token': csrf },
-          })
-          .catch(() => {});
-      }
-      for (const id of createdResumeIds) {
-        await context.request
-          .delete(`/api/admin/resume/${id}`, {
-            headers: { 'X-CSRF-Token': csrf },
-          })
-          .catch(() => {});
-      }
-    } finally {
-      await context.close();
-    }
+    await cleanupProjects(createdProjectIds);
+    await cleanupResumes(createdResumeIds);
   });
 
   // ---------------------------------------------------------------------------

@@ -469,7 +469,7 @@ test.describe('Like Toggle MBT', () => {
 
       // Assert error toast
       await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
-      await expect(page.getByText('Failed to update like')).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByText('Failed to update like', { exact: true })).toBeVisible({ timeout: 10_000 });
 
       // Assert reverted to unliked state
       await assertUnlikedState(likeBtn, beforeCount);
