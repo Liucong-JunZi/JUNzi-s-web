@@ -69,6 +69,9 @@ test.describe('TPC Anonymous', () => {
       await page.goto('/blog');
       await expect(page).toHaveURL(/\/blog$/, { timeout: 15_000 });
       await expect(page.locator('header')).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByTestId('blog-page')).toBeVisible({ timeout: 15_000 });
+      // Wait for posts to load before capturing initial count
+      await expect(page.getByTestId('post-card').first()).toBeVisible({ timeout: 10_000 });
       // capture initial post card count
       const initialCards = page.locator('[data-testid="post-card"]');
       const initialCount = await initialCards.count();
