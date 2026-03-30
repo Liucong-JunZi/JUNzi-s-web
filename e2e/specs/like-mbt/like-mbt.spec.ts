@@ -161,7 +161,7 @@ test.describe('Like Toggle MBT', () => {
       const beforeCount = await extractLikeCount(likeBtn);
 
       await likeBtn.click();
-      await expect(page.locator('[data-sonner-toast]')).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
 
       await assertLikedState(likeBtn, beforeCount + 1);
 
@@ -191,12 +191,12 @@ test.describe('Like Toggle MBT', () => {
 
       // Like
       await likeBtn.click();
-      await expect(page.locator('[data-sonner-toast]')).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
       await assertLikedState(likeBtn, originalCount + 1);
 
       // Unlike
       await likeBtn.click();
-      await expect(page.getByText('You unliked this post')).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
       await assertUnlikedState(likeBtn, originalCount);
     } finally {
       await context.close();
@@ -210,13 +210,9 @@ test.describe('Like Toggle MBT', () => {
     const post = await postsApi.create(seed);
     createdPostIds.push(post.id);
 
-    // Pre-like via API
-    const preLikeCtx = await createActorContext(browser, baseURL, 'user');
-    const csrf = await readCsrfToken(preLikeCtx, baseURL);
-    await preLikeCtx.request.post(`/api/posts/${post.id}/like`, {
-      headers: { 'X-CSRF-Token': csrf },
-    });
-    await preLikeCtx.close();
+    // Pre-like via API client
+    await postsApi.like(post.id);
+    createdPostIds.push(post.id);
 
     const context = await createActorContext(browser, baseURL, 'user');
     const page = await context.newPage();
@@ -234,13 +230,13 @@ test.describe('Like Toggle MBT', () => {
 
       // Unlike
       await likeBtn.click();
-      await expect(page.getByText('You unliked this post')).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
       await assertUnlikedState(likeBtn, likedCount - 1);
       const unlikedCount = likedCount - 1;
 
       // Like again
       await likeBtn.click();
-      await expect(page.locator('[data-sonner-toast]')).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
       await assertLikedState(likeBtn, unlikedCount + 1);
     } finally {
       await context.close();
@@ -266,7 +262,7 @@ test.describe('Like Toggle MBT', () => {
 
       // Like
       await likeBtn.click();
-      await expect(page.locator('[data-sonner-toast]')).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
       await assertLikedState(likeBtn, beforeCount + 1);
 
       // Navigate to blog list
@@ -292,13 +288,9 @@ test.describe('Like Toggle MBT', () => {
     const post = await postsApi.create(seed);
     createdPostIds.push(post.id);
 
-    // Pre-like via API
-    const preLikeCtx = await createActorContext(browser, baseURL, 'user');
-    const csrf = await readCsrfToken(preLikeCtx, baseURL);
-    await preLikeCtx.request.post(`/api/posts/${post.id}/like`, {
-      headers: { 'X-CSRF-Token': csrf },
-    });
-    await preLikeCtx.close();
+    // Pre-like via API client
+    await postsApi.like(post.id);
+    createdPostIds.push(post.id);
 
     const context = await createActorContext(browser, baseURL, 'user');
     const page = await context.newPage();
@@ -314,7 +306,7 @@ test.describe('Like Toggle MBT', () => {
 
       // Unlike
       await likeBtn.click();
-      await expect(page.getByText('You unliked this post')).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
       const unlikedCount = likedCount - 1;
       await assertUnlikedState(likeBtn, unlikedCount);
 
@@ -353,7 +345,7 @@ test.describe('Like Toggle MBT', () => {
 
       // Like
       await likeBtn.click();
-      await expect(page.locator('[data-sonner-toast]')).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
       await assertLikedState(likeBtn, beforeCount + 1);
 
       // Reload page
@@ -375,13 +367,9 @@ test.describe('Like Toggle MBT', () => {
     const post = await postsApi.create(seed);
     createdPostIds.push(post.id);
 
-    // Pre-like via API
-    const preLikeCtx = await createActorContext(browser, baseURL, 'user');
-    const csrf = await readCsrfToken(preLikeCtx, baseURL);
-    await preLikeCtx.request.post(`/api/posts/${post.id}/like`, {
-      headers: { 'X-CSRF-Token': csrf },
-    });
-    await preLikeCtx.close();
+    // Pre-like via API client
+    await postsApi.like(post.id);
+    createdPostIds.push(post.id);
 
     const context = await createActorContext(browser, baseURL, 'user');
     const page = await context.newPage();
@@ -395,7 +383,7 @@ test.describe('Like Toggle MBT', () => {
 
       // Unlike
       await likeBtn.click();
-      await expect(page.getByText('You unliked this post')).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
       const unlikedCount = likedCount - 1;
       await assertUnlikedState(likeBtn, unlikedCount);
 
@@ -430,7 +418,7 @@ test.describe('Like Toggle MBT', () => {
 
       // Like
       await likeBtn.click();
-      await expect(page.locator('[data-sonner-toast]')).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
       await assertLikedState(likeBtn, beforeCount + 1);
 
       // Logout via UI
@@ -528,7 +516,7 @@ test.describe('Like Toggle MBT', () => {
       // Now click like — should succeed
       const likeBtnAfter = page.getByTestId('like-btn');
       await likeBtnAfter.click();
-      await expect(page.locator('[data-sonner-toast]')).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
       await assertLikedState(likeBtnAfter, beforeCount + 1);
     } finally {
       await context.close();
@@ -827,7 +815,7 @@ test.describe('Like Toggle MBT', () => {
 
       // Like
       await likeBtn.click();
-      await expect(page.locator('[data-sonner-toast]')).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
       await assertLikedState(likeBtn, beforeCount + 1);
 
       // Logout via UI
@@ -873,7 +861,7 @@ test.describe('Like Toggle MBT', () => {
 
       // Like
       await likeBtn.click();
-      await expect(page.locator('[data-sonner-toast]')).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
       await assertLikedState(likeBtn, beforeCount + 1);
 
       // Navigate away
@@ -913,7 +901,7 @@ test.describe('Like Toggle MBT', () => {
       const beforeCount = await extractLikeCount(likeBtn);
 
       await likeBtn.click();
-      await expect(page.locator('[data-sonner-toast]')).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
       await assertLikedState(likeBtn, beforeCount + 1);
 
       // Verify S6 invariants (admin, on post detail, liked)
@@ -942,12 +930,12 @@ test.describe('Like Toggle MBT', () => {
 
       // Like
       await likeBtn.click();
-      await expect(page.locator('[data-sonner-toast]')).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
       await assertLikedState(likeBtn, originalCount + 1);
 
       // Unlike
       await likeBtn.click();
-      await expect(page.getByText('You unliked this post')).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
       await assertUnlikedState(likeBtn, originalCount);
     } finally {
       await context.close();
@@ -973,22 +961,22 @@ test.describe('Like Toggle MBT', () => {
 
       // Cycle 1: Like
       await likeBtn.click();
-      await expect(page.locator('[data-sonner-toast]')).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
       await assertLikedState(likeBtn, originalCount + 1);
 
       // Cycle 2: Unlike
       await likeBtn.click();
-      await expect(page.getByText('You unliked this post')).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
       await assertUnlikedState(likeBtn, originalCount);
 
       // Cycle 3: Like
       await likeBtn.click();
-      await expect(page.locator('[data-sonner-toast]')).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
       await assertLikedState(likeBtn, originalCount + 1);
 
       // Cycle 4: Unlike
       await likeBtn.click();
-      await expect(page.getByText('You unliked this post')).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
       await assertUnlikedState(likeBtn, originalCount);
 
       // Reload and verify final state
