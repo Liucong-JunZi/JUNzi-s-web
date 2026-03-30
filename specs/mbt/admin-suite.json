@@ -1,0 +1,5812 @@
+{
+  "name": "Admin User Tests",
+  "description": "TPC test suite for admin",
+  "testCases": [
+    {
+      "id": "TC_logout_logout",
+      "name": "User Logout → User Logout",
+      "description": "Test User logs out of the system followed by User logs out of the system",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "logout"
+        },
+        {
+          "type": "logout"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "logout",
+        "logout",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_logout_view_post",
+      "name": "User Logout → View Post",
+      "description": "Test User logs out of the system followed by Navigate to and view a blog post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "logout"
+        },
+        {
+          "type": "view_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "logout",
+        "view_post",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_logout_create_post",
+      "name": "User Logout → Create Post",
+      "description": "Test User logs out of the system followed by Create a new blog post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "logout"
+        },
+        {
+          "type": "create_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "logout",
+        "create_post",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_logout_update_post",
+      "name": "User Logout → Update Post",
+      "description": "Test User logs out of the system followed by Update an existing blog post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "logout"
+        },
+        {
+          "type": "update_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "logout",
+        "update_post",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_logout_delete_post",
+      "name": "User Logout → Delete Post",
+      "description": "Test User logs out of the system followed by Delete a blog post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "logout"
+        },
+        {
+          "type": "delete_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "logout",
+        "delete_post",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_logout_like",
+      "name": "User Logout → Like Post",
+      "description": "Test User logs out of the system followed by Like a blog post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "logout"
+        },
+        {
+          "type": "like"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"like-btn\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "logout",
+        "like",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_logout_unlike",
+      "name": "User Logout → Unlike Post",
+      "description": "Test User logs out of the system followed by Remove like from a blog post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "logout"
+        },
+        {
+          "type": "unlike"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "logout",
+        "unlike",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_logout_submit_comment",
+      "name": "User Logout → Submit Comment",
+      "description": "Test User logs out of the system followed by Submit a comment on a post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "logout"
+        },
+        {
+          "type": "submit_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"comments-section\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "logout",
+        "submit_comment",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_logout_approve_comment",
+      "name": "User Logout → Approve Comment",
+      "description": "Test User logs out of the system followed by Approve a submitted comment",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "logout"
+        },
+        {
+          "type": "approve_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "logout",
+        "approve_comment",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_logout_reject_comment",
+      "name": "User Logout → Reject Comment",
+      "description": "Test User logs out of the system followed by Reject a submitted comment",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "logout"
+        },
+        {
+          "type": "reject_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "logout",
+        "reject_comment",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_logout_view_profile",
+      "name": "User Logout → View Profile",
+      "description": "Test User logs out of the system followed by View user profile",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "logout"
+        },
+        {
+          "type": "view_profile"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "logout",
+        "view_profile",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_logout_edit_profile",
+      "name": "User Logout → Edit Profile",
+      "description": "Test User logs out of the system followed by Edit user profile information",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "logout"
+        },
+        {
+          "type": "edit_profile"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "logout",
+        "edit_profile",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_logout_navigate",
+      "name": "User Logout → Navigate",
+      "description": "Test User logs out of the system followed by Navigate between pages",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "logout"
+        },
+        {
+          "type": "navigate"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "logout",
+        "navigate",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_post_logout",
+      "name": "View Post → User Logout",
+      "description": "Test Navigate to and view a blog post followed by User logs out of the system",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_post"
+        },
+        {
+          "type": "logout"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "view_post",
+        "logout",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_post_create_post",
+      "name": "View Post → Create Post",
+      "description": "Test Navigate to and view a blog post followed by Create a new blog post",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_post"
+        },
+        {
+          "type": "create_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "view_post",
+        "create_post",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_post_delete_post",
+      "name": "View Post → Delete Post",
+      "description": "Test Navigate to and view a blog post followed by Delete a blog post",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_post"
+        },
+        {
+          "type": "delete_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "view_post",
+        "delete_post",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_post_like",
+      "name": "View Post → Like Post",
+      "description": "Test Navigate to and view a blog post followed by Like a blog post",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_post"
+        },
+        {
+          "type": "like"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"like-btn\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "view_post",
+        "like",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_post_unlike",
+      "name": "View Post → Unlike Post",
+      "description": "Test Navigate to and view a blog post followed by Remove like from a blog post",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_post"
+        },
+        {
+          "type": "unlike"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "view_post",
+        "unlike",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_create_post_logout",
+      "name": "Create Post → User Logout",
+      "description": "Test Create a new blog post followed by User logs out of the system",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "create_post"
+        },
+        {
+          "type": "logout"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "create_post",
+        "logout",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_create_post_view_post",
+      "name": "Create Post → View Post",
+      "description": "Test Create a new blog post followed by Navigate to and view a blog post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "create_post"
+        },
+        {
+          "type": "view_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "create_post",
+        "view_post",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_create_post_create_post",
+      "name": "Create Post → Create Post",
+      "description": "Test Create a new blog post followed by Create a new blog post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "create_post"
+        },
+        {
+          "type": "create_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "create_post",
+        "create_post",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_create_post_update_post",
+      "name": "Create Post → Update Post",
+      "description": "Test Create a new blog post followed by Update an existing blog post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "create_post"
+        },
+        {
+          "type": "update_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "create_post",
+        "update_post",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_create_post_delete_post",
+      "name": "Create Post → Delete Post",
+      "description": "Test Create a new blog post followed by Delete a blog post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "create_post"
+        },
+        {
+          "type": "delete_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "create_post",
+        "delete_post",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_create_post_like",
+      "name": "Create Post → Like Post",
+      "description": "Test Create a new blog post followed by Like a blog post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "create_post"
+        },
+        {
+          "type": "like"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"like-btn\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "create_post",
+        "like",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_create_post_unlike",
+      "name": "Create Post → Unlike Post",
+      "description": "Test Create a new blog post followed by Remove like from a blog post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "create_post"
+        },
+        {
+          "type": "unlike"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "create_post",
+        "unlike",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_create_post_submit_comment",
+      "name": "Create Post → Submit Comment",
+      "description": "Test Create a new blog post followed by Submit a comment on a post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "create_post"
+        },
+        {
+          "type": "submit_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"comments-section\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "create_post",
+        "submit_comment",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_create_post_approve_comment",
+      "name": "Create Post → Approve Comment",
+      "description": "Test Create a new blog post followed by Approve a submitted comment",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "create_post"
+        },
+        {
+          "type": "approve_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "create_post",
+        "approve_comment",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_create_post_reject_comment",
+      "name": "Create Post → Reject Comment",
+      "description": "Test Create a new blog post followed by Reject a submitted comment",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "create_post"
+        },
+        {
+          "type": "reject_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "create_post",
+        "reject_comment",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_create_post_view_profile",
+      "name": "Create Post → View Profile",
+      "description": "Test Create a new blog post followed by View user profile",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "create_post"
+        },
+        {
+          "type": "view_profile"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "create_post",
+        "view_profile",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_create_post_edit_profile",
+      "name": "Create Post → Edit Profile",
+      "description": "Test Create a new blog post followed by Edit user profile information",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "create_post"
+        },
+        {
+          "type": "edit_profile"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "create_post",
+        "edit_profile",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_create_post_navigate",
+      "name": "Create Post → Navigate",
+      "description": "Test Create a new blog post followed by Navigate between pages",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "create_post"
+        },
+        {
+          "type": "navigate"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "create_post",
+        "navigate",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_update_post_logout",
+      "name": "Update Post → User Logout",
+      "description": "Test Update an existing blog post followed by User logs out of the system",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "update_post"
+        },
+        {
+          "type": "logout"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "update_post",
+        "logout",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_update_post_create_post",
+      "name": "Update Post → Create Post",
+      "description": "Test Update an existing blog post followed by Create a new blog post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "update_post"
+        },
+        {
+          "type": "create_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "update_post",
+        "create_post",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_update_post_delete_post",
+      "name": "Update Post → Delete Post",
+      "description": "Test Update an existing blog post followed by Delete a blog post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "update_post"
+        },
+        {
+          "type": "delete_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "update_post",
+        "delete_post",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_update_post_like",
+      "name": "Update Post → Like Post",
+      "description": "Test Update an existing blog post followed by Like a blog post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "update_post"
+        },
+        {
+          "type": "like"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"like-btn\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "update_post",
+        "like",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_update_post_unlike",
+      "name": "Update Post → Unlike Post",
+      "description": "Test Update an existing blog post followed by Remove like from a blog post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "update_post"
+        },
+        {
+          "type": "unlike"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "update_post",
+        "unlike",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_delete_post_logout",
+      "name": "Delete Post → User Logout",
+      "description": "Test Delete a blog post followed by User logs out of the system",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "delete_post"
+        },
+        {
+          "type": "logout"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "delete_post",
+        "logout",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_delete_post_view_post",
+      "name": "Delete Post → View Post",
+      "description": "Test Delete a blog post followed by Navigate to and view a blog post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "delete_post"
+        },
+        {
+          "type": "view_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "delete_post",
+        "view_post",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_delete_post_create_post",
+      "name": "Delete Post → Create Post",
+      "description": "Test Delete a blog post followed by Create a new blog post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "delete_post"
+        },
+        {
+          "type": "create_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "delete_post",
+        "create_post",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_delete_post_update_post",
+      "name": "Delete Post → Update Post",
+      "description": "Test Delete a blog post followed by Update an existing blog post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "delete_post"
+        },
+        {
+          "type": "update_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "delete_post",
+        "update_post",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_delete_post_delete_post",
+      "name": "Delete Post → Delete Post",
+      "description": "Test Delete a blog post followed by Delete a blog post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "delete_post"
+        },
+        {
+          "type": "delete_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "delete_post",
+        "delete_post",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_delete_post_like",
+      "name": "Delete Post → Like Post",
+      "description": "Test Delete a blog post followed by Like a blog post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "delete_post"
+        },
+        {
+          "type": "like"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"like-btn\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "delete_post",
+        "like",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_delete_post_unlike",
+      "name": "Delete Post → Unlike Post",
+      "description": "Test Delete a blog post followed by Remove like from a blog post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "delete_post"
+        },
+        {
+          "type": "unlike"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "delete_post",
+        "unlike",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_delete_post_submit_comment",
+      "name": "Delete Post → Submit Comment",
+      "description": "Test Delete a blog post followed by Submit a comment on a post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "delete_post"
+        },
+        {
+          "type": "submit_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"comments-section\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "delete_post",
+        "submit_comment",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_delete_post_approve_comment",
+      "name": "Delete Post → Approve Comment",
+      "description": "Test Delete a blog post followed by Approve a submitted comment",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "delete_post"
+        },
+        {
+          "type": "approve_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "delete_post",
+        "approve_comment",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_delete_post_reject_comment",
+      "name": "Delete Post → Reject Comment",
+      "description": "Test Delete a blog post followed by Reject a submitted comment",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "delete_post"
+        },
+        {
+          "type": "reject_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "delete_post",
+        "reject_comment",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_delete_post_view_profile",
+      "name": "Delete Post → View Profile",
+      "description": "Test Delete a blog post followed by View user profile",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "delete_post"
+        },
+        {
+          "type": "view_profile"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "delete_post",
+        "view_profile",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_delete_post_edit_profile",
+      "name": "Delete Post → Edit Profile",
+      "description": "Test Delete a blog post followed by Edit user profile information",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "delete_post"
+        },
+        {
+          "type": "edit_profile"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "delete_post",
+        "edit_profile",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_delete_post_navigate",
+      "name": "Delete Post → Navigate",
+      "description": "Test Delete a blog post followed by Navigate between pages",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "delete_post"
+        },
+        {
+          "type": "navigate"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "delete_post",
+        "navigate",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_like_logout",
+      "name": "Like Post → User Logout",
+      "description": "Test Like a blog post followed by User logs out of the system",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "like"
+        },
+        {
+          "type": "logout"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"like-btn\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "like",
+        "logout",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_like_view_post",
+      "name": "Like Post → View Post",
+      "description": "Test Like a blog post followed by Navigate to and view a blog post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "like"
+        },
+        {
+          "type": "view_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"like-btn\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "like",
+        "view_post",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_like_create_post",
+      "name": "Like Post → Create Post",
+      "description": "Test Like a blog post followed by Create a new blog post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "like"
+        },
+        {
+          "type": "create_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"like-btn\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "like",
+        "create_post",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_like_update_post",
+      "name": "Like Post → Update Post",
+      "description": "Test Like a blog post followed by Update an existing blog post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "like"
+        },
+        {
+          "type": "update_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"like-btn\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "like",
+        "update_post",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_like_delete_post",
+      "name": "Like Post → Delete Post",
+      "description": "Test Like a blog post followed by Delete a blog post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "like"
+        },
+        {
+          "type": "delete_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"like-btn\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "like",
+        "delete_post",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_like_like",
+      "name": "Like Post → Like Post",
+      "description": "Test Like a blog post followed by Like a blog post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "like"
+        },
+        {
+          "type": "like"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"like-btn\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "like",
+        "like",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_like_unlike",
+      "name": "Like Post → Unlike Post",
+      "description": "Test Like a blog post followed by Remove like from a blog post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "like"
+        },
+        {
+          "type": "unlike"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"like-btn\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "like",
+        "unlike",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_like_submit_comment",
+      "name": "Like Post → Submit Comment",
+      "description": "Test Like a blog post followed by Submit a comment on a post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "like"
+        },
+        {
+          "type": "submit_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"like-btn\"]",
+          "expected": "visible"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"comments-section\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "like",
+        "submit_comment",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_like_approve_comment",
+      "name": "Like Post → Approve Comment",
+      "description": "Test Like a blog post followed by Approve a submitted comment",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "like"
+        },
+        {
+          "type": "approve_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"like-btn\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "like",
+        "approve_comment",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_like_reject_comment",
+      "name": "Like Post → Reject Comment",
+      "description": "Test Like a blog post followed by Reject a submitted comment",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "like"
+        },
+        {
+          "type": "reject_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"like-btn\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "like",
+        "reject_comment",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_like_view_profile",
+      "name": "Like Post → View Profile",
+      "description": "Test Like a blog post followed by View user profile",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "like"
+        },
+        {
+          "type": "view_profile"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"like-btn\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "like",
+        "view_profile",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_like_edit_profile",
+      "name": "Like Post → Edit Profile",
+      "description": "Test Like a blog post followed by Edit user profile information",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "like"
+        },
+        {
+          "type": "edit_profile"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"like-btn\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "like",
+        "edit_profile",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_like_navigate",
+      "name": "Like Post → Navigate",
+      "description": "Test Like a blog post followed by Navigate between pages",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "like"
+        },
+        {
+          "type": "navigate"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"like-btn\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "like",
+        "navigate",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_unlike_logout",
+      "name": "Unlike Post → User Logout",
+      "description": "Test Remove like from a blog post followed by User logs out of the system",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "unlike"
+        },
+        {
+          "type": "logout"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "unlike",
+        "logout",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_unlike_view_post",
+      "name": "Unlike Post → View Post",
+      "description": "Test Remove like from a blog post followed by Navigate to and view a blog post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "unlike"
+        },
+        {
+          "type": "view_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "unlike",
+        "view_post",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_unlike_create_post",
+      "name": "Unlike Post → Create Post",
+      "description": "Test Remove like from a blog post followed by Create a new blog post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "unlike"
+        },
+        {
+          "type": "create_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "unlike",
+        "create_post",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_unlike_update_post",
+      "name": "Unlike Post → Update Post",
+      "description": "Test Remove like from a blog post followed by Update an existing blog post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "unlike"
+        },
+        {
+          "type": "update_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "unlike",
+        "update_post",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_unlike_delete_post",
+      "name": "Unlike Post → Delete Post",
+      "description": "Test Remove like from a blog post followed by Delete a blog post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "unlike"
+        },
+        {
+          "type": "delete_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "unlike",
+        "delete_post",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_unlike_like",
+      "name": "Unlike Post → Like Post",
+      "description": "Test Remove like from a blog post followed by Like a blog post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "unlike"
+        },
+        {
+          "type": "like"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"like-btn\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "unlike",
+        "like",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_unlike_unlike",
+      "name": "Unlike Post → Unlike Post",
+      "description": "Test Remove like from a blog post followed by Remove like from a blog post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "unlike"
+        },
+        {
+          "type": "unlike"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "unlike",
+        "unlike",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_unlike_submit_comment",
+      "name": "Unlike Post → Submit Comment",
+      "description": "Test Remove like from a blog post followed by Submit a comment on a post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "unlike"
+        },
+        {
+          "type": "submit_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"comments-section\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "unlike",
+        "submit_comment",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_unlike_approve_comment",
+      "name": "Unlike Post → Approve Comment",
+      "description": "Test Remove like from a blog post followed by Approve a submitted comment",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "unlike"
+        },
+        {
+          "type": "approve_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "unlike",
+        "approve_comment",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_unlike_reject_comment",
+      "name": "Unlike Post → Reject Comment",
+      "description": "Test Remove like from a blog post followed by Reject a submitted comment",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "unlike"
+        },
+        {
+          "type": "reject_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "unlike",
+        "reject_comment",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_unlike_view_profile",
+      "name": "Unlike Post → View Profile",
+      "description": "Test Remove like from a blog post followed by View user profile",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "unlike"
+        },
+        {
+          "type": "view_profile"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "unlike",
+        "view_profile",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_unlike_edit_profile",
+      "name": "Unlike Post → Edit Profile",
+      "description": "Test Remove like from a blog post followed by Edit user profile information",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "unlike"
+        },
+        {
+          "type": "edit_profile"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "unlike",
+        "edit_profile",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_unlike_navigate",
+      "name": "Unlike Post → Navigate",
+      "description": "Test Remove like from a blog post followed by Navigate between pages",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "unlike"
+        },
+        {
+          "type": "navigate"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "unlike",
+        "navigate",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_submit_comment_logout",
+      "name": "Submit Comment → User Logout",
+      "description": "Test Submit a comment on a post followed by User logs out of the system",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "submit_comment"
+        },
+        {
+          "type": "logout"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"comments-section\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "submit_comment",
+        "logout",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_submit_comment_create_post",
+      "name": "Submit Comment → Create Post",
+      "description": "Test Submit a comment on a post followed by Create a new blog post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "submit_comment"
+        },
+        {
+          "type": "create_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"comments-section\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "submit_comment",
+        "create_post",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_submit_comment_delete_post",
+      "name": "Submit Comment → Delete Post",
+      "description": "Test Submit a comment on a post followed by Delete a blog post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "submit_comment"
+        },
+        {
+          "type": "delete_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"comments-section\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "submit_comment",
+        "delete_post",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_submit_comment_like",
+      "name": "Submit Comment → Like Post",
+      "description": "Test Submit a comment on a post followed by Like a blog post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "submit_comment"
+        },
+        {
+          "type": "like"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"like-btn\"]",
+          "expected": "visible"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"comments-section\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "submit_comment",
+        "like",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_submit_comment_unlike",
+      "name": "Submit Comment → Unlike Post",
+      "description": "Test Submit a comment on a post followed by Remove like from a blog post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "submit_comment"
+        },
+        {
+          "type": "unlike"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"comments-section\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "submit_comment",
+        "unlike",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_approve_comment_logout",
+      "name": "Approve Comment → User Logout",
+      "description": "Test Approve a submitted comment followed by User logs out of the system",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "approve_comment"
+        },
+        {
+          "type": "logout"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "approve_comment",
+        "logout",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_approve_comment_create_post",
+      "name": "Approve Comment → Create Post",
+      "description": "Test Approve a submitted comment followed by Create a new blog post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "approve_comment"
+        },
+        {
+          "type": "create_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "approve_comment",
+        "create_post",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_approve_comment_delete_post",
+      "name": "Approve Comment → Delete Post",
+      "description": "Test Approve a submitted comment followed by Delete a blog post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "approve_comment"
+        },
+        {
+          "type": "delete_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "approve_comment",
+        "delete_post",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_approve_comment_like",
+      "name": "Approve Comment → Like Post",
+      "description": "Test Approve a submitted comment followed by Like a blog post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "approve_comment"
+        },
+        {
+          "type": "like"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"like-btn\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "approve_comment",
+        "like",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_approve_comment_unlike",
+      "name": "Approve Comment → Unlike Post",
+      "description": "Test Approve a submitted comment followed by Remove like from a blog post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "approve_comment"
+        },
+        {
+          "type": "unlike"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "approve_comment",
+        "unlike",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_reject_comment_logout",
+      "name": "Reject Comment → User Logout",
+      "description": "Test Reject a submitted comment followed by User logs out of the system",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "reject_comment"
+        },
+        {
+          "type": "logout"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "reject_comment",
+        "logout",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_reject_comment_create_post",
+      "name": "Reject Comment → Create Post",
+      "description": "Test Reject a submitted comment followed by Create a new blog post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "reject_comment"
+        },
+        {
+          "type": "create_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "reject_comment",
+        "create_post",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_reject_comment_delete_post",
+      "name": "Reject Comment → Delete Post",
+      "description": "Test Reject a submitted comment followed by Delete a blog post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "reject_comment"
+        },
+        {
+          "type": "delete_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "reject_comment",
+        "delete_post",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_reject_comment_like",
+      "name": "Reject Comment → Like Post",
+      "description": "Test Reject a submitted comment followed by Like a blog post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "reject_comment"
+        },
+        {
+          "type": "like"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"like-btn\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "reject_comment",
+        "like",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_reject_comment_unlike",
+      "name": "Reject Comment → Unlike Post",
+      "description": "Test Reject a submitted comment followed by Remove like from a blog post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "reject_comment"
+        },
+        {
+          "type": "unlike"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "reject_comment",
+        "unlike",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_profile_logout",
+      "name": "View Profile → User Logout",
+      "description": "Test View user profile followed by User logs out of the system",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_profile"
+        },
+        {
+          "type": "logout"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "view_profile",
+        "logout",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_profile_create_post",
+      "name": "View Profile → Create Post",
+      "description": "Test View user profile followed by Create a new blog post",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_profile"
+        },
+        {
+          "type": "create_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "view_profile",
+        "create_post",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_profile_delete_post",
+      "name": "View Profile → Delete Post",
+      "description": "Test View user profile followed by Delete a blog post",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_profile"
+        },
+        {
+          "type": "delete_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "view_profile",
+        "delete_post",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_profile_like",
+      "name": "View Profile → Like Post",
+      "description": "Test View user profile followed by Like a blog post",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_profile"
+        },
+        {
+          "type": "like"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"like-btn\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "view_profile",
+        "like",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_profile_unlike",
+      "name": "View Profile → Unlike Post",
+      "description": "Test View user profile followed by Remove like from a blog post",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_profile"
+        },
+        {
+          "type": "unlike"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "view_profile",
+        "unlike",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_edit_profile_logout",
+      "name": "Edit Profile → User Logout",
+      "description": "Test Edit user profile information followed by User logs out of the system",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "edit_profile"
+        },
+        {
+          "type": "logout"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "edit_profile",
+        "logout",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_edit_profile_create_post",
+      "name": "Edit Profile → Create Post",
+      "description": "Test Edit user profile information followed by Create a new blog post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "edit_profile"
+        },
+        {
+          "type": "create_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "edit_profile",
+        "create_post",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_edit_profile_delete_post",
+      "name": "Edit Profile → Delete Post",
+      "description": "Test Edit user profile information followed by Delete a blog post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "edit_profile"
+        },
+        {
+          "type": "delete_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "edit_profile",
+        "delete_post",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_edit_profile_like",
+      "name": "Edit Profile → Like Post",
+      "description": "Test Edit user profile information followed by Like a blog post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "edit_profile"
+        },
+        {
+          "type": "like"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"like-btn\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "edit_profile",
+        "like",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_edit_profile_unlike",
+      "name": "Edit Profile → Unlike Post",
+      "description": "Test Edit user profile information followed by Remove like from a blog post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "edit_profile"
+        },
+        {
+          "type": "unlike"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "edit_profile",
+        "unlike",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_navigate_logout",
+      "name": "Navigate → User Logout",
+      "description": "Test Navigate between pages followed by User logs out of the system",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "navigate"
+        },
+        {
+          "type": "logout"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "navigate",
+        "logout",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_navigate_create_post",
+      "name": "Navigate → Create Post",
+      "description": "Test Navigate between pages followed by Create a new blog post",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "navigate"
+        },
+        {
+          "type": "create_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "navigate",
+        "create_post",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_navigate_delete_post",
+      "name": "Navigate → Delete Post",
+      "description": "Test Navigate between pages followed by Delete a blog post",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "navigate"
+        },
+        {
+          "type": "delete_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "navigate",
+        "delete_post",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_navigate_like",
+      "name": "Navigate → Like Post",
+      "description": "Test Navigate between pages followed by Like a blog post",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "navigate"
+        },
+        {
+          "type": "like"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"like-btn\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "navigate",
+        "like",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_navigate_unlike",
+      "name": "Navigate → Unlike Post",
+      "description": "Test Navigate between pages followed by Remove like from a blog post",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "navigate"
+        },
+        {
+          "type": "unlike"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "high",
+      "tags": [
+        "navigate",
+        "unlike",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_post_submit_comment",
+      "name": "View Post → Submit Comment",
+      "description": "Test Navigate to and view a blog post followed by Submit a comment on a post",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_post"
+        },
+        {
+          "type": "submit_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"comments-section\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "view_post",
+        "submit_comment",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_post_approve_comment",
+      "name": "View Post → Approve Comment",
+      "description": "Test Navigate to and view a blog post followed by Approve a submitted comment",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_post"
+        },
+        {
+          "type": "approve_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "view_post",
+        "approve_comment",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_post_reject_comment",
+      "name": "View Post → Reject Comment",
+      "description": "Test Navigate to and view a blog post followed by Reject a submitted comment",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_post"
+        },
+        {
+          "type": "reject_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "view_post",
+        "reject_comment",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_update_post_submit_comment",
+      "name": "Update Post → Submit Comment",
+      "description": "Test Update an existing blog post followed by Submit a comment on a post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "update_post"
+        },
+        {
+          "type": "submit_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"comments-section\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "update_post",
+        "submit_comment",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_update_post_approve_comment",
+      "name": "Update Post → Approve Comment",
+      "description": "Test Update an existing blog post followed by Approve a submitted comment",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "update_post"
+        },
+        {
+          "type": "approve_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "update_post",
+        "approve_comment",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_update_post_reject_comment",
+      "name": "Update Post → Reject Comment",
+      "description": "Test Update an existing blog post followed by Reject a submitted comment",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "update_post"
+        },
+        {
+          "type": "reject_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "update_post",
+        "reject_comment",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_submit_comment_view_post",
+      "name": "Submit Comment → View Post",
+      "description": "Test Submit a comment on a post followed by Navigate to and view a blog post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "submit_comment"
+        },
+        {
+          "type": "view_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"comments-section\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "submit_comment",
+        "view_post",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_submit_comment_update_post",
+      "name": "Submit Comment → Update Post",
+      "description": "Test Submit a comment on a post followed by Update an existing blog post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "submit_comment"
+        },
+        {
+          "type": "update_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"comments-section\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "submit_comment",
+        "update_post",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_submit_comment_submit_comment",
+      "name": "Submit Comment → Submit Comment",
+      "description": "Test Submit a comment on a post followed by Submit a comment on a post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "submit_comment"
+        },
+        {
+          "type": "submit_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"comments-section\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "submit_comment",
+        "submit_comment",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_submit_comment_approve_comment",
+      "name": "Submit Comment → Approve Comment",
+      "description": "Test Submit a comment on a post followed by Approve a submitted comment",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "submit_comment"
+        },
+        {
+          "type": "approve_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"comments-section\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "submit_comment",
+        "approve_comment",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_submit_comment_reject_comment",
+      "name": "Submit Comment → Reject Comment",
+      "description": "Test Submit a comment on a post followed by Reject a submitted comment",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "submit_comment"
+        },
+        {
+          "type": "reject_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"comments-section\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "submit_comment",
+        "reject_comment",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_submit_comment_view_profile",
+      "name": "Submit Comment → View Profile",
+      "description": "Test Submit a comment on a post followed by View user profile",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "submit_comment"
+        },
+        {
+          "type": "view_profile"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"comments-section\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "submit_comment",
+        "view_profile",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_submit_comment_edit_profile",
+      "name": "Submit Comment → Edit Profile",
+      "description": "Test Submit a comment on a post followed by Edit user profile information",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "submit_comment"
+        },
+        {
+          "type": "edit_profile"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"comments-section\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "submit_comment",
+        "edit_profile",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_submit_comment_navigate",
+      "name": "Submit Comment → Navigate",
+      "description": "Test Submit a comment on a post followed by Navigate between pages",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "submit_comment"
+        },
+        {
+          "type": "navigate"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"comments-section\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "submit_comment",
+        "navigate",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_approve_comment_view_post",
+      "name": "Approve Comment → View Post",
+      "description": "Test Approve a submitted comment followed by Navigate to and view a blog post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "approve_comment"
+        },
+        {
+          "type": "view_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "approve_comment",
+        "view_post",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_approve_comment_update_post",
+      "name": "Approve Comment → Update Post",
+      "description": "Test Approve a submitted comment followed by Update an existing blog post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "approve_comment"
+        },
+        {
+          "type": "update_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "approve_comment",
+        "update_post",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_approve_comment_submit_comment",
+      "name": "Approve Comment → Submit Comment",
+      "description": "Test Approve a submitted comment followed by Submit a comment on a post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "approve_comment"
+        },
+        {
+          "type": "submit_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"comments-section\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "approve_comment",
+        "submit_comment",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_approve_comment_approve_comment",
+      "name": "Approve Comment → Approve Comment",
+      "description": "Test Approve a submitted comment followed by Approve a submitted comment",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "approve_comment"
+        },
+        {
+          "type": "approve_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "approve_comment",
+        "approve_comment",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_approve_comment_reject_comment",
+      "name": "Approve Comment → Reject Comment",
+      "description": "Test Approve a submitted comment followed by Reject a submitted comment",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "approve_comment"
+        },
+        {
+          "type": "reject_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "approve_comment",
+        "reject_comment",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_approve_comment_view_profile",
+      "name": "Approve Comment → View Profile",
+      "description": "Test Approve a submitted comment followed by View user profile",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "approve_comment"
+        },
+        {
+          "type": "view_profile"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "approve_comment",
+        "view_profile",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_approve_comment_edit_profile",
+      "name": "Approve Comment → Edit Profile",
+      "description": "Test Approve a submitted comment followed by Edit user profile information",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "approve_comment"
+        },
+        {
+          "type": "edit_profile"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "approve_comment",
+        "edit_profile",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_approve_comment_navigate",
+      "name": "Approve Comment → Navigate",
+      "description": "Test Approve a submitted comment followed by Navigate between pages",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "approve_comment"
+        },
+        {
+          "type": "navigate"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "approve_comment",
+        "navigate",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_reject_comment_view_post",
+      "name": "Reject Comment → View Post",
+      "description": "Test Reject a submitted comment followed by Navigate to and view a blog post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "reject_comment"
+        },
+        {
+          "type": "view_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "reject_comment",
+        "view_post",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_reject_comment_update_post",
+      "name": "Reject Comment → Update Post",
+      "description": "Test Reject a submitted comment followed by Update an existing blog post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "reject_comment"
+        },
+        {
+          "type": "update_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "reject_comment",
+        "update_post",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_reject_comment_submit_comment",
+      "name": "Reject Comment → Submit Comment",
+      "description": "Test Reject a submitted comment followed by Submit a comment on a post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "reject_comment"
+        },
+        {
+          "type": "submit_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"comments-section\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "reject_comment",
+        "submit_comment",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_reject_comment_approve_comment",
+      "name": "Reject Comment → Approve Comment",
+      "description": "Test Reject a submitted comment followed by Approve a submitted comment",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "reject_comment"
+        },
+        {
+          "type": "approve_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "reject_comment",
+        "approve_comment",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_reject_comment_reject_comment",
+      "name": "Reject Comment → Reject Comment",
+      "description": "Test Reject a submitted comment followed by Reject a submitted comment",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "reject_comment"
+        },
+        {
+          "type": "reject_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "reject_comment",
+        "reject_comment",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_reject_comment_view_profile",
+      "name": "Reject Comment → View Profile",
+      "description": "Test Reject a submitted comment followed by View user profile",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "reject_comment"
+        },
+        {
+          "type": "view_profile"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "reject_comment",
+        "view_profile",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_reject_comment_edit_profile",
+      "name": "Reject Comment → Edit Profile",
+      "description": "Test Reject a submitted comment followed by Edit user profile information",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "reject_comment"
+        },
+        {
+          "type": "edit_profile"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "reject_comment",
+        "edit_profile",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_reject_comment_navigate",
+      "name": "Reject Comment → Navigate",
+      "description": "Test Reject a submitted comment followed by Navigate between pages",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "reject_comment"
+        },
+        {
+          "type": "navigate"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "reject_comment",
+        "navigate",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_profile_submit_comment",
+      "name": "View Profile → Submit Comment",
+      "description": "Test View user profile followed by Submit a comment on a post",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_profile"
+        },
+        {
+          "type": "submit_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"comments-section\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "view_profile",
+        "submit_comment",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_profile_approve_comment",
+      "name": "View Profile → Approve Comment",
+      "description": "Test View user profile followed by Approve a submitted comment",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_profile"
+        },
+        {
+          "type": "approve_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "view_profile",
+        "approve_comment",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_profile_reject_comment",
+      "name": "View Profile → Reject Comment",
+      "description": "Test View user profile followed by Reject a submitted comment",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_profile"
+        },
+        {
+          "type": "reject_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "view_profile",
+        "reject_comment",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_edit_profile_submit_comment",
+      "name": "Edit Profile → Submit Comment",
+      "description": "Test Edit user profile information followed by Submit a comment on a post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "edit_profile"
+        },
+        {
+          "type": "submit_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"comments-section\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "edit_profile",
+        "submit_comment",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_edit_profile_approve_comment",
+      "name": "Edit Profile → Approve Comment",
+      "description": "Test Edit user profile information followed by Approve a submitted comment",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "edit_profile"
+        },
+        {
+          "type": "approve_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "edit_profile",
+        "approve_comment",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_edit_profile_reject_comment",
+      "name": "Edit Profile → Reject Comment",
+      "description": "Test Edit user profile information followed by Reject a submitted comment",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "edit_profile"
+        },
+        {
+          "type": "reject_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "edit_profile",
+        "reject_comment",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_navigate_submit_comment",
+      "name": "Navigate → Submit Comment",
+      "description": "Test Navigate between pages followed by Submit a comment on a post",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "navigate"
+        },
+        {
+          "type": "submit_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        },
+        {
+          "type": "ui_element",
+          "target": "[data-testid=\"comments-section\"]",
+          "expected": "visible"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "navigate",
+        "submit_comment",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_navigate_approve_comment",
+      "name": "Navigate → Approve Comment",
+      "description": "Test Navigate between pages followed by Approve a submitted comment",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "navigate"
+        },
+        {
+          "type": "approve_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "navigate",
+        "approve_comment",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_navigate_reject_comment",
+      "name": "Navigate → Reject Comment",
+      "description": "Test Navigate between pages followed by Reject a submitted comment",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "navigate"
+        },
+        {
+          "type": "reject_comment"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "medium",
+      "tags": [
+        "navigate",
+        "reject_comment",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_post_view_post",
+      "name": "View Post → View Post",
+      "description": "Test Navigate to and view a blog post followed by Navigate to and view a blog post",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_post"
+        },
+        {
+          "type": "view_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "view_post",
+        "view_post",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_post_update_post",
+      "name": "View Post → Update Post",
+      "description": "Test Navigate to and view a blog post followed by Update an existing blog post",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_post"
+        },
+        {
+          "type": "update_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "view_post",
+        "update_post",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_post_view_profile",
+      "name": "View Post → View Profile",
+      "description": "Test Navigate to and view a blog post followed by View user profile",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_post"
+        },
+        {
+          "type": "view_profile"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "view_post",
+        "view_profile",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_post_edit_profile",
+      "name": "View Post → Edit Profile",
+      "description": "Test Navigate to and view a blog post followed by Edit user profile information",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_post"
+        },
+        {
+          "type": "edit_profile"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "view_post",
+        "edit_profile",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_post_navigate",
+      "name": "View Post → Navigate",
+      "description": "Test Navigate to and view a blog post followed by Navigate between pages",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_post"
+        },
+        {
+          "type": "navigate"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "view_post",
+        "navigate",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_update_post_view_post",
+      "name": "Update Post → View Post",
+      "description": "Test Update an existing blog post followed by Navigate to and view a blog post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "update_post"
+        },
+        {
+          "type": "view_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "update_post",
+        "view_post",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_update_post_update_post",
+      "name": "Update Post → Update Post",
+      "description": "Test Update an existing blog post followed by Update an existing blog post",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "update_post"
+        },
+        {
+          "type": "update_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "update_post",
+        "update_post",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_update_post_view_profile",
+      "name": "Update Post → View Profile",
+      "description": "Test Update an existing blog post followed by View user profile",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "update_post"
+        },
+        {
+          "type": "view_profile"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "update_post",
+        "view_profile",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_update_post_edit_profile",
+      "name": "Update Post → Edit Profile",
+      "description": "Test Update an existing blog post followed by Edit user profile information",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "update_post"
+        },
+        {
+          "type": "edit_profile"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "update_post",
+        "edit_profile",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_update_post_navigate",
+      "name": "Update Post → Navigate",
+      "description": "Test Update an existing blog post followed by Navigate between pages",
+      "actor": "admin",
+      "initialState": {
+        "actor": "admin",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "update_post"
+        },
+        {
+          "type": "navigate"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "admin"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "update_post",
+        "navigate",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_profile_view_post",
+      "name": "View Profile → View Post",
+      "description": "Test View user profile followed by Navigate to and view a blog post",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_profile"
+        },
+        {
+          "type": "view_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "view_profile",
+        "view_post",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_profile_update_post",
+      "name": "View Profile → Update Post",
+      "description": "Test View user profile followed by Update an existing blog post",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_profile"
+        },
+        {
+          "type": "update_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "view_profile",
+        "update_post",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_profile_view_profile",
+      "name": "View Profile → View Profile",
+      "description": "Test View user profile followed by View user profile",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_profile"
+        },
+        {
+          "type": "view_profile"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "view_profile",
+        "view_profile",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_profile_edit_profile",
+      "name": "View Profile → Edit Profile",
+      "description": "Test View user profile followed by Edit user profile information",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_profile"
+        },
+        {
+          "type": "edit_profile"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "view_profile",
+        "edit_profile",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_view_profile_navigate",
+      "name": "View Profile → Navigate",
+      "description": "Test View user profile followed by Navigate between pages",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "view_profile"
+        },
+        {
+          "type": "navigate"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "view_profile",
+        "navigate",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_edit_profile_view_post",
+      "name": "Edit Profile → View Post",
+      "description": "Test Edit user profile information followed by Navigate to and view a blog post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "edit_profile"
+        },
+        {
+          "type": "view_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "edit_profile",
+        "view_post",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_edit_profile_update_post",
+      "name": "Edit Profile → Update Post",
+      "description": "Test Edit user profile information followed by Update an existing blog post",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "edit_profile"
+        },
+        {
+          "type": "update_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "edit_profile",
+        "update_post",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_edit_profile_view_profile",
+      "name": "Edit Profile → View Profile",
+      "description": "Test Edit user profile information followed by View user profile",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "edit_profile"
+        },
+        {
+          "type": "view_profile"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "edit_profile",
+        "view_profile",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_edit_profile_edit_profile",
+      "name": "Edit Profile → Edit Profile",
+      "description": "Test Edit user profile information followed by Edit user profile information",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "edit_profile"
+        },
+        {
+          "type": "edit_profile"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "edit_profile",
+        "edit_profile",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_edit_profile_navigate",
+      "name": "Edit Profile → Navigate",
+      "description": "Test Edit user profile information followed by Navigate between pages",
+      "actor": "user",
+      "initialState": {
+        "actor": "user",
+        "page": "home",
+        "isAuthenticated": true
+      },
+      "transitions": [
+        {
+          "type": "edit_profile"
+        },
+        {
+          "type": "navigate"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "user"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "edit_profile",
+        "navigate",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_navigate_view_post",
+      "name": "Navigate → View Post",
+      "description": "Test Navigate between pages followed by Navigate to and view a blog post",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "navigate"
+        },
+        {
+          "type": "view_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "navigate",
+        "view_post",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_navigate_update_post",
+      "name": "Navigate → Update Post",
+      "description": "Test Navigate between pages followed by Update an existing blog post",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "navigate"
+        },
+        {
+          "type": "update_post"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "navigate",
+        "update_post",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_navigate_view_profile",
+      "name": "Navigate → View Profile",
+      "description": "Test Navigate between pages followed by View user profile",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "navigate"
+        },
+        {
+          "type": "view_profile"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "navigate",
+        "view_profile",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_navigate_edit_profile",
+      "name": "Navigate → Edit Profile",
+      "description": "Test Navigate between pages followed by Edit user profile information",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "navigate"
+        },
+        {
+          "type": "edit_profile"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "navigate",
+        "edit_profile",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    },
+    {
+      "id": "TC_navigate_navigate",
+      "name": "Navigate → Navigate",
+      "description": "Test Navigate between pages followed by Navigate between pages",
+      "actor": "anonymous",
+      "initialState": {
+        "actor": "anonymous",
+        "page": "home",
+        "isAuthenticated": false
+      },
+      "transitions": [
+        {
+          "type": "navigate"
+        },
+        {
+          "type": "navigate"
+        }
+      ],
+      "assertions": [
+        {
+          "type": "state_invariant",
+          "target": "header",
+          "expected": "anonymous"
+        }
+      ],
+      "priority": "low",
+      "tags": [
+        "navigate",
+        "navigate",
+        "anonymous",
+        "user",
+        "admin"
+      ]
+    }
+  ],
+  "coverage": {
+    "transitions": 13,
+    "transitionPairs": 169,
+    "states": 0
+  }
+}
