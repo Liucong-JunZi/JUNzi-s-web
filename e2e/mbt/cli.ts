@@ -6,7 +6,7 @@ const { ActorStates } = require('./models/stateMachine');
 const fs = require('fs');
 const path = require('path');
 
-const OUTPUT_DIR = path.join(__dirname, '../../specs/mbt');
+const OUTPUT_DIR = path.join(__dirname, '../specs/mbt');
 
 async function main() {
   console.log('MBT Test Generator\n');

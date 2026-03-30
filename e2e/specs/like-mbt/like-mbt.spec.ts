@@ -972,24 +972,31 @@ test.describe('Like Toggle MBT', () => {
       const likeBtn = page.getByTestId('like-btn');
       await expect(likeBtn).toBeVisible({ timeout: 10_000 });
       const originalCount = await extractLikeCount(likeBtn);
+      const waitLikeApi = () =>
+        page.waitForResponse(
+          (response) =>
+            response.url().includes(`/api/posts/${post.id}/like`) &&
+            response.request().method() === 'POST' &&
+            response.status() < 300
+        );
 
       // Cycle 1: Like
-      await likeBtn.click();
+      await Promise.all([waitLikeApi(), likeBtn.click()]);
       await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
       await assertLikedState(likeBtn, originalCount + 1);
 
       // Cycle 2: Unlike
-      await likeBtn.click();
+      await Promise.all([waitLikeApi(), likeBtn.click()]);
       await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
       await assertUnlikedState(likeBtn, originalCount);
 
       // Cycle 3: Like
-      await likeBtn.click();
+      await Promise.all([waitLikeApi(), likeBtn.click()]);
       await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
       await assertLikedState(likeBtn, originalCount + 1);
 
       // Cycle 4: Unlike
-      await likeBtn.click();
+      await Promise.all([waitLikeApi(), likeBtn.click()]);
       await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
       await assertUnlikedState(likeBtn, originalCount);
 

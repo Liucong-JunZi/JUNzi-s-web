@@ -48,7 +48,9 @@ test.describe('TPC Admin Management', () => {
       });
       expect(createRes.ok()).toBeTruthy();
       const body = await createRes.json();
-      createdProjectIds.push(body.project?.id || body.id);
+      const projectId = body.project?.id || body.id;
+      expect(projectId).toBeTruthy();
+      createdProjectIds.push(projectId);
 
       await page.goto('/');
       await expect(page.locator('header')).toBeVisible({ timeout: 10_000 });
@@ -58,9 +60,10 @@ test.describe('TPC Admin Management', () => {
       // Rule 1: Assert new-project-btn is visible
       const newBtn = page.getByTestId('new-project-btn');
       await expect(newBtn).toBeVisible();
-      // Rule 1: Assert at least one project exists
-      const count = await page.locator('[data-testid^="edit-project-btn-"]').count();
-      expect(count).toBeGreaterThan(0);
+      // Rule 1: Assert created project row is visible and actionable
+      const editBtn = page.getByTestId(`edit-project-btn-${projectId}`);
+      await expect(editBtn).toBeVisible();
+      await editBtn.click({ trial: true });
       await newBtn.click();
       await expect(page).toHaveURL(/\/admin\/projects\/new$/, { timeout: 10_000 });
     } finally {
@@ -1250,9 +1253,6 @@ test.describe('TPC Admin Management', () => {
       await page.goto('/admin/resume');
       await expect(page.getByTestId('admin-resume-page')).toBeVisible({ timeout: 15_000 });
 
-      // Count items before add (Rule 8)
-      const itemsBeforeAdd = await page.locator('[data-testid^="edit-resume-btn-"]').count();
-
       // Add new item
       await page.getByTestId('resume-type-select').selectOption('work');
       await page.getByTestId('resume-title-input').fill(`TPC-375 Cycle ${Date.now()}`);
@@ -1271,20 +1271,21 @@ test.describe('TPC Admin Management', () => {
       const resumeId = body.resume?.id || body.id;
       expect(resumeId).toBeTruthy();
 
-      // Assert add succeeds — item count increases (Rule 8)
-      await expect(page.locator('[data-testid^="edit-resume-btn-"]')).toHaveCount(itemsBeforeAdd + 1, { timeout: 10_000 });
-      await expect(page.getByTestId(`edit-resume-btn-${resumeId}`)).toBeVisible({ timeout: 10_000 });
+      // Assert add succeeds — newly created item exists (Rule 8)
+      const editResumeBtn = page.getByTestId(`edit-resume-btn-${resumeId}`);
+      await expect(editResumeBtn).toHaveCount(1, { timeout: 10_000 });
+      await expect(editResumeBtn).toBeVisible({ timeout: 10_000 });
 
       // Edit then cancel
-      await page.getByTestId(`edit-resume-btn-${resumeId}`).click();
+      await editResumeBtn.click();
       await expect(page.getByTestId('cancel-edit-btn')).toBeVisible({ timeout: 10_000 });
       await page.getByTestId('cancel-edit-btn').click();
 
       // Assert edit succeeds — item still exists (Rule 8)
-      await expect(page.getByTestId(`edit-resume-btn-${resumeId}`)).toBeVisible({ timeout: 5_000 });
+      await expect(editResumeBtn).toBeVisible({ timeout: 5_000 });
 
       // Edit then submit
-      await page.getByTestId(`edit-resume-btn-${resumeId}`).click();
+      await editResumeBtn.click();
       await expect(page.getByTestId('cancel-edit-btn')).toBeVisible({ timeout: 10_000 });
       await page.getByTestId('resume-title-input').fill(`TPC-375 Edited ${Date.now()}`);
       const [editRes] = await Promise.all([
@@ -1300,9 +1301,8 @@ test.describe('TPC Admin Management', () => {
         page.getByTestId(`delete-resume-btn-${resumeId}`).click(),
       ]);
       expect(deleteRes.status()).toBeLessThan(300);
-      // Assert delete succeeds — item count decreases back (Rule 8)
-      await expect(page.locator('[data-testid^="edit-resume-btn-"]')).toHaveCount(itemsBeforeAdd, { timeout: 10_000 });
-      await expect(page.getByTestId(`edit-resume-btn-${resumeId}`)).not.toBeVisible({ timeout: 10_000 });
+      // Assert delete succeeds — newly created item no longer exists (Rule 8)
+      await expect(editResumeBtn).toHaveCount(0, { timeout: 10_000 });
     } finally {
       await context.close();
     }
@@ -1726,4 +1726,3 @@ test.describe('TPC Admin Management', () => {
     }
   });
 });
-

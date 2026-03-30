@@ -53,6 +53,28 @@ export class PostsApiClient {
     await ctx.dispose();
   }
 
+  async update(id: number, data: Partial<CreatePostData>) {
+    const { ctx, csrf } = await this.adminContext();
+    const res = await ctx.put(`/api/admin/posts/${id}`, {
+      data: JSON.stringify(data),
+      headers: { 'X-CSRF-Token': csrf, 'Content-Type': 'application/json' },
+    });
+    const body = await res.json();
+    await ctx.dispose();
+    return body.post || body;
+  }
+
+  async publish(id: number) {
+    const { ctx, csrf } = await this.adminContext();
+    const res = await ctx.put(`/api/admin/posts/${id}`, {
+      data: JSON.stringify({ status: 'published' }),
+      headers: { 'X-CSRF-Token': csrf, 'Content-Type': 'application/json' },
+    });
+    const body = await res.json();
+    await ctx.dispose();
+    return body.post || body;
+  }
+
   async getBySlug(slug: string) {
     const ctx = await request.newContext({ baseURL: this.baseUrl });
     const res = await ctx.get(`/api/posts/${slug}`);

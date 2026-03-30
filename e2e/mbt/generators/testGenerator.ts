@@ -164,6 +164,13 @@ export function generateTestSuite(
 export function exportAsPlaywrightTests(testCases: TestCase[]): string {
   let output = `// Auto-generated TPC test cases\n`;
   output += `// Generated: ${new Date().toISOString()}\n\n`;
+  output += `import { test, expect } from '@playwright/test';\n`;
+  output += `import { openPageAsActor, type ActorRole } from '../tpc/helpers';\n\n`;
+  output += `function toActorRole(actor: string): ActorRole {\n`;
+  output += `  if (actor === 'S_USER') return 'user';\n`;
+  output += `  if (actor === 'S_ADMIN') return 'admin';\n`;
+  output += `  return 'anonymous';\n`;
+  output += `}\n\n`;
   
   for (const tc of testCases) {
     output += generateTestFunction(tc);
@@ -177,19 +184,42 @@ function generateTestFunction(tc: TestCase): string {
   return `
 test('${tc.id}: ${tc.name}', async ({ browser }) => {
   const baseURL = process.env.E2E_BASE_URL ?? 'http://localhost';
-  const { context, page } = await openPageAsActor(browser, baseURL, '${tc.actor}');
-  
+  const { context, page } = await openPageAsActor(browser, baseURL, toActorRole('${tc.actor}'));
+
   try {
     // Setup: Navigate to initial page
     await page.goto('/');
     await expect(page.locator('header')).toBeVisible();
-    
+
     // TODO: Add transition steps based on tc.transitions
     // TODO: Add assertions based on tc.assertions
-    
+
   } finally {
     await context.close();
   }
 });
 `.trim();
+}
+
+/**
+ * Generate a complete Playwright spec file that uses the MBT runner
+ * (adapter + observer) instead of empty TODO stubs.
+ *
+ * @param suite - The TestSuite to render as a spec
+ * @param role  - ActorRole string: 'anonymous' | 'user' | 'admin'
+ * @returns A self-contained spec file as a string
+ */
+export function generatePlaywrightSpec(suite: TestSuite, role: string): string {
+  // Derive the ActorStates key from the role (e.g. 'user' -> 'USER')
+  const actorKey = role.toUpperCase();
+
+  return `// Auto-generated MBT spec — model-driven with adapter + oracle
+import { test, expect } from '@playwright/test';
+import { registerMBTTests } from '../../mbt/runner';
+import { generateTestSuite } from '../../mbt/generators/testGenerator';
+import { ActorStates } from '../../mbt/models/stateMachine';
+
+const suite = generateTestSuite(ActorStates.${actorKey}, '${suite.name}');
+registerMBTTests(suite, '${role}');
+`;
 }

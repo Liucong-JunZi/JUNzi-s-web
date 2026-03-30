@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { createActorContext } from './helpers';
+import { createActorContext, readCsrfToken } from './helpers';
 import { PostsApiClient } from '../../clients/PostsApiClient';
 import { PostFactory } from '../../factories/PostFactory';
-import { cleanupPosts } from '../../helpers/cleanup';
+import { cleanupPosts, cleanupProjects } from '../../helpers/cleanup';
 
 test.describe.configure({ mode: 'parallel' });
 
@@ -11,9 +11,11 @@ const baseURL = process.env.BASE_URL ?? 'http://localhost';
 test.describe('TPC Authenticated User', () => {
   const postsApi = new PostsApiClient();
   const createdPostIds: number[] = [];
+  const createdProjectIds: number[] = [];
 
   test.afterAll(async () => {
     await cleanupPosts(createdPostIds);
+    await cleanupProjects(createdProjectIds);
   });
 
   // TPC pairs: 16,56,67,151
@@ -123,27 +125,45 @@ test.describe('TPC Authenticated User', () => {
   // TPC pairs: 71,73
   // PATH_44: Login → browse portfolio → project detail → back
   test('OP-204: user browses portfolio and views project detail', async ({ browser }) => {
+    let projectId = 0;
+    const adminContext = await createActorContext(browser, baseURL, 'admin');
+    try {
+      const csrf = await readCsrfToken(adminContext, baseURL);
+      const createRes = await adminContext.request.post('/api/admin/projects', {
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
+        data: JSON.stringify({
+          title: `OP-204 Project ${Date.now()}`,
+          description: 'e2e op-204 project',
+          tech_stack: 'TypeScript',
+          status: 'active',
+          sort_order: 999,
+        }),
+      });
+      expect(createRes.ok()).toBeTruthy();
+      const body = await createRes.json();
+      projectId = Number(body.project?.id ?? body.id);
+      expect(projectId).toBeGreaterThan(0);
+      createdProjectIds.push(projectId);
+    } finally {
+      await adminContext.close();
+    }
+
     const context = await createActorContext(browser, baseURL, 'user');
     const page = await context.newPage();
     try {
       await page.goto('/portfolio');
-      // Portfolio page container doesn't have a testid, verify via heading
-      await expect(page.getByRole('heading', { name: 'Portfolio' })).toBeVisible({ timeout: 10_000 });
+      await expect(page).toHaveURL(/\/portfolio$/, { timeout: 10_000 });
 
-      // Click the first project-details-btn to navigate to project detail
-      const detailsBtn = page.getByTestId('project-details-btn').first();
+      const detailsBtn = page.locator(`[data-testid="project-details-btn"][href="/portfolio/${projectId}"]`);
       await expect(detailsBtn).toBeVisible({ timeout: 10_000 });
       await detailsBtn.click();
-      // Assert URL matches /portfolio/:slug or /portfolio/:id
-      await expect(page).toHaveURL(/\/portfolio\/[\w-]+/, { timeout: 10_000 });
-      // Assert back-to-portfolio-btn is visible on the detail page
+      await expect(page).toHaveURL(new RegExp(`/portfolio/${projectId}$`), { timeout: 10_000 });
       await expect(page.getByTestId('back-to-portfolio-btn')).toBeVisible({ timeout: 10_000 });
-      // Assert some project content is visible (h1 title has no testid)
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible({ timeout: 10_000 });
 
-      // Navigate back using back-to-portfolio-btn
       await page.getByTestId('back-to-portfolio-btn').click();
       await expect(page).toHaveURL(/\/portfolio$/, { timeout: 10_000 });
+      await expect(detailsBtn).toBeVisible({ timeout: 10_000 });
     } finally {
       await context.close();
     }

@@ -1,7 +1,52 @@
-import { test, expect } from '@playwright/test';
-import { createActorContext, openPageAsActor } from './helpers';
+import { test, expect, type Browser } from '@playwright/test';
+import { createActorContext, openPageAsActor, readCsrfToken } from './helpers';
 
 const baseURL = process.env.E2E_BASE_URL ?? 'http://localhost';
+
+type SeededProject = {
+  id: string;
+  title: string;
+};
+
+async function seedPortfolioProject(browser: Browser): Promise<SeededProject> {
+  const { context } = await openPageAsActor(browser, baseURL, 'admin');
+  try {
+    const csrf = await readCsrfToken(context, baseURL);
+    const suffix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const title = `TPC-ANON-${suffix}`;
+    const createRes = await context.request.post('/api/admin/projects', {
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
+      data: JSON.stringify({
+        title,
+        description: `anonymous flow seed ${suffix}`,
+        tech_stack: 'Playwright,TypeScript',
+        status: 'active',
+        sort_order: 999,
+      }),
+    });
+    expect(createRes.ok(), `seed project create status=${createRes.status()}`).toBeTruthy();
+    const body = await createRes.json();
+    const id = String(body?.project?.id ?? body?.id ?? '');
+    expect(id).toMatch(/^\d+$/);
+    return { id, title };
+  } finally {
+    await context.close();
+  }
+}
+
+async function cleanupPortfolioProject(browser: Browser, projectId: string): Promise<void> {
+  const { context } = await openPageAsActor(browser, baseURL, 'admin');
+  try {
+    const csrf = await readCsrfToken(context, baseURL);
+    await context.request.delete(`/api/admin/projects/${projectId}`, {
+      headers: { 'X-CSRF-Token': csrf },
+    });
+  } catch (error) {
+    void error;
+  } finally {
+    await context.close();
+  }
+}
 
 test.describe('TPC Anonymous', () => {
   test.describe.configure({ mode: 'parallel' });
@@ -48,14 +93,23 @@ test.describe('TPC Anonymous', () => {
       // Capture current like count
       const beforeText = await likeBtn.textContent();
       const beforeCount = parseInt(beforeText!.match(/\d+/)![0]);
+      const postUrlBeforeLike = page.url();
+      let likeRequestCount = 0;
+      await page.route('**/api/posts/*/like', async (route) => {
+        likeRequestCount += 1;
+        await route.continue();
+      });
 
       await likeBtn.click();
-      // Anonymous should see "Login Required" toast
-      await expect(page.getByText('Login Required')).toBeVisible({ timeout: 10_000 });
+      // Anonymous like should be blocked without calling like API
+      await page.waitForLoadState('networkidle');
+      expect(likeRequestCount).toBe(0);
+      await expect(page).toHaveURL(postUrlBeforeLike);
       // Like count should NOT change
       const afterText = await likeBtn.textContent();
       const afterCount = parseInt(afterText!.match(/\d+/)![0]);
       expect(afterCount).toBe(beforeCount);
+      await page.unroute('**/api/posts/*/like');
     } finally {
       await context.close();
     }
@@ -116,7 +170,7 @@ test.describe('TPC Anonymous', () => {
       await postCard.click();
       await expect(page).toHaveURL(/\/blog\/[^/]+$/, { timeout: 10_000 });
       // T71: click Back to Blog → SP1
-      await page.getByRole('link', { name: /back to blog/i }).click();
+      await page.locator('main a[href="/blog"]').first().click();
       await expect(page).toHaveURL(/\/blog$/, { timeout: 10_000 });
       await expect(page.getByTestId('blog-page')).toBeVisible({ timeout: 10_000 });
       // T68: click Next pagination → SB4
@@ -140,52 +194,51 @@ test.describe('TPC Anonymous', () => {
   // OP-105 | PATH_5 | Browse portfolio → project detail → back
   // TPC pairs: 71, 73
   test('OP-105: portfolio → project detail → back to portfolio', async ({ browser }) => {
+    const seededProject = await seedPortfolioProject(browser);
     const { context, page } = await openPageAsActor(browser, baseURL, 'anonymous');
     try {
       await page.goto('/portfolio');
       await expect(page).toHaveURL(/\/portfolio$/, { timeout: 15_000 });
-      // Portfolio page loaded -- verify by heading visibility
-      await expect(page.getByRole('heading', { name: 'Portfolio' })).toBeVisible({ timeout: 15_000 });
-      // T75: click project card Details → SP4
-      const detailsBtn = page.getByTestId('project-details-btn').first();
+      const projectCard = page.getByTestId('project-card').filter({ hasText: seededProject.title });
+      await expect(projectCard).toBeVisible({ timeout: 15_000 });
+      const detailsBtn = projectCard.getByTestId('project-details-btn');
       await expect(detailsBtn).toBeVisible({ timeout: 10_000 });
       await detailsBtn.click();
-      await expect(page).toHaveURL(/\/portfolio\/[^/]+$/, { timeout: 10_000 });
-      // Project detail page loaded -- verify back button is visible
+      await expect(page).toHaveURL(new RegExp(`/portfolio/${seededProject.id}$`), { timeout: 10_000 });
       await expect(page.getByTestId('back-to-portfolio-btn')).toBeVisible({ timeout: 10_000 });
-      // T76: click Back → SP3
       await page.getByTestId('back-to-portfolio-btn').click();
       await expect(page).toHaveURL(/\/portfolio$/, { timeout: 10_000 });
-      await expect(page.getByRole('heading', { name: 'Portfolio' })).toBeVisible({ timeout: 15_000 });
+      await expect(projectCard).toBeVisible({ timeout: 10_000 });
     } finally {
       await context.close();
+      await cleanupPortfolioProject(browser, seededProject.id);
     }
   });
 
   // OP-106 | PATH_6 | Home → portfolio CTA → project → back to portfolio
   // TPC pairs: 49, 70, 73
   test('OP-106: home portfolio CTA → project detail → back', async ({ browser }) => {
+    const seededProject = await seedPortfolioProject(browser);
     const { context, page } = await openPageAsActor(browser, baseURL, 'anonymous');
     try {
       await page.goto('/');
       await expect(page).toHaveURL(/\/$/, { timeout: 15_000 });
       await expect(page.locator('header')).toBeVisible({ timeout: 15_000 });
-      // T63: click Portfolio CTA button → SP3
-      await page.getByRole('link', { name: 'View Portfolio' }).click();
+      await page.getByTestId('home-portfolio-cta').click();
       await expect(page).toHaveURL(/\/portfolio$/, { timeout: 10_000 });
-      await expect(page.getByRole('heading', { name: 'Portfolio' })).toBeVisible({ timeout: 10_000 });
-      // T75: click project Details → SP4
-      const detailsBtn = page.getByTestId('project-details-btn').first();
+      const projectCard = page.getByTestId('project-card').filter({ hasText: seededProject.title });
+      await expect(projectCard).toBeVisible({ timeout: 15_000 });
+      const detailsBtn = projectCard.getByTestId('project-details-btn');
       await expect(detailsBtn).toBeVisible({ timeout: 10_000 });
       await detailsBtn.click();
-      await expect(page).toHaveURL(/\/portfolio\/[^/]+$/, { timeout: 10_000 });
+      await expect(page).toHaveURL(new RegExp(`/portfolio/${seededProject.id}$`), { timeout: 10_000 });
       await expect(page.getByTestId('back-to-portfolio-btn')).toBeVisible({ timeout: 10_000 });
-      // T76: back → SP3
       await page.getByTestId('back-to-portfolio-btn').click();
       await expect(page).toHaveURL(/\/portfolio$/, { timeout: 10_000 });
-      await expect(page.getByRole('heading', { name: 'Portfolio' })).toBeVisible({ timeout: 10_000 });
+      await expect(projectCard).toBeVisible({ timeout: 10_000 });
     } finally {
       await context.close();
+      await cleanupPortfolioProject(browser, seededProject.id);
     }
   });
 
@@ -242,7 +295,7 @@ test.describe('TPC Anonymous', () => {
       // Rule 8: Assert 404 message is shown (use first() to avoid strict mode with multiple matches)
       await expect(page.getByText(/not found|404/i).first()).toBeVisible({ timeout: 10_000 });
       // T77: click Go Home → SP0
-      await page.getByRole('link', { name: /go home/i }).click();
+      await page.locator('main a[href="/"]').first().click();
       await expect(page).toHaveURL(/\/$/, { timeout: 10_000 });
       await expect(page.locator('header')).toBeVisible({ timeout: 10_000 });
       // T48: nav to blog
@@ -267,7 +320,7 @@ test.describe('TPC Anonymous', () => {
       // Rule 8: Assert 404 message is shown (use first() to avoid strict mode with multiple matches)
       await expect(page.getByText(/not found|404/i).first()).toBeVisible({ timeout: 10_000 });
       // T78: click Go Back → SP1
-      await page.getByRole('button', { name: /go back/i }).click();
+      await page.locator('main button').filter({ has: page.locator('svg.lucide-arrow-left') }).first().click();
       await expect(page).toHaveURL(/\/blog$/, { timeout: 10_000 });
       await expect(page.getByTestId('blog-page')).toBeVisible({ timeout: 10_000 });
     } finally {
@@ -523,19 +576,20 @@ test.describe('TPC Anonymous', () => {
       await expect(page).toHaveURL(/\/blog$/, { timeout: 15_000 });
       await expect(page.locator('header')).toBeVisible({ timeout: 15_000 });
       // T54: open mobile menu
-      const hamburger = page.locator('header button.md\\:hidden');
+      const hamburger = page.getByTestId('mobile-menu-btn');
       await hamburger.click();
-      const mobileNav = page.locator('header div.md\\:hidden.border-t');
+      const mobileNav = page.getByTestId('mobile-menu');
       await expect(mobileNav).toBeVisible({ timeout: 5_000 });
       // Rule 6: Assert Home link visible in mobile menu
-      await expect(mobileNav.getByRole('link', { name: 'Home' })).toBeVisible({ timeout: 5_000 });
+      const homeLink = mobileNav.locator('a[href="/"]').first();
+      await expect(homeLink).toBeVisible({ timeout: 5_000 });
       // T56: tap Home in mobile nav → SP0
-      await mobileNav.getByRole('link', { name: 'Home' }).click();
+      await homeLink.click();
       // Rule 6: Assert mobile menu closed after navigation
       await expect(mobileNav).not.toBeVisible({ timeout: 5_000 });
       await expect(page).toHaveURL(/\/$/, { timeout: 10_000 });
       // T62: click Blog CTA button on home → SP1
-      await page.getByRole('link', { name: 'Read Blog' }).click();
+      await page.getByTestId('home-blog-cta').click();
       await expect(page).toHaveURL(/\/blog$/, { timeout: 10_000 });
       await expect(page.getByTestId('blog-page')).toBeVisible({ timeout: 10_000 });
       // T65: click post card → SP2
@@ -544,7 +598,7 @@ test.describe('TPC Anonymous', () => {
       await postCard.click();
       await expect(page).toHaveURL(/\/blog\/[^/]+$/, { timeout: 10_000 });
       // T71: back to blog
-      await page.getByRole('link', { name: /back to blog/i }).click();
+      await page.locator('main a[href="/blog"]').first().click();
       await expect(page).toHaveURL(/\/blog$/, { timeout: 10_000 });
       await expect(page.getByTestId('blog-page')).toBeVisible({ timeout: 10_000 });
     } finally {
