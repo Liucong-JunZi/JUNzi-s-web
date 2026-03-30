@@ -167,9 +167,8 @@ func OptionalAuth(cfg *config.Config) gin.HandlerFunc {
 			return
 		}
 		if claims, ok := token.Claims.(*jwt.MapClaims); ok {
-			if userIDFloat, ok := (*claims)["user_id"].(float64); ok {
+			if userIDFloat, ok := (*claims)["sub"].(float64); ok {
 				userID := uint(userIDFloat)
-				// Load user from DB to verify they still exist
 				var user models.User
 				if err := database.DB.First(&user, userID).Error; err == nil {
 					c.Set("userID", userID)
