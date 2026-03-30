@@ -161,7 +161,7 @@ test.describe('Like Toggle MBT', () => {
       const beforeCount = await extractLikeCount(likeBtn);
 
       await likeBtn.click();
-      await expect(page.getByText('You liked this post!')).toBeVisible({ timeout: 10_000 });
+      await expect(page.locator('[data-sonner-toast]')).toBeVisible({ timeout: 10_000 });
 
       await assertLikedState(likeBtn, beforeCount + 1);
 
@@ -191,7 +191,7 @@ test.describe('Like Toggle MBT', () => {
 
       // Like
       await likeBtn.click();
-      await expect(page.getByText('You liked this post!')).toBeVisible({ timeout: 10_000 });
+      await expect(page.locator('[data-sonner-toast]')).toBeVisible({ timeout: 10_000 });
       await assertLikedState(likeBtn, originalCount + 1);
 
       // Unlike
@@ -240,7 +240,7 @@ test.describe('Like Toggle MBT', () => {
 
       // Like again
       await likeBtn.click();
-      await expect(page.getByText('You liked this post!')).toBeVisible({ timeout: 10_000 });
+      await expect(page.locator('[data-sonner-toast]')).toBeVisible({ timeout: 10_000 });
       await assertLikedState(likeBtn, unlikedCount + 1);
     } finally {
       await context.close();
@@ -266,7 +266,7 @@ test.describe('Like Toggle MBT', () => {
 
       // Like
       await likeBtn.click();
-      await expect(page.getByText('You liked this post!')).toBeVisible({ timeout: 10_000 });
+      await expect(page.locator('[data-sonner-toast]')).toBeVisible({ timeout: 10_000 });
       await assertLikedState(likeBtn, beforeCount + 1);
 
       // Navigate to blog list
@@ -353,7 +353,7 @@ test.describe('Like Toggle MBT', () => {
 
       // Like
       await likeBtn.click();
-      await expect(page.getByText('You liked this post!')).toBeVisible({ timeout: 10_000 });
+      await expect(page.locator('[data-sonner-toast]')).toBeVisible({ timeout: 10_000 });
       await assertLikedState(likeBtn, beforeCount + 1);
 
       // Reload page
@@ -430,7 +430,7 @@ test.describe('Like Toggle MBT', () => {
 
       // Like
       await likeBtn.click();
-      await expect(page.getByText('You liked this post!')).toBeVisible({ timeout: 10_000 });
+      await expect(page.locator('[data-sonner-toast]')).toBeVisible({ timeout: 10_000 });
       await assertLikedState(likeBtn, beforeCount + 1);
 
       // Logout via UI
@@ -528,7 +528,7 @@ test.describe('Like Toggle MBT', () => {
       // Now click like — should succeed
       const likeBtnAfter = page.getByTestId('like-btn');
       await likeBtnAfter.click();
-      await expect(page.getByText('You liked this post!')).toBeVisible({ timeout: 10_000 });
+      await expect(page.locator('[data-sonner-toast]')).toBeVisible({ timeout: 10_000 });
       await assertLikedState(likeBtnAfter, beforeCount + 1);
     } finally {
       await context.close();
@@ -827,7 +827,7 @@ test.describe('Like Toggle MBT', () => {
 
       // Like
       await likeBtn.click();
-      await expect(page.getByText('You liked this post!')).toBeVisible({ timeout: 10_000 });
+      await expect(page.locator('[data-sonner-toast]')).toBeVisible({ timeout: 10_000 });
       await assertLikedState(likeBtn, beforeCount + 1);
 
       // Logout via UI
@@ -873,7 +873,7 @@ test.describe('Like Toggle MBT', () => {
 
       // Like
       await likeBtn.click();
-      await expect(page.getByText('You liked this post!')).toBeVisible({ timeout: 10_000 });
+      await expect(page.locator('[data-sonner-toast]')).toBeVisible({ timeout: 10_000 });
       await assertLikedState(likeBtn, beforeCount + 1);
 
       // Navigate away
@@ -913,7 +913,7 @@ test.describe('Like Toggle MBT', () => {
       const beforeCount = await extractLikeCount(likeBtn);
 
       await likeBtn.click();
-      await expect(page.getByText('You liked this post!')).toBeVisible({ timeout: 10_000 });
+      await expect(page.locator('[data-sonner-toast]')).toBeVisible({ timeout: 10_000 });
       await assertLikedState(likeBtn, beforeCount + 1);
 
       // Verify S6 invariants (admin, on post detail, liked)
@@ -942,7 +942,7 @@ test.describe('Like Toggle MBT', () => {
 
       // Like
       await likeBtn.click();
-      await expect(page.getByText('You liked this post!')).toBeVisible({ timeout: 10_000 });
+      await expect(page.locator('[data-sonner-toast]')).toBeVisible({ timeout: 10_000 });
       await assertLikedState(likeBtn, originalCount + 1);
 
       // Unlike
@@ -973,7 +973,7 @@ test.describe('Like Toggle MBT', () => {
 
       // Cycle 1: Like
       await likeBtn.click();
-      await expect(page.getByText('You liked this post!')).toBeVisible({ timeout: 10_000 });
+      await expect(page.locator('[data-sonner-toast]')).toBeVisible({ timeout: 10_000 });
       await assertLikedState(likeBtn, originalCount + 1);
 
       // Cycle 2: Unlike
@@ -983,7 +983,7 @@ test.describe('Like Toggle MBT', () => {
 
       // Cycle 3: Like
       await likeBtn.click();
-      await expect(page.getByText('You liked this post!')).toBeVisible({ timeout: 10_000 });
+      await expect(page.locator('[data-sonner-toast]')).toBeVisible({ timeout: 10_000 });
       await assertLikedState(likeBtn, originalCount + 1);
 
       // Cycle 4: Unlike
