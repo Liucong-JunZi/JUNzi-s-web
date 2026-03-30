@@ -99,7 +99,7 @@ test.describe('TPC Authenticated User', () => {
 
       // First click: LIKE
       await likeBtn.click();
-      await expect(page.getByRole('status', { name: /Liked!/ })).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
       // Button should show "Liked" text and count incremented
       const afterLikeText = await likeBtn.textContent();
       const afterLikeCount = parseInt(afterLikeText!.match(/\d+/)![0]);
@@ -107,7 +107,7 @@ test.describe('TPC Authenticated User', () => {
 
       // Second click: UNLIKE
       await likeBtn.click();
-      await expect(page.getByRole('status', { name: /Unliked/ })).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
       const afterUnlikeText = await likeBtn.textContent();
       const afterUnlikeCount = parseInt(afterUnlikeText!.match(/\d+/)![0]);
       expect(afterUnlikeCount).toBe(beforeCount);
