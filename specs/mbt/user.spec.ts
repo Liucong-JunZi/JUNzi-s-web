@@ -1,6 +1,23 @@
 // Auto-generated TPC test cases
 // Generated: 2026-03-30T14:16:03.477Z
 
+import { test, expect } from '@playwright/test';
+import { openPageAsActor } from '../tpc/helpers';
+import { PostsApiClient } from '../../clients/PostsApiClient';
+import { PostFactory } from '../../factories/PostFactory';
+import { transitionAssertions } from '../../mbt/assertions/transitions';
+import { stateInvariants } from '../../mbt/assertions/state';
+
+const baseURL = process.env.E2E_BASE_URL ?? 'http://localhost';
+const postsApi = new PostsApiClient();
+const createdPostIds: number[] = [];
+
+test.afterAll(async () => {
+  for (const id of createdPostIds) {
+    await postsApi.delete(id).catch(() => {});
+  }
+});
+
 test('TC_T_NAV_T_LOGOUT: Navigate → Logout', async ({ browser }) => {
   const baseURL = process.env.E2E_BASE_URL ?? 'http://localhost';
   const { context, page } = await openPageAsActor(browser, baseURL, 'S_ANON');
@@ -241,16 +258,25 @@ test('TC_T_LIKE_T_LOGOUT: Like Post → Logout', async ({ browser }) => {
 
 test('TC_T_LIKE_T_LIKE: Like Post → Like Post', async ({ browser }) => {
   const baseURL = process.env.E2E_BASE_URL ?? 'http://localhost';
-  const { context, page } = await openPageAsActor(browser, baseURL, 'S_USER');
+  const { context, page } = await openPageAsActor(browser, baseURL, 'user');
+  
+  const post = await postsApi.create(PostFactory.create({ status: 'published' }));
+  createdPostIds.push(post.id);
   
   try {
-    // Setup: Navigate to initial page
-    await page.goto('/');
-    await expect(page.locator('header')).toBeVisible();
+    await page.goto(`${baseURL}/blog/${post.slug}`);
+    await expect(page.getByTestId('post-title')).toBeVisible({ timeout: 10000 });
     
-    // TODO: Add transition steps based on tc.transitions
-    // TODO: Add assertions based on tc.assertions
+    const likeBtn = page.getByTestId('like-btn');
+    await expect(likeBtn).toBeVisible();
     
+    await likeBtn.click();
+    await page.waitForTimeout(500);
+    await expect(likeBtn).toContainText('Liked');
+    
+    await likeBtn.click();
+    await page.waitForTimeout(500);
+    await expect(likeBtn).toContainText('Like');
   } finally {
     await context.close();
   }
@@ -258,16 +284,25 @@ test('TC_T_LIKE_T_LIKE: Like Post → Like Post', async ({ browser }) => {
 
 test('TC_T_LIKE_T_UNLIKE: Like Post → Unlike Post', async ({ browser }) => {
   const baseURL = process.env.E2E_BASE_URL ?? 'http://localhost';
-  const { context, page } = await openPageAsActor(browser, baseURL, 'S_USER');
+  const { context, page } = await openPageAsActor(browser, baseURL, 'user');
+  
+  const post = await postsApi.create(PostFactory.create({ status: 'published' }));
+  createdPostIds.push(post.id);
   
   try {
-    // Setup: Navigate to initial page
-    await page.goto('/');
-    await expect(page.locator('header')).toBeVisible();
+    await page.goto(`${baseURL}/blog/${post.slug}`);
+    await expect(page.getByTestId('post-title')).toBeVisible({ timeout: 10000 });
     
-    // TODO: Add transition steps based on tc.transitions
-    // TODO: Add assertions based on tc.assertions
+    const likeBtn = page.getByTestId('like-btn');
+    await expect(likeBtn).toBeVisible();
     
+    await likeBtn.click();
+    await page.waitForTimeout(500);
+    await expect(likeBtn).toContainText('Liked');
+    
+    await likeBtn.click();
+    await page.waitForTimeout(500);
+    await expect(likeBtn).toContainText('Like');
   } finally {
     await context.close();
   }
@@ -394,16 +429,21 @@ test('TC_T_UNLIKE_T_LOGOUT: Unlike Post → Logout', async ({ browser }) => {
 
 test('TC_T_UNLIKE_T_LIKE: Unlike Post → Like Post', async ({ browser }) => {
   const baseURL = process.env.E2E_BASE_URL ?? 'http://localhost';
-  const { context, page } = await openPageAsActor(browser, baseURL, 'S_USER');
+  const { context, page } = await openPageAsActor(browser, baseURL, 'user');
+  
+  const post = await postsApi.create(PostFactory.create({ status: 'published' }));
+  createdPostIds.push(post.id);
   
   try {
-    // Setup: Navigate to initial page
-    await page.goto('/');
-    await expect(page.locator('header')).toBeVisible();
+    await page.goto(`${baseURL}/blog/${post.slug}`);
+    await expect(page.getByTestId('post-title')).toBeVisible({ timeout: 10000 });
     
-    // TODO: Add transition steps based on tc.transitions
-    // TODO: Add assertions based on tc.assertions
+    const likeBtn = page.getByTestId('like-btn');
+    await expect(likeBtn).toBeVisible();
     
+    await likeBtn.click();
+    await page.waitForTimeout(500);
+    await expect(likeBtn).toContainText('Liked');
   } finally {
     await context.close();
   }
@@ -411,16 +451,25 @@ test('TC_T_UNLIKE_T_LIKE: Unlike Post → Like Post', async ({ browser }) => {
 
 test('TC_T_UNLIKE_T_UNLIKE: Unlike Post → Unlike Post', async ({ browser }) => {
   const baseURL = process.env.E2E_BASE_URL ?? 'http://localhost';
-  const { context, page } = await openPageAsActor(browser, baseURL, 'S_USER');
+  const { context, page } = await openPageAsActor(browser, baseURL, 'user');
+  
+  const post = await postsApi.create(PostFactory.create({ status: 'published' }));
+  createdPostIds.push(post.id);
   
   try {
-    // Setup: Navigate to initial page
-    await page.goto('/');
-    await expect(page.locator('header')).toBeVisible();
+    await page.goto(`${baseURL}/blog/${post.slug}`);
+    await expect(page.getByTestId('post-title')).toBeVisible({ timeout: 10000 });
     
-    // TODO: Add transition steps based on tc.transitions
-    // TODO: Add assertions based on tc.assertions
+    const likeBtn = page.getByTestId('like-btn');
+    await expect(likeBtn).toBeVisible();
     
+    await likeBtn.click();
+    await page.waitForTimeout(500);
+    await expect(likeBtn).toContainText('Liked');
+    
+    await likeBtn.click();
+    await page.waitForTimeout(500);
+    await expect(likeBtn).toContainText('Like');
   } finally {
     await context.close();
   }
