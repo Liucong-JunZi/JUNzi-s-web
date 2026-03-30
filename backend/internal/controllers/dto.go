@@ -3,6 +3,7 @@ package controllers
 import (
 	"time"
 
+	"github.com/liucong/personal-website/internal/database"
 	"github.com/liucong/personal-website/internal/models"
 )
 
@@ -34,6 +35,7 @@ type PublicPost struct {
 	Status     string          `json:"status"`
 	ViewCount  int             `json:"view_count"`
 	LikeCount  int             `json:"like_count"`
+	Liked      bool            `json:"liked"`
 	AuthorID   uint            `json:"author_id"`
 	Author     PublicUser      `json:"author"`
 	CategoryID *uint           `json:"category_id"`
@@ -70,6 +72,17 @@ func toPublicPosts(posts []models.Post) []PublicPost {
 		result[i] = toPublicPost(&posts[i])
 	}
 	return result
+}
+
+func toPublicPostWithLike(p *models.Post, userID uint) PublicPost {
+	pp := toPublicPost(p)
+	if userID > 0 {
+		var like models.UserLike
+		if err := database.DB.Where("user_id = ? AND post_id = ?", userID, p.ID).First(&like).Error; err == nil {
+			pp.Liked = true
+		}
+	}
+	return pp
 }
 
 // PublicComment is the public response DTO for comments (strips sensitive User fields).

@@ -78,7 +78,6 @@ func Setup(cfg *config.Config) *gin.Engine {
 		// Posts
 		api.GET("/posts", postController.ListPosts)
 		api.GET("/posts/:slug", postController.GetPostBySlug)
-		api.POST("/posts/:id/like", middleware.RateLimiter(cache.Client, 20, time.Minute), postController.LikePost)
 
 		// Projects
 		api.GET("/projects", projectController.ListProjects)
@@ -135,6 +134,7 @@ func Setup(cfg *config.Config) *gin.Engine {
 			commentRateLimit = 10000
 		}
 		protected.POST("/comments", middleware.CSRFProtection(), middleware.RateLimiter(cache.Client, commentRateLimit, time.Minute), commentController.CreateComment)
+		protected.POST("/posts/:id/like", middleware.CSRFProtection(), postController.LikePost)
 
 			// Admin routes
 			admin := protected.Group("/admin")

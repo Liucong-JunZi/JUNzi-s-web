@@ -112,3 +112,10 @@ type Setting struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
+
+type UserLike struct {
+	ID        uint      `json:"id" gorm:"primaryKey"`
+	UserID    uint      `json:"user_id" gorm:"uniqueIndex:idx_user_post_like"`
+	PostID    uint      `json:"post_id" gorm:"uniqueIndex:idx_user_post_like"`
+	CreatedAt time.Time `json:"created_at"`
+}

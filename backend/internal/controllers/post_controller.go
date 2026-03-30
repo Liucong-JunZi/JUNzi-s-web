@@ -161,7 +161,12 @@ func (pc *PostController) GetPostBySlug(c *gin.Context) {
 		post.ViewCount++
 	}
 
-	c.JSON(http.StatusOK, gin.H{"post": toPublicPost(&post)})
+	userID, _ := c.Get("userID")
+	if uid, ok := userID.(uint); ok {
+		c.JSON(http.StatusOK, gin.H{"post": toPublicPostWithLike(&post, uid)})
+	} else {
+		c.JSON(http.StatusOK, gin.H{"post": toPublicPost(&post)})
+	}
 }
 
 // GetPostByID gets a single post by ID (admin only)
@@ -310,9 +315,15 @@ func (pc *PostController) DeletePost(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Post deleted successfully"})
 }
 
-// LikePost increments the like count for a published post
+// LikePost toggles the like for a published post (authenticated users only)
 func (pc *PostController) LikePost(c *gin.Context) {
 	id := c.Param("id")
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
+		return
+	}
+	uid := userID.(uint)
 
 	var post models.Post
 	if err := database.DB.Where("status = ?", "published").First(&post, id).Error; err != nil {
@@ -320,15 +331,23 @@ func (pc *PostController) LikePost(c *gin.Context) {
 		return
 	}
 
-	// Increment like count atomically
-	if err := database.DB.Model(&models.Post{}).Where("id = ?", post.ID).
-		UpdateColumn("like_count", database.DB.Raw("COALESCE(like_count, 0) + 1")).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update like count"})
-		return
+	// Check if user already liked
+	var existingLike models.UserLike
+	result := database.DB.Where("user_id = ? AND post_id = ?", uid, post.ID).First(&existingLike)
+
+	if result.Error == nil {
+		// Already liked → unlike
+		database.DB.Delete(&existingLike)
+		database.DB.Model(&models.Post{}).Where("id = ?", post.ID).
+			UpdateColumn("like_count", database.DB.Raw("GREATEST(COALESCE(like_count, 0) - 1, 0)"))
+		database.DB.First(&post, post.ID)
+		c.JSON(http.StatusOK, gin.H{"message": "Post unliked", "like_count": post.LikeCount, "liked": false})
+	} else {
+		// Not liked → like
+		database.DB.Create(&models.UserLike{UserID: uid, PostID: post.ID})
+		database.DB.Model(&models.Post{}).Where("id = ?", post.ID).
+			UpdateColumn("like_count", database.DB.Raw("COALESCE(like_count, 0) + 1"))
+		database.DB.First(&post, post.ID)
+		c.JSON(http.StatusOK, gin.H{"message": "Post liked successfully", "like_count": post.LikeCount, "liked": true})
 	}
-
-	// Reload to get updated like_count
-	database.DB.First(&post, post.ID)
-
-	c.JSON(http.StatusOK, gin.H{"message": "Post liked successfully", "like_count": post.LikeCount})
 }
