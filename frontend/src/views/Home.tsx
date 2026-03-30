@@ -1,26 +1,28 @@
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { FileText, Briefcase, User } from 'lucide-react';
 
 export function Home() {
+  const { t } = useTranslation();
+
   return (
     <div className="container mx-auto px-4 py-12">
       {/* Hero Section */}
       <section className="text-center mb-16">
         <h1 className="text-4xl md:text-6xl font-bold mb-6">
-          Welcome to <span className="text-primary">JUNzi</span>
+          {t('home.welcome')}
         </h1>
         <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-          A personal website featuring blog posts, portfolio projects, and professional resume.
-          Built with React, TypeScript, and modern web technologies.
+          {t('home.heroDescription')}
         </p>
         <div className="flex justify-center gap-4">
           <Button asChild size="lg" data-testid="home-blog-cta">
-            <Link to="/blog">Read Blog</Link>
+            <Link to="/blog">{t('home.readBlog')}</Link>
           </Button>
           <Button asChild variant="outline" size="lg" data-testid="home-portfolio-cta">
-            <Link to="/portfolio">View Portfolio</Link>
+            <Link to="/portfolio">{t('home.viewPortfolio')}</Link>
           </Button>
         </div>
       </section>
@@ -30,14 +32,14 @@ export function Home() {
         <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
             <FileText className="h-12 w-12 mb-4 text-primary" />
-            <CardTitle>Blog</CardTitle>
+            <CardTitle>{t('home.blogTitle')}</CardTitle>
             <CardDescription>
-              Technical articles, tutorials, and thoughts on software development.
+              {t('home.blogDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild variant="ghost" className="w-full">
-              <Link to="/blog">Read Articles</Link>
+              <Link to="/blog">{t('home.readArticles')}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -45,14 +47,14 @@ export function Home() {
         <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
             <Briefcase className="h-12 w-12 mb-4 text-primary" />
-            <CardTitle>Portfolio</CardTitle>
+            <CardTitle>{t('home.portfolioTitle')}</CardTitle>
             <CardDescription>
-              Showcase of projects and applications I've built and contributed to.
+              {t('home.portfolioDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild variant="ghost" className="w-full">
-              <Link to="/portfolio">View Projects</Link>
+              <Link to="/portfolio">{t('home.viewProjects')}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -60,14 +62,14 @@ export function Home() {
         <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
             <User className="h-12 w-12 mb-4 text-primary" />
-            <CardTitle>Resume</CardTitle>
+            <CardTitle>{t('home.resumeTitle')}</CardTitle>
             <CardDescription>
-              Professional experience, skills, and educational background.
+              {t('home.resumeDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild variant="ghost" className="w-full" data-testid="home-resume-cta">
-              <Link to="/resume">View Resume</Link>
+              <Link to="/resume">{t('home.viewResume')}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -75,15 +77,12 @@ export function Home() {
 
       {/* About Section */}
       <section className="max-w-3xl mx-auto text-center">
-        <h2 className="text-3xl font-bold mb-6">About This Site</h2>
+        <h2 className="text-3xl font-bold mb-6">{t('home.aboutTitle')}</h2>
         <p className="text-muted-foreground mb-4">
-          This is a personal website built with modern web technologies including React 18,
-          TypeScript, Vite, Tailwind CSS, and shadcn/ui components on the frontend, paired with
-          a Go backend using the Gin framework.
+          {t('home.aboutDescription1')}
         </p>
         <p className="text-muted-foreground">
-          The site features a full-featured blog with markdown support, project portfolio,
-          resume section, comment system, admin dashboard, and GitHub OAuth authentication.
+          {t('home.aboutDescription2')}
         </p>
       </section>
     </div>

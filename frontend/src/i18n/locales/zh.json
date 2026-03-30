@@ -1,0 +1,41 @@
+{
+  "nav": {
+    "home": "首页",
+    "blog": "博客",
+    "portfolio": "作品集",
+    "resume": "简历",
+    "login": "登录",
+    "logout": "退出",
+    "dashboard": "控制台"
+  },
+  "home": {
+    "welcome": "欢迎来到 JUNzi",
+    "heroDescription": "一个包含博客文章、作品集和专业简历的个人网站。使用 React、TypeScript 和现代 Web 技术构建。",
+    "readBlog": "阅读博客",
+    "viewPortfolio": "查看作品集",
+    "blogTitle": "博客",
+    "blogDescription": "技术文章、教程和关于软件开发的思考。",
+    "readArticles": "阅读文章",
+    "portfolioTitle": "作品集",
+    "portfolioDescription": "展示我构建和参与的项目和应用程序。",
+    "viewProjects": "查看项目",
+    "resumeTitle": "简历",
+    "resumeDescription": "专业经验、技能和教育背景。",
+    "viewResume": "查看简历",
+    "aboutTitle": "关于本站",
+    "aboutDescription1": "这是一个使用现代 Web 技术构建的个人网站，前端采用 React 18、TypeScript、Vite、Tailwind CSS 和 shadcn/ui 组件，后端使用 Go 的 Gin 框架。",
+    "aboutDescription2": "网站功能包括：支持 Markdown 的博客、项目作品集、简历专区、评论系统、管理员仪表板和 GitHub OAuth 身份验证。"
+  },
+  "footer": {
+    "brand": "JUNzi",
+    "description": "包含博客、作品集和简历功能的个人网站。",
+    "quickLinks": "快速链接",
+    "categories": "分类",
+    "connect": "联系方式",
+    "technology": "技术",
+    "programming": "编程",
+    "design": "设计",
+    "life": "生活",
+    "copyright": "版权所有。"
+  }
+}
