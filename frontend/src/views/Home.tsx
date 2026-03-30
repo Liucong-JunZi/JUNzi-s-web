@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import '../i18n';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';

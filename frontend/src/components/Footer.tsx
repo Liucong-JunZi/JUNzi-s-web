@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import '../i18n';
 import { Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -138,7 +139,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
-          <p>&copy; {currentYear} {t('footer.brand')}. {t('footer.copyright')}</p>
+          <p>{t('footer.copyright', { year: currentYear })}</p>
         </div>
       </div>
     </footer>

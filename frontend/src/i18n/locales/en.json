@@ -9,32 +9,22 @@
     "logout": "Log out"
   },
   "home": {
-    "hero": {
-      "title": "Welcome to JUNzi",
-      "description": "A personal website featuring blog posts, portfolio projects, and professional resume. Built with React, TypeScript, and modern web technologies."
-    },
-    "cta": {
-      "readBlog": "Read Blog",
-      "viewPortfolio": "View Portfolio"
-    },
-    "features": {
-      "blog": {
-        "title": "Blog",
-        "description": "Technical articles, tutorials, and thoughts on software development."
-      },
-      "portfolio": {
-        "title": "Portfolio",
-        "description": "Showcase of projects and applications I've built and contributed to."
-      },
-      "resume": {
-        "title": "Resume",
-        "description": "Professional experience, skills, and educational background."
-      }
-    },
-    "about": {
-      "title": "About This Site",
-      "description": "This is a personal website built with modern web technologies including React 18, TypeScript, Vite, Tailwind CSS, and shadcn/ui components on the frontend, paired with a Go backend using the Gin framework. The site features a full-featured blog with markdown support, project portfolio, resume section, comment system, admin dashboard, and GitHub OAuth authentication."
-    }
+    "welcome": "Welcome to JUNzi",
+    "heroDescription": "A personal website featuring blog posts, portfolio projects, and professional resume. Built with React, TypeScript, and modern web technologies.",
+    "readBlog": "Read Blog",
+    "viewPortfolio": "View Portfolio",
+    "blogTitle": "Blog",
+    "blogDescription": "Technical articles, tutorials, and thoughts on software development.",
+    "readArticles": "Read Articles",
+    "portfolioTitle": "Portfolio",
+    "portfolioDescription": "Showcase of projects and applications I've built and contributed to.",
+    "viewProjects": "View Projects",
+    "resumeTitle": "Resume",
+    "resumeDescription": "Professional experience, skills, and educational background.",
+    "viewResume": "View Resume",
+    "aboutTitle": "About This Site",
+    "aboutDescription1": "This is a personal website built with modern web technologies including React 18, TypeScript, Vite, Tailwind CSS, and shadcn/ui components on the frontend, paired with a Go backend using the Gin framework.",
+    "aboutDescription2": "The site features a full-featured blog with markdown support, project portfolio, resume section, comment system, admin dashboard, and GitHub OAuth authentication."
   },
   "footer": {
     "brand": "JUNzi",
