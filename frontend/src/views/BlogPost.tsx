@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import '../i18n';
 import { postsAPI, commentsAPI } from '../api';
 import type { Post, Comment as CommentType } from '../types';
 import { SafeMarkdown } from '../components/SafeMarkdown';
@@ -12,6 +14,7 @@ import { useAuthStore } from '../store/authStore';
 import { useToast } from '../hooks/use-toast';
 
 export function BlogPost() {
+  const { t } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
   const [post, setPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<CommentType[]>([]);
@@ -73,8 +76,8 @@ export function BlogPost() {
     if (!post) return;
     if (!isAuthenticated) {
       toast({
-        title: 'Login Required',
-        description: 'Please login to like this post',
+        title: t('common.loginRequired') || 'Login Required',
+        description: t('blogPost.loginToComment'),
         variant: 'destructive',
       });
       return;
@@ -90,15 +93,15 @@ export function BlogPost() {
       setLiked(result.liked);
       setPost({ ...post, like_count: result.like_count });
       toast({
-        title: result.liked ? 'Liked!' : 'Unliked',
-        description: result.liked ? 'You liked this post!' : 'You unliked this post',
+        title: result.liked ? t('blogPost.liked') + '!' : 'Unliked',
+        description: result.liked ? t('blogPost.liked') + '!' : 'You unliked this post',
       });
     } catch (error) {
       // Revert optimistic update
       setLiked(wasLiked);
       setPost({ ...post, like_count: prevCount });
       toast({
-        title: 'Error',
+        title: t('common.error') || 'Error',
         description: 'Failed to update like',
         variant: 'destructive',
       });
@@ -114,12 +117,12 @@ export function BlogPost() {
       setCommentText('');
       fetchComments();
       toast({
-        title: 'Comment Submitted',
-        description: 'Your comment is pending review and will appear once approved.',
+        title: t('blogPost.commentSubmitted'),
+        description: t('blogPost.commentPending'),
       });
     } catch (error) {
       toast({
-        title: 'Error',
+        title: t('common.error') || 'Error',
         description: 'Failed to add comment',
         variant: 'destructive',
       });
@@ -137,7 +140,7 @@ export function BlogPost() {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-12">
-        <div className="text-center">Loading...</div>
+        <div className="text-center">{t('common.loading')}</div>
       </div>
     );
   }
@@ -146,11 +149,11 @@ export function BlogPost() {
     return (
       <div className="container mx-auto px-4 py-12">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Post not found</h1>
+          <h1 className="text-2xl font-bold mb-4">{t('blogPost.postNotFound')}</h1>
           <Button asChild>
             <Link to="/blog">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Blog
+              {t('blogPost.backToBlog')}
             </Link>
           </Button>
         </div>
@@ -164,7 +167,7 @@ export function BlogPost() {
       <Button variant="ghost" asChild className="mb-6">
         <Link to="/blog">
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Blog
+          {t('blogPost.backToBlog')}
         </Link>
       </Button>
 
@@ -179,7 +182,7 @@ export function BlogPost() {
             </div>
             <div className="flex items-center gap-1">
               <Clock className="h-4 w-4" />
-              <span>{Math.ceil(post.content.length / 200)} min read</span>
+              <span>{t('blogPost.minRead', { count: Math.ceil(post.content.length / 200) })}</span>
             </div>
             <div className="flex items-center gap-1">
               <span>{post.view_count} views</span>
@@ -214,11 +217,11 @@ export function BlogPost() {
         <div className="flex items-center gap-4 py-4 border-t">
           <Button variant={liked ? "default" : "outline"} onClick={handleLike} data-testid="like-btn">
             <Heart className={`mr-2 h-4 w-4 ${liked ? "fill-red-500 text-red-500" : ""}`} />
-            {liked ? 'Liked' : 'Like'} ({post.like_count})
+            {liked ? t('blogPost.liked') : t('blogPost.like')} ({post.like_count})
           </Button>
           <div className="flex items-center text-muted-foreground">
             <MessageCircle className="mr-2 h-4 w-4" />
-            {comments.length} Comments
+            {t('blogPost.comments', { count: comments.length })}
           </div>
         </div>
       </article>
@@ -227,26 +230,25 @@ export function BlogPost() {
       <section className="max-w-4xl mx-auto" data-testid="comments-section">
         <Card>
           <CardHeader>
-            <CardTitle>Comments ({comments.length})</CardTitle>
+            <CardTitle>{t('blogPost.comments', { count: comments.length })}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Comment Form */}
             {isAuthenticated ? (
               <form onSubmit={handleSubmitComment} className="space-y-4">
                 <Textarea
-                  placeholder="Write a comment..."
+                  placeholder={t('blogPost.writeComment')}
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
                   rows={4}
                   data-testid="comment-textarea"
                 />
                 <Button type="submit" disabled={!commentText.trim()} data-testid="comment-submit-btn">
-                  Post Comment
+                  {t('blogPost.postComment')}
                 </Button>
               </form>
             ) : (
               <p className="text-muted-foreground">
-                Please{' '}
                 <Link to="/login" className="text-primary hover:underline" data-testid="comment-login-link">
                   login
                 </Link>{' '}
@@ -258,7 +260,7 @@ export function BlogPost() {
             <div className="space-y-4 pt-4 border-t">
               {comments.length === 0 ? (
                 <p className="text-muted-foreground text-center py-4">
-                  No comments yet. Be the first to comment!
+                  {t('blogPost.noCommentsYet')}
                 </p>
               ) : (
                 comments.map((comment) => (
@@ -274,7 +276,7 @@ export function BlogPost() {
                   disabled={loadingMore}
                   data-testid="load-more-comments-btn"
                 >
-                  {loadingMore ? 'Loading...' : 'Load More Comments'}
+                  {loadingMore ? t('common.loading') : t('blogPost.loadMoreComments')}
                 </Button>
               </div>
             )}

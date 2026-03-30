@@ -1,0 +1,112 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "previous": "Previous",
+    "next": "Next",
+    "goBack": "Go Back",
+    "goHome": "Go Home",
+    "details": "Details",
+    "back": "Back",
+    "views": "views",
+    "likes": "likes",
+    "comments": "Comments",
+    "present": "Present",
+    "error": "Error",
+    "loginRequired": "Login Required"
+  },
+  "login": {
+    "title": "Welcome Back",
+    "description": "Sign in to your account to access all features",
+    "continueWithGithub": "Continue with GitHub",
+    "termsText": "By signing in, you agree to our Terms of Service and Privacy Policy.",
+    "noGithubAccount": "Don't have a GitHub account?",
+    "signUpForFree": "Sign up for free",
+    "loggingIn": "Logging in..."
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "description": "The page you're looking for doesn't exist or has been moved."
+  },
+  "blog": {
+    "title": "Blog",
+    "description": "Thoughts, tutorials, and insights on software development and technology.",
+    "searchPlaceholder": "Search articles...",
+    "searchBtn": "Search",
+    "clearFilter": "Clear filter",
+    "noPostsFound": "No posts found.",
+    "pageOf": "Page {{page}} of {{total}}"
+  },
+  "blogPost": {
+    "backToBlog": "Back to Blog",
+    "minRead": "{{count}} min read",
+    "liked": "Liked",
+    "like": "Like",
+    "comments": "Comments ({{count}})",
+    "writeComment": "Write a comment...",
+    "postComment": "Post Comment",
+    "loginToComment": "Please login to comment.",
+    "noCommentsYet": "No comments yet. Be the first to comment!",
+    "loadMoreComments": "Load More Comments",
+    "postNotFound": "Post not found",
+    "commentSubmitted": "Comment Submitted",
+    "commentPending": "Your comment is pending review and will appear once approved."
+  },
+  "portfolio": {
+    "title": "Portfolio",
+    "description": "A showcase of projects I've built and contributed to.",
+    "noProjects": "No projects found.",
+    "code": "Code",
+    "demo": "Demo",
+    "planning": "Planning",
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "archived": "Archived",
+    "active": "Active",
+    "backToPortfolio": "Back to Portfolio",
+    "viewCode": "View Code",
+    "liveDemo": "Live Demo",
+    "projectNotFound": "Project not found"
+  },
+  "resume": {
+    "title": "Resume",
+    "description": "Professional experience, education, and projects.",
+    "download": "Download",
+    "workExperience": "Work Experience",
+    "education": "Education",
+    "project": "Project",
+    "noResumeContent": "No resume content available yet."
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Dashboard",
+      "welcome": "Welcome back, {{username}}!",
+      "totalPosts": "Total Posts",
+      "totalProjects": "Total Projects",
+      "totalComments": "Total Comments",
+      "quickActions": "Quick Actions",
+      "createPost": "Create Post",
+      "createPostDesc": "Write a new blog post",
+      "addProject": "Add Project",
+      "addProjectDesc": "Add a new portfolio project",
+      "editResume": "Edit Resume",
+      "editResumeDesc": "Update your resume",
+      "manageContent": "Manage Content",
+      "managePosts": "Manage Posts",
+      "manageProjects": "Manage Projects",
+      "manageComments": "Manage Comments",
+      "editResumeBtn": "Edit Resume"
+    }
+  },
+  "authCallback": {
+    "completingLogin": "Completing login...",
+    "loginFailed": "Login failed. Please try again.",
+    "redirecting": "Redirecting to login..."
+  }
+}

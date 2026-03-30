@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import '../i18n';
 import { authAPI } from '../api';
 import { useAuthStore } from '../store/authStore';
 import { Button } from '../components/ui/button';
@@ -15,6 +17,7 @@ function GithubIcon({ className }: { className?: string }) {
 }
 
 export function Login() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -71,7 +74,7 @@ export function Login() {
     return (
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-md mx-auto text-center">
-          <p>Logging in...</p>
+          <p>{t('login.loggingIn')}</p>
         </div>
       </div>
     );
@@ -82,20 +85,20 @@ export function Login() {
       <div className="max-w-md mx-auto">
         <Card>
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Welcome Back</CardTitle>
+            <CardTitle className="text-2xl">{t('login.title')}</CardTitle>
             <CardDescription>
-              Sign in to your account to access all features
+              {t('login.description')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Button onClick={handleGitHubLogin} className="w-full" size="lg" data-testid="github-login-btn">
               <GithubIcon className="mr-2 h-5 w-5" />
-              Continue with GitHub
+              {t('login.continueWithGithub')}
             </Button>
 
             <div className="text-center text-sm text-muted-foreground">
               <p>
-                By signing in, you agree to our Terms of Service and Privacy Policy.
+                {t('login.termsText')}
               </p>
             </div>
           </CardContent>
@@ -103,14 +106,14 @@ export function Login() {
 
         <div className="mt-8 text-center text-sm text-muted-foreground">
           <p>
-            Don't have a GitHub account?{' '}
+            {t('login.noGithubAccount')}{' '}
             <a
               href="https://github.com/signup"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:underline"
             >
-              Sign up for free
+              {t('login.signUpForFree')}
             </a>
           </p>
         </div>

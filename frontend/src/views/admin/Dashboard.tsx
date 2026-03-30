@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import '../../i18n';
 import { useAuthStore } from '../../store/authStore';
 import { postsAPI, projectsAPI } from '../../api';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
@@ -13,6 +15,7 @@ interface DashboardStats {
 }
 
 export function AdminDashboard() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const [stats, setStats] = useState<DashboardStats>({
     postsCount: 0,
@@ -47,20 +50,20 @@ export function AdminDashboard() {
 
   const quickActions = [
     {
-      title: 'Create Post',
-      description: 'Write a new blog post',
+      title: t('admin.dashboard.createPost'),
+      description: t('admin.dashboard.createPostDesc'),
       icon: FileText,
       href: '/admin/posts/new',
     },
     {
-      title: 'Add Project',
-      description: 'Add a new portfolio project',
+      title: t('admin.dashboard.addProject'),
+      description: t('admin.dashboard.addProjectDesc'),
       icon: Briefcase,
       href: '/admin/projects/new',
     },
     {
-      title: 'Edit Resume',
-      description: 'Update your resume',
+      title: t('admin.dashboard.editResume'),
+      description: t('admin.dashboard.editResumeDesc'),
       icon: File,
       href: '/admin/resume',
     },
@@ -68,9 +71,9 @@ export function AdminDashboard() {
 
   const getActionTestId = (title: string): string | undefined => {
     switch (title) {
-      case 'Create Post': return 'create-post-action';
-      case 'Add Project': return 'create-project-action';
-      case 'Edit Resume': return 'edit-resume-quick-action';
+      case t('admin.dashboard.createPost'): return 'create-post-action';
+      case t('admin.dashboard.addProject'): return 'create-project-action';
+      case t('admin.dashboard.editResume'): return 'edit-resume-quick-action';
       default: return undefined;
     }
   };
@@ -79,18 +82,18 @@ export function AdminDashboard() {
     <div className="container mx-auto px-4 py-12" data-testid="admin-dashboard">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome back, {user?.username}!</p>
+        <h1 className="text-4xl font-bold mb-2">{t('admin.dashboard.title')}</h1>
+        <p className="text-muted-foreground">{t('admin.dashboard.welcome', { username: user?.username })}</p>
       </div>
 
       {/* Stats */}
       {loading ? (
-        <div className="text-center py-8">Loading...</div>
+        <div className="text-center py-8">{t('common.loading')}</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Total Posts</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('admin.dashboard.totalPosts')}</CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -100,7 +103,7 @@ export function AdminDashboard() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Total Projects</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('admin.dashboard.totalProjects')}</CardTitle>
               <Briefcase className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -110,7 +113,7 @@ export function AdminDashboard() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Total Comments</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('admin.dashboard.totalComments')}</CardTitle>
               <MessageCircle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -122,7 +125,7 @@ export function AdminDashboard() {
 
       {/* Quick Actions */}
       <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">Quick Actions</h2>
+        <h2 className="text-2xl font-bold mb-4">{t('admin.dashboard.quickActions')}</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {quickActions.map((action) => (
             <Card key={action.title} className="hover:shadow-lg transition-shadow" data-testid={getActionTestId(action.title)}>
@@ -147,30 +150,30 @@ export function AdminDashboard() {
 
       {/* Navigation Cards */}
       <div>
-        <h2 className="text-2xl font-bold mb-4">Manage Content</h2>
+        <h2 className="text-2xl font-bold mb-4">{t('admin.dashboard.manageContent')}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Button asChild variant="outline" className="h-24">
             <Link to="/admin/posts" className="flex flex-col gap-2" data-testid="manage-posts-action">
               <FileText className="h-6 w-6" />
-              <span>Manage Posts</span>
+              <span>{t('admin.dashboard.managePosts')}</span>
             </Link>
           </Button>
           <Button asChild variant="outline" className="h-24">
             <Link to="/admin/projects" className="flex flex-col gap-2" data-testid="manage-projects-action">
               <Briefcase className="h-6 w-6" />
-              <span>Manage Projects</span>
+              <span>{t('admin.dashboard.manageProjects')}</span>
             </Link>
           </Button>
           <Button asChild variant="outline" className="h-24">
             <Link to="/admin/comments" className="flex flex-col gap-2" data-testid="manage-comments-action">
               <MessageCircle className="h-6 w-6" />
-              <span>Manage Comments</span>
+              <span>{t('admin.dashboard.manageComments')}</span>
             </Link>
           </Button>
           <Button asChild variant="outline" className="h-24">
             <Link to="/admin/resume" className="flex flex-col gap-2" data-testid="edit-resume-action">
               <File className="h-6 w-6" />
-              <span>Edit Resume</span>
+              <span>{t('admin.dashboard.editResumeBtn')}</span>
             </Link>
           </Button>
         </div>

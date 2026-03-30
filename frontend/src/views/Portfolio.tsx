@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import '../i18n';
 import { projectsAPI } from '../api';
 import type { Project } from '../types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
@@ -17,6 +19,7 @@ function GithubIcon({ className }: { className?: string }) {
 }
 
 export function Portfolio() {
+  const { t } = useTranslation();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -47,13 +50,7 @@ export function Portfolio() {
   };
 
   const getStatusLabel = (status: string) => {
-    const statusMap: Record<string, string> = {
-      planning: 'Planning',
-      in_progress: 'In Progress',
-      completed: 'Completed',
-      archived: 'Archived',
-    };
-    return statusMap[status] || status;
+    return t(`portfolio.${status}`) || status;
   };
 
   // Helper to get field from project (handles both camelCase and snake_case)
@@ -71,18 +68,18 @@ export function Portfolio() {
     <div className="container mx-auto px-4 py-12">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-4">Portfolio</h1>
+        <h1 className="text-4xl font-bold mb-4">{t('portfolio.title')}</h1>
         <p className="text-muted-foreground">
-          A showcase of projects I've built and contributed to.
+          {t('portfolio.description')}
         </p>
       </div>
 
       {/* Projects Grid */}
       {loading ? (
-        <div className="text-center py-12">Loading...</div>
+        <div className="text-center py-12">{t('common.loading')}</div>
       ) : projects.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">No projects found.</p>
+          <p className="text-muted-foreground">{t('portfolio.noProjects')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -119,7 +116,7 @@ export function Portfolio() {
                     <Button variant="outline" size="sm" asChild>
                       <a href={getGithubUrl(project)!} target="_blank" rel="noopener noreferrer" data-testid="project-code-btn">
                         <GithubIcon className="mr-2 h-4 w-4" />
-                        Code
+                        {t('portfolio.code')}
                       </a>
                     </Button>
                   )}
@@ -127,12 +124,12 @@ export function Portfolio() {
                     <Button size="sm" asChild>
                       <a href={getDemoUrl(project)!} target="_blank" rel="noopener noreferrer" data-testid="project-demo-btn">
                         <ExternalLink className="mr-2 h-4 w-4" />
-                        Demo
+                        {t('portfolio.demo')}
                       </a>
                     </Button>
                   )}
                   <Button variant="ghost" size="sm" asChild className="ml-auto">
-                    <Link to={`/portfolio/${project.id}`} data-testid="project-details-btn">Details</Link>
+                    <Link to={`/portfolio/${project.id}`} data-testid="project-details-btn">{t('common.details')}</Link>
                   </Button>
                 </div>
               </CardContent>
