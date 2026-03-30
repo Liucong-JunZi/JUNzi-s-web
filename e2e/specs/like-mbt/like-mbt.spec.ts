@@ -210,10 +210,6 @@ test.describe('Like Toggle MBT', () => {
     const post = await postsApi.create(seed);
     createdPostIds.push(post.id);
 
-    // Pre-like via API client
-    await postsApi.like(post.id);
-    createdPostIds.push(post.id);
-
     const context = await createActorContext(browser, baseURL, 'user');
     const page = await context.newPage();
     try {
@@ -222,17 +218,19 @@ test.describe('Like Toggle MBT', () => {
 
       const likeBtn = page.getByTestId('like-btn');
       await expect(likeBtn).toBeVisible({ timeout: 10_000 });
+      const originalCount = await extractLikeCount(likeBtn);
 
-      // Should be in liked state
-      const likedCount = await extractLikeCount(likeBtn);
-      const heart = likeBtn.locator('svg');
-      await expect(heart).toHaveClass(/fill-red-500/);
+      // Like via UI (transitions to liked state)
+      await likeBtn.click();
+      await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
+      await assertLikedState(likeBtn, originalCount + 1);
+      const likedCount = originalCount + 1;
 
       // Unlike
       await likeBtn.click();
       await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
-      await assertUnlikedState(likeBtn, likedCount - 1);
       const unlikedCount = likedCount - 1;
+      await assertUnlikedState(likeBtn, unlikedCount);
 
       // Like again
       await likeBtn.click();
@@ -288,10 +286,6 @@ test.describe('Like Toggle MBT', () => {
     const post = await postsApi.create(seed);
     createdPostIds.push(post.id);
 
-    // Pre-like via API client
-    await postsApi.like(post.id);
-    createdPostIds.push(post.id);
-
     const context = await createActorContext(browser, baseURL, 'user');
     const page = await context.newPage();
     try {
@@ -300,9 +294,13 @@ test.describe('Like Toggle MBT', () => {
 
       const likeBtn = page.getByTestId('like-btn');
       await expect(likeBtn).toBeVisible({ timeout: 10_000 });
+      const originalCount = await extractLikeCount(likeBtn);
 
-      // Should start as liked
-      const likedCount = await extractLikeCount(likeBtn);
+      // Like via UI first
+      await likeBtn.click();
+      await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
+      const likedCount = originalCount + 1;
+      await assertLikedState(likeBtn, likedCount);
 
       // Unlike
       await likeBtn.click();
@@ -367,10 +365,6 @@ test.describe('Like Toggle MBT', () => {
     const post = await postsApi.create(seed);
     createdPostIds.push(post.id);
 
-    // Pre-like via API client
-    await postsApi.like(post.id);
-    createdPostIds.push(post.id);
-
     const context = await createActorContext(browser, baseURL, 'user');
     const page = await context.newPage();
     try {
@@ -379,7 +373,13 @@ test.describe('Like Toggle MBT', () => {
 
       const likeBtn = page.getByTestId('like-btn');
       await expect(likeBtn).toBeVisible({ timeout: 10_000 });
-      const likedCount = await extractLikeCount(likeBtn);
+      const originalCount = await extractLikeCount(likeBtn);
+
+      // Like via UI first
+      await likeBtn.click();
+      await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
+      const likedCount = originalCount + 1;
+      await assertLikedState(likeBtn, likedCount);
 
       // Unlike
       await likeBtn.click();
@@ -468,7 +468,7 @@ test.describe('Like Toggle MBT', () => {
       await likeBtn.click();
 
       // Assert error toast
-      await expect(page.getByText('Error')).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
       await expect(page.getByText('Failed to update like')).toBeVisible({ timeout: 10_000 });
 
       // Assert reverted to unliked state
