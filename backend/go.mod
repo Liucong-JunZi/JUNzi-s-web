@@ -11,7 +11,7 @@ require (
 	github.com/redis/go-redis/v9 v9.6.3
 	golang.org/x/oauth2 v0.18.0
 	gorm.io/driver/mysql v1.5.4
-	gorm.io/gorm v1.25.7
+	gorm.io/gorm v1.31.1
 )
 
 require (
