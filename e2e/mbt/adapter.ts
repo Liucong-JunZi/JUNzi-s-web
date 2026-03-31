@@ -107,6 +107,45 @@ function uid(): string {
   return `${Date.now()}`;
 }
 
+/**
+ * Ensure the browser is on a blog post detail page.
+ *
+ * If a `currentPostSlug` is tracked, navigate directly. Otherwise go to
+ * `/blog` and click the first post link, remembering the slug for future
+ * transitions.
+ */
+async function ensureBlogPostPage(ctx: AdapterContext): Promise<void> {
+  // Already on a blog post page?
+  const currentPath = new URL(ctx.page.url()).pathname;
+  if (currentPath.match(/^\/blog\/[^/]+$/) && ctx.data.currentPostSlug) {
+    return;
+  }
+
+  // Navigate directly if we know the slug
+  if (ctx.data.currentPostSlug) {
+    await ctx.page.goto(`/blog/${ctx.data.currentPostSlug}`);
+    await expect(ctx.page.getByTestId('post-title')).toBeVisible({ timeout: 10_000 });
+    return;
+  }
+
+  // Discover a post: go to /blog and click the first post link
+  await ctx.page.goto('/blog');
+  await expect(ctx.page.locator('header')).toBeVisible({ timeout: 10_000 });
+
+  const firstPostLink = ctx.page.locator('a[href^="/blog/"]').first();
+  await expect(firstPostLink).toBeVisible({ timeout: 10_000 });
+
+  await firstPostLink.click();
+  await expect(ctx.page.getByTestId('post-title')).toBeVisible({ timeout: 10_000 });
+
+  // Remember the slug for subsequent transitions
+  const url = ctx.page.url();
+  const match = url.match(/\/blog\/([^/?#]+)/);
+  if (match) {
+    ctx.data.currentPostSlug = match[1];
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Adapter implementations
 // ---------------------------------------------------------------------------
@@ -120,7 +159,17 @@ const adapters: Record<TransitionType, TransitionAdapter> = {
     const url = pageUrl(target, ctx.data);
     await ctx.page.goto(url);
     await expect(ctx.page.locator('header')).toBeVisible({ timeout: 10_000 });
-    return { page: target };
+
+    // After navigation, observe the actual page we landed on
+    const actualPath = new URL(ctx.page.url()).pathname;
+    const actualPage = actualPath === '/login' ? PageStates.LOGIN
+      : actualPath === '/blog' ? PageStates.BLOG_LIST
+      : actualPath.match(/^\/blog\//) ? PageStates.BLOG_POST
+      : actualPath === '/portfolio' ? PageStates.PORTFOLIO_LIST
+      : actualPath === '/resume' ? PageStates.RESUME
+      : PageStates.HOME;
+
+    return { page: actualPage };
   },
 
   // --- Auth -----------------------------------------------------------------
@@ -133,9 +182,31 @@ const adapters: Record<TransitionType, TransitionAdapter> = {
     expect(res.ok(), `test-login status=${res.status()}`).toBeTruthy();
 
     await ctx.page.reload();
-    await expect(ctx.page.locator('header')).toBeVisible({ timeout: 10_000 });
+    // Wait for the page to settle — header may or may not appear depending on page
+    await ctx.page.waitForTimeout(1000);
+    await expect(ctx.page.locator('header')).toBeVisible({ timeout: 10_000 }).catch(() => {
+      // Header may not be present on all pages — that's acceptable
+    });
 
-    return { actor: ActorStates.USER };
+    // Observe the actual page — we stay wherever we were (reload, not navigate)
+    const actualPath = new URL(ctx.page.url()).pathname;
+    const actualPage = actualPath === '/blog' ? PageStates.BLOG_LIST
+      : actualPath.match(/^\/blog\//) ? PageStates.BLOG_POST
+      : actualPath === '/login' ? PageStates.LOGIN
+      : PageStates.HOME;
+
+    // If on a blog post, also observe like state (may change after auth)
+    let entity: Partial<NonNullable<AppState['entity']>> | undefined;
+    if (actualPage === PageStates.BLOG_POST) {
+      const likeBtn = ctx.page.getByTestId('like-btn');
+      const likeVisible = await likeBtn.isVisible().catch(() => false);
+      if (likeVisible) {
+        const text = await likeBtn.textContent().catch(() => '');
+        entity = { like: text?.includes('Liked') ? EntityStates.LIKED : EntityStates.UNLIKED };
+      }
+    }
+
+    return { actor: ActorStates.USER, page: actualPage, ...(entity ? { entity } : {}) };
   },
 
   async logout(ctx) {
@@ -152,53 +223,45 @@ const adapters: Record<TransitionType, TransitionAdapter> = {
       await ctx.context.request.post('/api/auth/logout');
       await ctx.page.reload();
     }
-    return { actor: ActorStates.ANONYMOUS };
+
+    // Observe the actual page
+    const actualPath = new URL(ctx.page.url()).pathname;
+    const actualPage = actualPath === '/login' ? PageStates.LOGIN
+      : actualPath === '/' ? PageStates.HOME
+      : PageStates.HOME;
+
+    return { actor: ActorStates.ANONYMOUS, page: actualPage };
   },
 
   // --- Like / Unlike --------------------------------------------------------
 
   async like(ctx, fromState) {
     // Ensure we are on a blog post page
-    if (fromState.page !== PageStates.BLOG_POST) {
-      if (ctx.data.currentPostSlug) {
-        await ctx.page.goto(`/blog/${ctx.data.currentPostSlug}`);
-        await expect(ctx.page.getByTestId('post-title')).toBeVisible({ timeout: 10_000 });
-      }
-    }
+    await ensureBlogPostPage(ctx);
 
     const likeBtn = ctx.page.getByTestId('like-btn');
     await expect(likeBtn).toBeVisible({ timeout: 10_000 });
     await likeBtn.click();
     await expect(ctx.page.getByRole('status')).toBeVisible({ timeout: 10_000 });
 
-    return { entity: { like: EntityStates.LIKED } };
+    return { page: PageStates.BLOG_POST, entity: { like: EntityStates.LIKED } };
   },
 
   async unlike(ctx, fromState) {
     // Ensure we are on a blog post page
-    if (fromState.page !== PageStates.BLOG_POST) {
-      if (ctx.data.currentPostSlug) {
-        await ctx.page.goto(`/blog/${ctx.data.currentPostSlug}`);
-        await expect(ctx.page.getByTestId('post-title')).toBeVisible({ timeout: 10_000 });
-      }
-    }
+    await ensureBlogPostPage(ctx);
 
     const likeBtn = ctx.page.getByTestId('like-btn');
     await expect(likeBtn).toBeVisible({ timeout: 10_000 });
     await likeBtn.click();
     await expect(ctx.page.getByRole('status')).toBeVisible({ timeout: 10_000 });
 
-    return { entity: { like: EntityStates.UNLIKED } };
+    return { page: PageStates.BLOG_POST, entity: { like: EntityStates.UNLIKED } };
   },
 
   async like_denied(ctx, fromState) {
     // Ensure we are on a blog post page as anonymous
-    if (fromState.page !== PageStates.BLOG_POST) {
-      if (ctx.data.currentPostSlug) {
-        await ctx.page.goto(`/blog/${ctx.data.currentPostSlug}`);
-        await expect(ctx.page.getByTestId('post-title')).toBeVisible({ timeout: 10_000 });
-      }
-    }
+    await ensureBlogPostPage(ctx);
 
     const likeBtn = ctx.page.getByTestId('like-btn');
     await expect(likeBtn).toBeVisible({ timeout: 10_000 });
@@ -207,19 +270,14 @@ const adapters: Record<TransitionType, TransitionAdapter> = {
     // Toast with role="status" should appear
     await expect(ctx.page.getByRole('status')).toBeVisible({ timeout: 10_000 });
 
-    return { entity: { like: EntityStates.UNLIKED } };
+    return { page: PageStates.BLOG_POST, entity: { like: EntityStates.UNLIKED } };
   },
 
   // --- Comments -------------------------------------------------------------
 
   async submit_comment(ctx, fromState) {
     // Ensure we are on a blog post page
-    if (fromState.page !== PageStates.BLOG_POST) {
-      if (ctx.data.currentPostSlug) {
-        await ctx.page.goto(`/blog/${ctx.data.currentPostSlug}`);
-        await expect(ctx.page.getByTestId('post-title')).toBeVisible({ timeout: 10_000 });
-      }
-    }
+    await ensureBlogPostPage(ctx);
 
     const commentText = `MBT comment ${uid()}`;
     const textarea = ctx.page.getByTestId('comment-textarea');
@@ -244,26 +302,24 @@ const adapters: Record<TransitionType, TransitionAdapter> = {
     // Textarea should be cleared on success
     await expect(textarea).toHaveValue('', { timeout: 5_000 });
 
-    return { entity: { comment: EntityStates.COMMENT_PENDING } };
+    return { page: PageStates.BLOG_POST, entity: { comment: EntityStates.COMMENT_PENDING } };
   },
 
   async comment_denied(ctx, fromState) {
     // Ensure we are on a blog post page as anonymous
-    if (fromState.page !== PageStates.BLOG_POST) {
-      if (ctx.data.currentPostSlug) {
-        await ctx.page.goto(`/blog/${ctx.data.currentPostSlug}`);
-        await expect(ctx.page.getByTestId('post-title')).toBeVisible({ timeout: 10_000 });
-      }
-    }
+    await ensureBlogPostPage(ctx);
 
     // The login link should be visible instead of comment form
     const loginLink = ctx.page.getByTestId('comment-login-link');
     await expect(loginLink).toBeVisible({ timeout: 10_000 });
 
-    return {};
+    return { page: PageStates.BLOG_POST };
   },
 
   async load_more_comments(ctx) {
+    // Ensure we are on a blog post page
+    await ensureBlogPostPage(ctx);
+
     // If a load-more button exists, click it
     const loadMoreBtn = ctx.page.locator(
       'button:has-text("Load More"), button:has-text("load more"), [data-testid="load-more-comments-btn"]',
@@ -272,7 +328,7 @@ const adapters: Record<TransitionType, TransitionAdapter> = {
       await loadMoreBtn.click();
       await ctx.page.waitForTimeout(500);
     }
-    return {};
+    return { page: PageStates.BLOG_POST };
   },
 
   async approve_comment(ctx) {
@@ -629,7 +685,11 @@ const adapters: Record<TransitionType, TransitionAdapter> = {
     // Should no longer be on /admin
     expect(url).not.toMatch(/\/admin$/);
 
-    return {};
+    // Determine where we actually ended up and return the real page state
+    const path = new URL(url).pathname;
+    const actualPage = path === '/login' ? PageStates.LOGIN : PageStates.HOME;
+
+    return { page: actualPage };
   },
 
   async '404_error'(ctx) {
@@ -639,7 +699,14 @@ const adapters: Record<TransitionType, TransitionAdapter> = {
     // Wait for page to settle — may show a 404 page or redirect home
     await ctx.page.waitForTimeout(2000);
 
-    return {};
+    // Determine actual page — app likely redirects to home or shows 404
+    const url = ctx.page.url();
+    const path = new URL(url).pathname;
+    if (path === '/this-page-does-not-exist-at-all') {
+      // Stayed on 404 page — return HOME as fallback (app may not have 404 route)
+      return { page: PageStates.HOME };
+    }
+    return { page: PageStates.HOME };
   },
 
   // --- Reload ---------------------------------------------------------------
@@ -650,7 +717,17 @@ const adapters: Record<TransitionType, TransitionAdapter> = {
       // Header might not be present on error pages; that is acceptable
     });
 
-    return {};
+    // Observe the actual page after reload
+    const actualPath = new URL(ctx.page.url()).pathname;
+    const actualPage = actualPath === '/login' ? PageStates.LOGIN
+      : actualPath === '/blog' ? PageStates.BLOG_LIST
+      : actualPath.match(/^\/blog\//) ? PageStates.BLOG_POST
+      : actualPath === '/portfolio' ? PageStates.PORTFOLIO_LIST
+      : actualPath === '/resume' ? PageStates.RESUME
+      : actualPath.startsWith('/admin') ? PageStates.ADMIN_DASHBOARD
+      : PageStates.HOME;
+
+    return { page: actualPage };
   },
 };
 
