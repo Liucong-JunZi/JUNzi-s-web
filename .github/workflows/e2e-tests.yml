@@ -78,7 +78,7 @@ jobs:
 
       - name: Upload artifacts on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: e2e-smoke-artifacts
           path: e2e/reports/
@@ -147,7 +147,7 @@ jobs:
 
       - name: Upload artifacts on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: e2e-regression-artifacts-${{ strategy.shard-index }}
           path: e2e/reports/
@@ -209,7 +209,7 @@ jobs:
 
       - name: Upload artifacts on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: e2e-full-artifacts-${{ strategy.shard-index }}
           path: e2e/reports/
