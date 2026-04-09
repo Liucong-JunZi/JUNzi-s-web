@@ -156,6 +156,16 @@ export function Footer() {
 
         <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
           <p>{t('footer.copyright', { year: currentYear })}</p>
+          <p className="mt-2">
+            <a
+              href="http://beian.miit.gov.cn/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-primary"
+            >
+              苏ICP备2024135901号
+            </a>
+          </p>
         </div>
       </div>
     </footer>
