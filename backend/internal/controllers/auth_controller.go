@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -18,10 +19,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/liucong/personal-website/internal/audit"
 	"github.com/liucong/personal-website/internal/cache"
-	"github.com/redis/go-redis/v9"
 	"github.com/liucong/personal-website/internal/config"
 	"github.com/liucong/personal-website/internal/database"
 	"github.com/liucong/personal-website/internal/models"
+	"github.com/redis/go-redis/v9"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/github"
 	"gorm.io/gorm"
@@ -60,11 +61,31 @@ type GitHubUser struct {
 	Bio       string `json:"bio"`
 }
 
-// isSecureCookie returns true when running in production.
-// Checks both APP_ENV and GIN_MODE to ensure Secure flag is set
-// even if APP_ENV is accidentally omitted.
+// isSecureCookie determines whether auth cookies should carry the Secure flag.
+// COOKIE_SECURE takes precedence when explicitly set. Otherwise the frontend
+// URL scheme is used so plain-HTTP deployments do not silently lose cookies.
+// If the URL is missing or unrecognised, production mode remains fail-closed.
 func isSecureCookie() bool {
-	return os.Getenv("APP_ENV") == "production" || os.Getenv("GIN_MODE") == "release"
+	if value := strings.ToLower(strings.TrimSpace(os.Getenv("COOKIE_SECURE"))); value != "" {
+		switch value {
+		case "true", "1", "yes", "on":
+			return true
+		case "false", "0", "no", "off":
+			return false
+		default:
+			log.Printf("[WARN] COOKIE_SECURE=%q is invalid; falling back to FRONTEND_URL", value)
+		}
+	}
+
+	frontendURL := strings.ToLower(strings.TrimSpace(os.Getenv("FRONTEND_URL")))
+	switch {
+	case strings.HasPrefix(frontendURL, "https://"):
+		return true
+	case strings.HasPrefix(frontendURL, "http://"):
+		return false
+	default:
+		return os.Getenv("APP_ENV") == "production" || os.Getenv("GIN_MODE") == "release"
+	}
 }
 
 // setCookie sets a cookie with SameSite=Lax using http.SetCookie.
@@ -282,7 +303,7 @@ func (ac *AuthController) GitHubCallback(c *gin.Context) {
 	}
 
 	// Set tokens as HttpOnly cookies with SameSite=Lax
-	setCookie(c, "access_token", accessTokenString, 3600, true)    // 1 hour
+	setCookie(c, "access_token", accessTokenString, 3600, true)     // 1 hour
 	setCookie(c, "refresh_token", refreshTokenString, 604800, true) // 7 days
 
 	// Generate CSRF token for double-submit cookie pattern

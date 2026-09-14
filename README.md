@@ -69,6 +69,7 @@ make generate-secrets
 |------|--------|------|
 | `FRONTEND_PORT` | `80` | 前端对外端口 |
 | `GIN_MODE` | `release` | Gin 运行模式 |
+| `COOKIE_SECURE` | 自动判断 | Cookie 的 Secure 标志；留空时按 `FRONTEND_URL` 的 http/https 自动判断 |
 | `CORS_ALLOWED_ORIGINS` | `http://localhost` | CORS 允许的源（逗号分隔） |
 | `MINIO_PUBLIC_URL` | `http://localhost:9000` | MinIO 公开访问地址 |
 
