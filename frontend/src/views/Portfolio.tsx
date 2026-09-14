@@ -41,6 +41,7 @@ export function Portfolio() {
 
   const getStatusColor = (status: string) => {
     const colorMap: Record<string, string> = {
+      active: 'bg-emerald-500',
       planning: 'bg-yellow-500',
       in_progress: 'bg-blue-500',
       completed: 'bg-green-500',
@@ -50,7 +51,15 @@ export function Portfolio() {
   };
 
   const getStatusLabel = (status: string) => {
-    return t(`portfolio.${status}`) || status;
+    const translationKey: Record<string, string> = {
+      active: 'active',
+      planning: 'planning',
+      in_progress: 'inProgress',
+      completed: 'completed',
+      archived: 'archived',
+    };
+    const key = translationKey[status];
+    return key ? t(`portfolio.${key}`) : status;
   };
 
   // Helper to get field from project (handles both camelCase and snake_case)
@@ -129,7 +138,7 @@ export function Portfolio() {
                     </Button>
                   )}
                   <Button variant="ghost" size="sm" asChild className="ml-auto">
-                    <Link to={`/portfolio/${project.id}`} data-testid="project-details-btn">{t('common.details')}</Link>
+                    <Link to={`/portfolio/${project.id}`} data-testid="project-details-btn">{t('portfolio.details')}</Link>
                   </Button>
                 </div>
               </CardContent>

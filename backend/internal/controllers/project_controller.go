@@ -11,6 +11,9 @@ import (
 
 type ProjectController struct{}
 
+// Public projects include every visible lifecycle state except archived.
+var publicProjectStatuses = []string{"active", "planning", "in_progress", "completed"}
+
 func NewProjectController() *ProjectController {
 	return &ProjectController{}
 }
@@ -39,7 +42,7 @@ type UpdateProjectRequest struct {
 	SortOrder   *int    `json:"sort_order"`
 }
 
-// ListProjects lists all projects
+// ListProjects lists all public projects.
 func (pc *ProjectController) ListProjects(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", c.DefaultQuery("limit", "10")))
@@ -48,7 +51,7 @@ func (pc *ProjectController) ListProjects(c *gin.Context) {
 
 	query := database.DB.Model(&models.Project{})
 
-	query = query.Where("status = ?", "active")
+	query = query.Where("status IN ?", publicProjectStatuses)
 
 	var total int64
 	query.Count(&total)
@@ -100,12 +103,12 @@ func (pc *ProjectController) AdminListProjects(c *gin.Context) {
 	})
 }
 
-// GetProject gets a single project by ID (public, active only)
+// GetProject gets a single public project by ID.
 func (pc *ProjectController) GetProject(c *gin.Context) {
 	id := c.Param("id")
 
 	var project models.Project
-	if err := database.DB.Where("id = ? AND status = ?", id, "active").First(&project).Error; err != nil {
+	if err := database.DB.Where("id = ? AND status IN ?", id, publicProjectStatuses).First(&project).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Project not found"})
 		return
 	}

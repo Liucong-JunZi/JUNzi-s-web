@@ -61,7 +61,15 @@ export function PortfolioDetail() {
   };
 
   const getStatusLabel = (status: string) => {
-    return t(`portfolio.${status}`) || status;
+    const translationKey: Record<string, string> = {
+      active: 'active',
+      planning: 'planning',
+      in_progress: 'inProgress',
+      completed: 'completed',
+      archived: 'archived',
+    };
+    const key = translationKey[status];
+    return key ? t(`portfolio.${key}`) : status;
   };
 
   const getStatusColor = (status: string) => {

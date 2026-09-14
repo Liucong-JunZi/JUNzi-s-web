@@ -77,6 +77,7 @@
     "description": "一些我捣鼓过的东西。",
     "loading": "加载中...",
     "noProjects": "还没有项目。",
+    "active": "进行中",
     "planning": "规划中",
     "inProgress": "进行中",
     "completed": "已完成",
