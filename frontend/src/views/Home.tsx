@@ -82,9 +82,6 @@ export function Home() {
         <p className="text-muted-foreground mb-4">
           {t('home.aboutDescription1')}
         </p>
-        <p className="text-muted-foreground">
-          {t('home.aboutDescription2')}
-        </p>
       </section>
     </div>
   );

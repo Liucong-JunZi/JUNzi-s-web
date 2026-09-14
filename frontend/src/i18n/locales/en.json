@@ -23,8 +23,7 @@
     "resumeDescription": "Education, skills, and experience.",
     "viewResume": "View Resume",
     "aboutTitle": "About This Site",
-    "aboutDescription1": "I built this site in 2025 through AI-assisted development — Go backend, React frontend, done in about 4 days, burning through 100M+ tokens. I hadn't studied Go or TypeScript before, but through collaborating with AI, I learned how to break down requirements, design architecture, and ensure quality.",
-    "aboutDescription2": "But testing is where I actually learned something real. Before launch I ran 700+ tests and built a state-machine-based MBT (Model-Based Testing) framework. I get the theory — Cartesian product exhaustive enumeration, TPC coverage, guard pruning, equivalence class partitioning. That's the part I truly understand."
+    "aboutDescription1": "I built this site in 2025 through AI-assisted development — Go backend, React frontend, done in about 4 days, burning through 100M+ tokens. I hadn't studied Go or TypeScript before, but through collaborating with AI, I learned how to break down requirements, design architecture, and ensure quality."
   },
   "footer": {
     "brand": "JUNzi",

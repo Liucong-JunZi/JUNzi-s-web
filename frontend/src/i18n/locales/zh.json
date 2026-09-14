@@ -23,8 +23,7 @@
     "resumeDescription": "教育背景、技能、和经历。",
     "viewResume": "查看简历",
     "aboutTitle": "关于本站",
-    "aboutDescription1": "这个网站是我在 2025 年通过 AI 辅助开发完成的——后端 Go、前端 React，四天搭完，烧了一个多亿的 token。我没有系统学过 Go 和 TypeScript，但在和 AI 协作的过程中，我学会了如何拆解需求、设计架构、把控质量。",
-    "aboutDescription2": "但测试是我认真学的——上线前跑了 700 多个测试，还搭了一个基于状态机的 MBT（模型驱动测试）框架。大概理解了笛卡尔乘积穷举、TPC 覆盖、guard 剪枝这些原理。这是我这个项目里学得最扎实的部分。"
+    "aboutDescription1": "这个网站是我在 2025 年通过 AI 辅助开发完成的——后端 Go、前端 React，四天搭完，烧了一个多亿的 token。我没有系统学过 Go 和 TypeScript，但在和 AI 协作的过程中，我学会了如何拆解需求、设计架构、把控质量。"
   },
   "footer": {
     "brand": "JUNzi",
