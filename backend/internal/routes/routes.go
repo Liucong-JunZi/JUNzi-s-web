@@ -50,7 +50,7 @@ func Setup(cfg *config.Config) *gin.Engine {
 	if os.Getenv("TEST_MODE") == "true" {
 		rateLimit = 10000
 	}
-	router.Use(middleware.RateLimiterWithConfig(cache.Client, rateLimit))
+	router.Use(middleware.RateLimiterWithScope(cache.Client, "global", rateLimit, time.Minute))
 
 	// Static files
 	router.Static("/uploads", "./uploads")
@@ -112,7 +112,7 @@ func Setup(cfg *config.Config) *gin.Engine {
 			authRateLimit = 10000
 		}
 		auth := api.Group("/auth")
-		auth.Use(middleware.RateLimiter(cache.Client, authRateLimit, time.Minute))
+		auth.Use(middleware.RateLimiterWithScope(cache.Client, "auth", authRateLimit, time.Minute))
 		{
 			auth.GET("/github", authController.GitHubRedirect)
 			auth.GET("/github/callback", authController.GitHubCallback)
@@ -130,11 +130,11 @@ func Setup(cfg *config.Config) *gin.Engine {
 		{
 			// User routes (authenticated users)
 			commentRateLimit := 20
-		if os.Getenv("TEST_MODE") == "true" {
-			commentRateLimit = 10000
-		}
-		protected.POST("/comments", middleware.CSRFProtection(), middleware.RateLimiter(cache.Client, commentRateLimit, time.Minute), commentController.CreateComment)
-		protected.POST("/posts/:id/like", middleware.CSRFProtection(), postController.LikePost)
+			if os.Getenv("TEST_MODE") == "true" {
+				commentRateLimit = 10000
+			}
+			protected.POST("/comments", middleware.CSRFProtection(), middleware.RateLimiterWithScope(cache.Client, "comment", commentRateLimit, time.Minute), commentController.CreateComment)
+			protected.POST("/posts/:id/like", middleware.CSRFProtection(), postController.LikePost)
 
 			// Admin routes
 			admin := protected.Group("/admin")

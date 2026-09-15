@@ -22,8 +22,19 @@ end
 return tonumber(current)
 `)
 
-// RateLimiter creates a rate limiting middleware using Redis
+const defaultRateLimitScope = "default"
+
+// RateLimiter creates a rate limiting middleware using the default scope.
+//
+// Keep this wrapper for callers that do not need separate buckets. Route
+// groups should use RateLimiterWithScope so their quotas do not interfere.
 func RateLimiter(client *redis.Client, limit int, window time.Duration) gin.HandlerFunc {
+	return RateLimiterWithScope(client, defaultRateLimitScope, limit, window)
+}
+
+// RateLimiterWithScope creates a Redis-backed rate limiter with an isolated
+// counter for the given scope and client IP.
+func RateLimiterWithScope(client *redis.Client, scope string, limit int, window time.Duration) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Fail-closed: if Redis client is nil, reject the request
 		if client == nil {
@@ -33,7 +44,7 @@ func RateLimiter(client *redis.Client, limit int, window time.Duration) gin.Hand
 		}
 
 		ip := c.ClientIP()
-		key := "rate_limit:" + ip
+		key := rateLimitKey(scope, ip)
 
 		ctx := context.Background()
 
@@ -59,5 +70,12 @@ func RateLimiter(client *redis.Client, limit int, window time.Duration) gin.Hand
 
 // RateLimiterWithConfig creates a rate limiter with custom config
 func RateLimiterWithConfig(client *redis.Client, requestsPerMinute int) gin.HandlerFunc {
-	return RateLimiter(client, requestsPerMinute, time.Minute)
+	return RateLimiterWithScope(client, "global", requestsPerMinute, time.Minute)
+}
+
+func rateLimitKey(scope, ip string) string {
+	if scope == "" {
+		scope = defaultRateLimitScope
+	}
+	return "rate_limit:" + scope + ":" + ip
 }
