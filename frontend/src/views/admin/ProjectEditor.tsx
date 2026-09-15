@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { projectsAPI, uploadAPI } from '../../api';
 import { Button } from '../../components/ui/button';
@@ -30,13 +30,7 @@ export function ProjectEditor() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    if (isEdit) {
-      fetchProject();
-    }
-  }, [id]);
-
-  const fetchProject = async () => {
+  const fetchProject = useCallback(async () => {
     setLoading(true);
     try {
       const project = await projectsAPI.getByIdAdmin(Number(id));
@@ -62,7 +56,13 @@ export function ProjectEditor() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, toast]);
+
+  useEffect(() => {
+    if (isEdit) {
+      fetchProject();
+    }
+  }, [fetchProject, isEdit]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -83,7 +83,7 @@ export function ProjectEditor() {
         title: 'Success',
         description: 'Image uploaded successfully',
       });
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: 'Failed to upload image',
@@ -125,7 +125,7 @@ export function ProjectEditor() {
       }
 
       navigate('/admin/projects');
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: `Failed to ${isEdit ? 'update' : 'create'} project`,

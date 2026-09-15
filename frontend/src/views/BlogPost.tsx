@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import '../i18n';
@@ -27,14 +27,7 @@ export function BlogPost() {
   const { isAuthenticated } = useAuthStore();
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (slug) {
-      fetchPost();
-      fetchComments(1);
-    }
-  }, [slug]);
-
-  const fetchPost = async () => {
+  const fetchPost = useCallback(async () => {
     setLoading(true);
     try {
       const data = await postsAPI.getBySlug(slug!);
@@ -45,9 +38,9 @@ export function BlogPost() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [slug]);
 
-  const fetchComments = async (page = 1) => {
+  const fetchComments = useCallback(async (page = 1) => {
     if (page === 1) {
       try {
         const data = await commentsAPI.getByPostSlug(slug!, { page: 1, page_size: 10 });
@@ -70,7 +63,14 @@ export function BlogPost() {
         setLoadingMore(false);
       }
     }
-  };
+  }, [slug]);
+
+  useEffect(() => {
+    if (slug) {
+      fetchPost();
+      fetchComments(1);
+    }
+  }, [fetchComments, fetchPost, slug]);
 
   const handleLike = async () => {
     if (!post) return;
@@ -96,7 +96,7 @@ export function BlogPost() {
         title: result.liked ? t('blogPost.liked') + '!' : 'Unliked',
         description: result.liked ? t('blogPost.liked') + '!' : 'You unliked this post',
       });
-    } catch (error) {
+    } catch {
       // Revert optimistic update
       setLiked(wasLiked);
       setPost({ ...post, like_count: prevCount });
@@ -120,7 +120,7 @@ export function BlogPost() {
         title: t('blogPost.commentSubmitted'),
         description: t('blogPost.commentPending'),
       });
-    } catch (error) {
+    } catch {
       toast({
         title: t('common.error') || 'Error',
         description: 'Failed to add comment',

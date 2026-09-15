@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { User, Post, Comment, Project, ResumeItem, Tag } from '../types';
+import type { User, Post, PostWriteData, Comment, Project, ResumeItem, Tag } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -149,18 +149,12 @@ export const postsAPI = {
     search?: string;
   }): Promise<{ posts: Post[]; total: number; page: number; limit: number }> => {
     // Map frontend params to backend expected params
-    const mappedParams: any = {
+    const mappedParams = {
       page: params?.page,
       page_size: params?.limit,  // Backend expects page_size instead of limit
       tag: params?.tag,
       search: params?.search,
     };
-    // Remove undefined values
-    Object.keys(mappedParams).forEach(key => {
-      if (mappedParams[key] === undefined) {
-        delete mappedParams[key];
-      }
-    });
     const response = await api.get('/posts', { params: mappedParams });
     return response.data;
   },
@@ -171,15 +165,12 @@ export const postsAPI = {
     tag?: string;
     search?: string;
   }): Promise<{ posts: Post[]; total: number; page: number; limit: number }> => {
-    const mappedParams: any = {
+    const mappedParams = {
       page: params?.page,
       page_size: params?.limit,
       tag: params?.tag,
       search: params?.search,
     };
-    Object.keys(mappedParams).forEach(key => {
-      if (mappedParams[key] === undefined) delete mappedParams[key];
-    });
     const response = await api.get('/admin/posts', { params: mappedParams });
     return response.data;
   },
@@ -194,25 +185,19 @@ export const postsAPI = {
     return response.data.post || response.data;
   },
 
-  create: async (data: Partial<Post>): Promise<Post> => {
+  create: async (data: PostWriteData): Promise<Post> => {
     // Map coverImage to cover_image for backend
-    const mappedData: any = { ...data };
-    if (mappedData.coverImage) {
-      mappedData.cover_image = mappedData.coverImage;
-      delete mappedData.coverImage;
-    }
+    const { coverImage, ...rest } = data;
+    const mappedData = coverImage === undefined ? rest : { ...rest, cover_image: coverImage };
     // tags stays as-is, backend expects "tags"
     const response = await api.post('/admin/posts', mappedData);
     return response.data.post || response.data;
   },
 
-  update: async (id: number, data: Partial<Post>): Promise<Post> => {
+  update: async (id: number, data: PostWriteData): Promise<Post> => {
     // Map coverImage to cover_image for backend
-    const mappedData: any = { ...data };
-    if (mappedData.coverImage) {
-      mappedData.cover_image = mappedData.coverImage;
-      delete mappedData.coverImage;
-    }
+    const { coverImage, ...rest } = data;
+    const mappedData = coverImage === undefined ? rest : { ...rest, cover_image: coverImage };
     // tags stays as-is, backend expects "tags"
     const response = await api.put(`/admin/posts/${id}`, mappedData);
     return response.data.post || response.data;
@@ -258,19 +243,13 @@ export const commentsAPI = {
 
   create: async (data: { content: string; postId?: number; parentId?: number; authorName?: string; authorEmail?: string }): Promise<Comment> => {
     // Map postId to post_id for backend
-    const mappedData: any = {
+    const mappedData = {
       content: data.content,
       post_id: data.postId,
       parent_id: data.parentId,
       author_name: data.authorName,
       author_email: data.authorEmail,
     };
-    // Remove undefined values
-    Object.keys(mappedData).forEach(key => {
-      if (mappedData[key] === undefined) {
-        delete mappedData[key];
-      }
-    });
     const response = await api.post('/comments', mappedData);
     return response.data.comment || response.data;
   },
@@ -296,13 +275,10 @@ export const projectsAPI = {
     page?: number;
     limit?: number;
   }): Promise<{ projects: Project[]; total: number; page: number; limit: number }> => {
-    const mappedParams: any = {
+    const mappedParams = {
       page: params?.page,
       page_size: params?.limit,
     };
-    Object.keys(mappedParams).forEach(key => {
-      if (mappedParams[key] === undefined) delete mappedParams[key];
-    });
     const response = await api.get('/projects', { params: mappedParams });
     return response.data;
   },
@@ -311,13 +287,10 @@ export const projectsAPI = {
     page?: number;
     limit?: number;
   }): Promise<{ projects: Project[]; total: number; page: number; limit: number }> => {
-    const mappedParams: any = {
+    const mappedParams = {
       page: params?.page,
       page_size: params?.limit,
     };
-    Object.keys(mappedParams).forEach(key => {
-      if (mappedParams[key] === undefined) delete mappedParams[key];
-    });
     const response = await api.get('/admin/projects', { params: mappedParams });
     return response.data;
   },
@@ -334,7 +307,7 @@ export const projectsAPI = {
 
   create: async (data: Partial<Project>): Promise<Project> => {
     // Map frontend field names to backend expected snake_case
-    const mappedData: any = {
+    const mappedData = {
       title: data.title,
       description: data.description,
       tech_stack: data.tech_stack,
@@ -344,19 +317,13 @@ export const projectsAPI = {
       demo_url: data.demo_url,
       github_url: data.github_url,
     };
-    // Remove undefined values
-    Object.keys(mappedData).forEach(key => {
-      if (mappedData[key] === undefined) {
-        delete mappedData[key];
-      }
-    });
     const response = await api.post('/admin/projects', mappedData);
     return response.data.project || response.data;
   },
 
   update: async (id: number, data: Partial<Project>): Promise<Project> => {
     // Map frontend field names to backend expected snake_case
-    const mappedData: any = {
+    const mappedData = {
       title: data.title,
       description: data.description,
       tech_stack: data.tech_stack,
@@ -366,12 +333,6 @@ export const projectsAPI = {
       demo_url: data.demo_url,
       github_url: data.github_url,
     };
-    // Remove undefined values
-    Object.keys(mappedData).forEach(key => {
-      if (mappedData[key] === undefined) {
-        delete mappedData[key];
-      }
-    });
     const response = await api.put(`/admin/projects/${id}`, mappedData);
     return response.data.project || response.data;
   },

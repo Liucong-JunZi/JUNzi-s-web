@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { commentsAPI } from '../../api';
 import type { Comment } from '../../types';
@@ -17,11 +17,7 @@ export function AdminComments() {
   const [total, setTotal] = useState(0);
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchComments(page);
-  }, [page]);
-
-  const fetchComments = async (page: number) => {
+  const fetchComments = useCallback(async (page: number) => {
     setLoading(true);
     try {
       const response = await commentsAPI.getAll({ page, page_size: PAGE_SIZE });
@@ -37,7 +33,11 @@ export function AdminComments() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchComments(page);
+  }, [fetchComments, page]);
 
   const handleDelete = async (id: number) => {
     if (!confirm('Are you sure you want to delete this comment?')) {
@@ -56,7 +56,7 @@ export function AdminComments() {
         title: 'Success',
         description: 'Comment deleted successfully',
       });
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: 'Failed to delete comment',
@@ -75,7 +75,7 @@ export function AdminComments() {
         title: 'Success',
         description: `Comment ${status}`,
       });
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: `Failed to ${status === 'approved' ? 'approve' : 'reject'} comment`,

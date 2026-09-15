@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import '../i18n';
@@ -18,22 +18,19 @@ export function Blog() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
+  const [submittedSearch, setSubmittedSearch] = useState('');
   const limit = 10;
 
   const tag = searchParams.get('tag') || undefined;
 
-  useEffect(() => {
-    fetchPosts();
-  }, [page, tag]);
-
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
     setLoading(true);
     try {
       const response = await postsAPI.getAll({
         page,
         limit,
         tag,
-        search: searchQuery || undefined,
+        search: submittedSearch || undefined,
       });
       setPosts(response.posts);
       setTotal(response.total);
@@ -42,12 +39,16 @@ export function Blog() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, submittedSearch, tag]);
+
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setPage(1);
-    fetchPosts();
+    setSubmittedSearch(searchQuery);
   };
 
   const formatDate = (dateString: string) => {

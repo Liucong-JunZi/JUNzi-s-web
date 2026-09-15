@@ -41,7 +41,7 @@ export function AdminPosts() {
         title: 'Success',
         description: 'Post deleted successfully',
       });
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: 'Failed to delete post',

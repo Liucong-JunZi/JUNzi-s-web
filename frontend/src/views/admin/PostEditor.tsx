@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { postsAPI, tagsAPI, uploadAPI } from '../../api';
-import type { Tag } from '../../types';
+import type { PostWriteData, Tag } from '../../types';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Textarea } from '../../components/ui/textarea';
@@ -32,23 +32,16 @@ export function PostEditor() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    fetchTags();
-    if (isEdit) {
-      fetchPost();
-    }
-  }, [id]);
-
-  const fetchTags = async () => {
+  const fetchTags = useCallback(async () => {
     try {
       const tags = await tagsAPI.getAll();
       setAvailableTags(tags);
     } catch (error) {
       console.error('Failed to fetch tags:', error);
     }
-  };
+  }, []);
 
-  const fetchPost = async () => {
+  const fetchPost = useCallback(async () => {
     setLoading(true);
     try {
       // Use getById for admin editing
@@ -72,7 +65,14 @@ export function PostEditor() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, toast]);
+
+  useEffect(() => {
+    fetchTags();
+    if (isEdit) {
+      fetchPost();
+    }
+  }, [fetchPost, fetchTags, isEdit]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -99,7 +99,7 @@ export function PostEditor() {
         title: 'Success',
         description: 'Image uploaded successfully',
       });
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: 'Failed to upload image',
@@ -130,13 +130,13 @@ export function PostEditor() {
       };
 
       if (isEdit) {
-        await postsAPI.update(Number(id), postData as any);
+        await postsAPI.update(Number(id), postData as PostWriteData);
         toast({
           title: 'Success',
           description: 'Post updated successfully',
         });
       } else {
-        const post = await postsAPI.create(postData as any);
+        const post = await postsAPI.create(postData as PostWriteData);
         toast({
           title: 'Success',
           description: 'Post created successfully',
@@ -146,7 +146,7 @@ export function PostEditor() {
       }
 
       navigate('/admin/posts');
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: `Failed to ${isEdit ? 'update' : 'create'} post`,

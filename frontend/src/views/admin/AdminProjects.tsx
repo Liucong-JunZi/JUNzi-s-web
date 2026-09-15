@@ -41,7 +41,7 @@ export function AdminProjects() {
         title: 'Success',
         description: 'Project deleted successfully',
       });
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: 'Failed to delete project',

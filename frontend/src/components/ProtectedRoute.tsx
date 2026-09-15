@@ -16,7 +16,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     const restoreSession = async () => {
       if (!isAuthenticated) {
         try {
-          const response = await api.get('/auth/me', { _skipAuthRedirect: true } as any);
+          const response = await api.get('/auth/me', { _skipAuthRedirect: true });
           const user = response.data.user || response.data;
           setUser(user);
         } catch {
@@ -61,7 +61,7 @@ export function AdminRoute({ children }: AdminRouteProps) {
     const restoreSession = async () => {
       if (!isAuthenticated) {
         try {
-          const response = await api.get('/auth/me', { _skipAuthRedirect: true } as any);
+          const response = await api.get('/auth/me', { _skipAuthRedirect: true });
           const me = response.data.user || response.data;
           setUser(me);
         } catch {

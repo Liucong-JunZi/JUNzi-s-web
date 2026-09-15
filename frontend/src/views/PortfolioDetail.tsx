@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import '../i18n';
@@ -23,13 +23,7 @@ export function PortfolioDetail() {
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (id) {
-      fetchProject();
-    }
-  }, [id]);
-
-  const fetchProject = async () => {
+  const fetchProject = useCallback(async () => {
     setLoading(true);
     try {
       const data = await projectsAPI.getById(Number(id));
@@ -39,7 +33,13 @@ export function PortfolioDetail() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    if (id) {
+      fetchProject();
+    }
+  }, [fetchProject, id]);
 
   const formatDate = (dateString: string) => {
     if (!dateString) return '';

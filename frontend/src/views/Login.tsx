@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import '../i18n';
@@ -25,7 +25,7 @@ export function Login() {
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Handle session restoration from OAuth callback
-  const handleCallback = async () => {
+  const handleCallback = useCallback(async () => {
     setIsProcessing(true);
     try {
       const user = await authAPI.me();
@@ -39,7 +39,7 @@ export function Login() {
     } finally {
       setIsProcessing(false);
     }
-  };
+  }, [navigate, setUser]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -52,7 +52,7 @@ export function Login() {
     if (fromCallback === 'true' && !isProcessing) {
       handleCallback();
     }
-  }, [searchParams, isAuthenticated, isProcessing, navigate]);
+  }, [handleCallback, searchParams, isAuthenticated, isProcessing, navigate]);
 
   const handleGitHubLogin = () => {
     const from = (location.state as { from?: { pathname?: string } })?.from?.pathname;

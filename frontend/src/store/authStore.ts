@@ -35,7 +35,7 @@ export const useAuthStore = create<AuthStore>()(
       },
       logout: async () => {
         try {
-          await api.post('/auth/logout', {}, { _skipAuthRedirect: true } as any);
+          await api.post('/auth/logout', {}, { _skipAuthRedirect: true });
         } catch {
           // Still clear local state even if backend call fails
         }
@@ -58,7 +58,7 @@ export const useAuthStore = create<AuthStore>()(
           // Use api directly with _skipAuthRedirect to avoid triggering the 401 → /login redirect.
           // This is critical: public users (no cookies) call /auth/me which returns 401,
           // and we must NOT redirect them to login.
-          api.get('/auth/me', { _skipAuthRedirect: true } as any)
+          api.get('/auth/me', { _skipAuthRedirect: true })
             .then((response) => {
               const user = response.data.user || response.data;
               useAuthStore.getState().setUser(user);

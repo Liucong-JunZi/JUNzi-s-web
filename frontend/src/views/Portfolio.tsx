@@ -62,12 +62,12 @@ export function Portfolio() {
     return key ? t(`portfolio.${key}`) : status;
   };
 
-  // Helper to get field from project (handles both camelCase and snake_case)
-  const getCoverImage = (project: Project) => project.cover_image || (project as any).imageUrl;
-  const getGithubUrl = (project: Project) => project.github_url || (project as any).githubUrl;
-  const getDemoUrl = (project: Project) => project.demo_url || (project as any).demoUrl;
+  // Backend project fields use snake_case.
+  const getCoverImage = (project: Project) => project.cover_image;
+  const getGithubUrl = (project: Project) => project.github_url;
+  const getDemoUrl = (project: Project) => project.demo_url;
   const getTechStack = (project: Project): string[] => {
-    const tech = project.tech_stack || (project as any).techStack;
+    const tech = project.tech_stack;
     if (Array.isArray(tech)) return tech;
     if (typeof tech === 'string' && tech) return tech.split(',').map((t: string) => t.trim()).filter(Boolean);
     return [];

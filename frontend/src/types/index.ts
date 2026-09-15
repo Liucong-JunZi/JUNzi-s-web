@@ -27,6 +27,12 @@ export interface Post {
   category_id?: number;
 }
 
+export type PostWriteData = Omit<Partial<Post>, 'cover_image' | 'tags'> & {
+  cover_image?: string;
+  coverImage?: string;
+  tags?: number[] | Tag[];
+};
+
 export interface Tag {
   id: number;
   name: string;

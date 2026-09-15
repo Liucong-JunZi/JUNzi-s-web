@@ -114,7 +114,7 @@ export function AdminResume() {
 
       resetForm();
       fetchResume();
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: `Failed to ${editingId ? 'update' : 'create'} resume item`,
@@ -140,7 +140,7 @@ export function AdminResume() {
         title: 'Success',
         description: 'Resume item deleted successfully',
       });
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: 'Failed to delete resume item',
