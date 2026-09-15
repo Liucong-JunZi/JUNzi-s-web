@@ -63,6 +63,10 @@ func Setup(cfg *config.Config) *gin.Engine {
 	categoryController := controllers.NewCategoryController()
 	tagController := controllers.NewTagController()
 
+	// Backward-compatible proxy for image URLs generated before the API file
+	// proxy was introduced.
+	router.GET("/uploads/*objectPath", uploadController.ServeLegacyFile)
+
 	// API routes
 	api := router.Group("/api")
 	{

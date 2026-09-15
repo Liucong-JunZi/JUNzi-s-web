@@ -102,6 +102,21 @@ func (uc *UploadController) ServeFile(c *gin.Context) {
 		c.Status(http.StatusNotFound)
 		return
 	}
+	uc.streamFile(c, objectName)
+}
+
+// ServeLegacyFile keeps existing /uploads/<year>/<filename> URLs working
+// while new uploads use /api/files/<bucket>/<year>/<filename>.
+func (uc *UploadController) ServeLegacyFile(c *gin.Context) {
+	objectName, ok := parseLegacyObjectPath(c.Param("objectPath"))
+	if !ok {
+		c.Status(http.StatusNotFound)
+		return
+	}
+	uc.streamFile(c, objectName)
+}
+
+func (uc *UploadController) streamFile(c *gin.Context, objectName string) {
 
 	object, info, err := storage.OpenFile(c.Request.Context(), &uc.cfg.MinIO, objectName)
 	if err != nil {
@@ -144,6 +159,17 @@ func parsePublicObjectPath(rawPath, bucket string) (string, bool) {
 		return "", false
 	}
 
+	return objectName, true
+}
+
+func parseLegacyObjectPath(rawPath string) (string, bool) {
+	objectName := strings.TrimPrefix(rawPath, "/")
+	if objectName == "" || objectName == "." || strings.Contains(objectName, "\\") {
+		return "", false
+	}
+	if path.Clean(objectName) != objectName {
+		return "", false
+	}
 	return objectName, true
 }
 

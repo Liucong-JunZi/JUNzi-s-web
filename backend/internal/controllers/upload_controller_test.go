@@ -26,3 +26,26 @@ func TestParsePublicObjectPath(t *testing.T) {
 		})
 	}
 }
+
+func TestParseLegacyObjectPath(t *testing.T) {
+	tests := []struct {
+		name      string
+		path      string
+		want      string
+		wantValid bool
+	}{
+		{name: "valid legacy object", path: "/2026/image.png", want: "2026/image.png", wantValid: true},
+		{name: "missing object", path: "/"},
+		{name: "path traversal", path: "/2026/../secret.txt"},
+		{name: "backslash", path: "/2026\\secret.txt"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, valid := parseLegacyObjectPath(tt.path)
+			if valid != tt.wantValid || got != tt.want {
+				t.Fatalf("parseLegacyObjectPath(%q) = (%q, %v), want (%q, %v)", tt.path, got, valid, tt.want, tt.wantValid)
+			}
+		})
+	}
+}
