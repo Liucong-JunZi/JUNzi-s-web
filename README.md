@@ -37,8 +37,8 @@
 ### 1. 克隆项目
 
 ```bash
-git clone https://github.com/liucong/JUNziweb.git
-cd JUNziweb
+git clone https://github.com/Liucong-JunZi/JUNzi-s-web.git
+cd JUNzi-s-web
 ```
 
 ### 2. 配置环境变量
@@ -220,7 +220,7 @@ make mysql-cli < docker/mysql/init.sql
 make backup-mysql
 
 # 恢复数据库
-docker-compose exec -T mysql mysql -uroot -p<password> personal_website < backup_xxx.sql
+docker-compose exec -T mysql mysql -uroot -p<password> "${DB_NAME:-personal_website}" < backup_xxx.sql
 ```
 
 ### 审计日志

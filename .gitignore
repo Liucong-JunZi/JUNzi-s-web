@@ -21,5 +21,8 @@ Thumbs.db
 .parallel-dev-path
 .worktrees/
 
+# Playwright test output
+test-results/
+
 # Misc
 *.zip

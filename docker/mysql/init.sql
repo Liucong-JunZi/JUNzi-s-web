@@ -1,10 +1,6 @@
--- 初始化数据库
--- 创建数据库（如果不存在）
-CREATE DATABASE IF NOT EXISTS personal_website
-    DEFAULT CHARACTER SET utf8mb4
-    DEFAULT COLLATE utf8mb4_unicode_ci;
-
-USE personal_website;
+-- 初始化数据库。
+-- 官方 MySQL 镜像会使用 MYSQL_DATABASE 作为当前数据库运行本文件；
+-- 不要在这里写死数据库名，以支持 docker-compose.yml 的 DB_NAME 配置。
 
 -- 设置时区
 SET time_zone = '+08:00';

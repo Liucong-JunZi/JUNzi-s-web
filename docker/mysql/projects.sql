@@ -1,7 +1,7 @@
 -- Portfolio content synchronized from Liucong-JunZi's public GitHub repositories.
 -- Safe to run repeatedly. Existing matching records are updated by github_url.
 
-USE personal_website;
+-- Run this file with the target database selected (for example, via `make mysql-cli`).
 
 UPDATE projects
 SET deleted_at = CURRENT_TIMESTAMP,

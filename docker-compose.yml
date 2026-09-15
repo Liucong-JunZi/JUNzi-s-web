@@ -83,7 +83,7 @@ services:
     environment:
       - GIN_MODE=${GIN_MODE:-release}
       - APP_ENV=production
-      - AUTO_MIGRATE=true
+      - AUTO_MIGRATE=${AUTO_MIGRATE:-false}
       - SERVER_PORT=8080
       - DB_HOST=mysql
       - DB_PORT=3306

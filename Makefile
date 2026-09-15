@@ -74,7 +74,9 @@ minio-logs: ## 查看 MinIO 日志
 
 # ==================== 数据库命令 ====================
 mysql-cli: ## 进入 MySQL 命令行
-	@docker-compose exec mysql mysql -uroot -p$$(grep DB_PASSWORD .env 2>/dev/null | cut -d'=' -f2-)
+	@db_name=$$(grep '^DB_NAME=' .env 2>/dev/null | cut -d'=' -f2-); \
+	db_name=$${db_name:-personal_website}; \
+	docker-compose exec mysql mysql -uroot -p$$(grep '^DB_PASSWORD=' .env 2>/dev/null | cut -d'=' -f2-) "$$db_name"
 
 redis-cli: ## 进入 Redis 命令行
 	@docker-compose exec redis redis-cli -a $(shell grep REDIS_PASSWORD .env 2>/dev/null | cut -d'=' -f2- || echo "")
@@ -102,7 +104,9 @@ deploy: build up ## 部署 (构建并启动)
 
 # ==================== 备份命令 ====================
 backup-mysql: ## 备份 MySQL 数据
-	@docker-compose exec mysql mysqldump -uroot -p$$(grep DB_PASSWORD .env 2>/dev/null | cut -d'=' -f2-) personal_website > backup_$$(date +%Y%m%d_%H%M%S).sql
+	@db_name=$$(grep '^DB_NAME=' .env 2>/dev/null | cut -d'=' -f2-); \
+	db_name=$${db_name:-personal_website}; \
+	docker-compose exec mysql mysqldump -uroot -p$$(grep '^DB_PASSWORD=' .env 2>/dev/null | cut -d'=' -f2-) "$$db_name" > backup_$$(date +%Y%m%d_%H%M%S).sql
 	@echo "备份完成"
 
 # ==================== 健康检查 ====================

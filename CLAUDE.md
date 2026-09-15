@@ -8,7 +8,7 @@ Personal website with blog, portfolio, and resume features.
 
 ## Tech Stack
 
-- **Frontend**: React 18 + TypeScript + Vite + Tailwind CSS + shadcn/ui
+- **Frontend**: React 19 + TypeScript + Vite + Tailwind CSS + shadcn/ui
 - **Backend**: Go + Gin + GORM
 - **Database**: MySQL 8.0
 - **Cache**: Redis
@@ -32,7 +32,7 @@ Personal website with blog, portfolio, and resume features.
 ### Backend (from backend/ directory)
 ```bash
 go mod tidy          # Install dependencies
-go run main.go       # Run development server (port 8080)
+go run cmd/api/main.go       # Run development server (port 8080)
 go test ./...        # Run all tests
 ```
 
@@ -54,11 +54,11 @@ docker-compose logs -f      # View logs
 ## Architecture
 
 ### Backend
-- Entry point: `backend/main.go`
-- Routes defined in `backend/routes/`
-- Controllers in `backend/controllers/`
-- Models in `backend/models/`
-- Middleware in `backend/middleware/`
+- Entry point: `backend/cmd/api/main.go`
+- Routes defined in `backend/internal/routes/`
+- Controllers in `backend/internal/controllers/`
+- Models in `backend/internal/models/`
+- Middleware in `backend/internal/middleware/`
 
 ### Frontend
 - Entry point: `frontend/src/main.tsx`
