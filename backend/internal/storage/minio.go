@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/liucong/personal-website/internal/config"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-	"github.com/google/uuid"
 )
 
 var MinioClient *minio.Client
@@ -88,6 +88,36 @@ func UploadFile(ctx context.Context, cfg *config.MinIOConfig, file *multipart.Fi
 		Filename: filename,
 		Size:     info.Size,
 	}, nil
+}
+
+// OpenFile opens an object and fetches its metadata for the public file proxy.
+// The object is private in MinIO; callers are responsible for closing it.
+func OpenFile(ctx context.Context, cfg *config.MinIOConfig, objectName string) (*minio.Object, minio.ObjectInfo, error) {
+	if MinioClient == nil {
+		return nil, minio.ObjectInfo{}, fmt.Errorf("storage service is unavailable")
+	}
+
+	object, err := MinioClient.GetObject(ctx, cfg.Bucket, objectName, minio.GetObjectOptions{})
+	if err != nil {
+		return nil, minio.ObjectInfo{}, err
+	}
+
+	info, err := object.Stat()
+	if err != nil {
+		_ = object.Close()
+		return nil, minio.ObjectInfo{}, err
+	}
+
+	return object, info, nil
+}
+
+func IsObjectNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	code := minio.ToErrorResponse(err).Code
+	return code == "NoSuchKey" || code == "NoSuchObject" || code == "NotFound"
 }
 
 func DeleteFile(ctx context.Context, cfg *config.MinIOConfig, objectName string) error {

@@ -71,7 +71,7 @@ make generate-secrets
 | `GIN_MODE` | `release` | Gin 运行模式 |
 | `COOKIE_SECURE` | 自动判断 | Cookie 的 Secure 标志；留空时按 `FRONTEND_URL` 的 http/https 自动判断 |
 | `CORS_ALLOWED_ORIGINS` | `http://localhost` | CORS 允许的源（逗号分隔） |
-| `MINIO_PUBLIC_URL` | `http://localhost:9000` | MinIO 公开访问地址 |
+| `MINIO_PUBLIC_URL` | `/api/files` | 后端同源文件代理地址；本地直启后端可用 `http://localhost:8080/api/files` |
 
 ### 3. 配置 GitHub OAuth
 
@@ -197,7 +197,7 @@ make deploy
 - [ ] `GITHUB_CALLBACK_URL` 已改为实际域名
 - [ ] `CORS_ALLOWED_ORIGINS` 已改为实际域名
 - [ ] `FRONTEND_URL` 已改为实际域名（默认从环境变量读取）
-- [ ] `MINIO_PUBLIC_URL` 已改为实际访问地址
+- [ ] `MINIO_PUBLIC_URL` 使用 `/api/files`（或本地直启后端的 `http://localhost:8080/api/files`）
 - [ ] `JWT_SECRET` 至少 32 字符，包含大小写字母、数字和特殊字符
 - [ ] 未使用 `minioadmin` 等默认凭据
 
@@ -432,7 +432,8 @@ make security-audit    # 检查已知漏洞
 
 ### MinIO 图片无法访问
 
-检查 `MINIO_PUBLIC_URL` 是否正确配置。Docker 部署时需要设为外部可访问的地址。
+图片通过后端的 `/api/files/<bucket>/<year>/<filename>` 同源代理访问，MinIO 不需要暴露宿主机端口。
+检查 `MINIO_PUBLIC_URL` 是否为 `/api/files`，然后重建 backend；如果仍有旧数据使用 `localhost:9000` 地址，需要重新保存对应文章或项目的图片 URL。
 
 ---
 

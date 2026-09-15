@@ -52,9 +52,6 @@ func Setup(cfg *config.Config) *gin.Engine {
 	}
 	router.Use(middleware.RateLimiterWithScope(cache.Client, "global", rateLimit, time.Minute))
 
-	// Static files
-	router.Static("/uploads", "./uploads")
-
 	// Initialize controllers
 	authController := controllers.NewAuthController(cfg)
 	postController := controllers.NewPostController()
@@ -97,6 +94,9 @@ func Setup(cfg *config.Config) *gin.Engine {
 
 		// Public settings
 		api.GET("/settings/public", settingController.GetPublicSettings)
+		// Public file proxy. Objects remain private in MinIO and are streamed
+		// through the backend so the browser only needs the site origin.
+		api.GET("/files/*objectPath", uploadController.ServeFile)
 
 		// Test-only login endpoint (bypasses GitHub OAuth). Registered on the
 		// api group (not the stricter auth group) to avoid E2E rate-limit issues.

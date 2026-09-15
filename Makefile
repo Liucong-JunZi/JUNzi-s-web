@@ -98,7 +98,7 @@ deploy: build up ## 部署 (构建并启动)
 	@echo "部署完成"
 	@echo "前端: http://localhost"
 	@echo "后端 API: http://localhost:8080"
-	@echo "MinIO 控制台: http://localhost:9001"
+	@echo "MinIO 控制台: 未对外暴露（需要时使用 SSH 隧道）"
 
 # ==================== 备份命令 ====================
 backup-mysql: ## 备份 MySQL 数据
