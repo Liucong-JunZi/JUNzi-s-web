@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"log"
 	"net/http"
 	"strconv"
@@ -9,6 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/liucong/personal-website/internal/database"
 	"github.com/liucong/personal-website/internal/models"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type PostController struct{}
@@ -315,7 +318,11 @@ func (pc *PostController) DeletePost(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Post deleted successfully"})
 }
 
-// LikePost toggles the like for a published post (authenticated users only)
+var errLikePostNotFound = errors.New("published post not found")
+
+// LikePost toggles the like for a published post (authenticated users only).
+// The post row is locked for the whole transaction so concurrent toggles for
+// the same post cannot both observe the same pre-mutation state.
 func (pc *PostController) LikePost(c *gin.Context) {
 	id := c.Param("id")
 	userID, exists := c.Get("userID")
@@ -326,28 +333,70 @@ func (pc *PostController) LikePost(c *gin.Context) {
 	uid := userID.(uint)
 
 	var post models.Post
-	if err := database.DB.Where("status = ?", "published").First(&post, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+	liked := false
+	if err := database.DB.Transaction(func(tx *gorm.DB) error {
+		// Lock the post before inspecting the like. Every toggle for this post
+		// therefore observes the result committed by the previous toggle.
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+			Where("status = ?", "published").First(&post, id).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return errLikePostNotFound
+			}
+			return err
+		}
+
+		var existingLike models.UserLike
+		result := tx.Where("user_id = ? AND post_id = ?", uid, post.ID).First(&existingLike)
+		switch {
+		case result.Error == nil:
+			// Already liked → unlike. A failed delete aborts the transaction, so
+			// the counter is never changed without removing the like row.
+			deleteResult := tx.Delete(&existingLike)
+			if deleteResult.Error != nil {
+				return deleteResult.Error
+			}
+			if deleteResult.RowsAffected != 1 {
+				return errors.New("like row was not deleted")
+			}
+			if err := tx.Model(&models.Post{}).Where("id = ?", post.ID).
+				UpdateColumn("like_count", tx.Raw("GREATEST(COALESCE(like_count, 0) - 1, 0)")).Error; err != nil {
+				return err
+			}
+			liked = false
+		case errors.Is(result.Error, gorm.ErrRecordNotFound):
+			// Not liked → like. The unique index remains a final safeguard for
+			// writes coming from outside this handler; on failure the transaction
+			// rolls back and the counter is left untouched.
+			createResult := tx.Create(&models.UserLike{UserID: uid, PostID: post.ID})
+			if createResult.Error != nil {
+				return createResult.Error
+			}
+			if createResult.RowsAffected != 1 {
+				return errors.New("like row was not created")
+			}
+			if err := tx.Model(&models.Post{}).Where("id = ?", post.ID).
+				UpdateColumn("like_count", tx.Raw("COALESCE(like_count, 0) + 1")).Error; err != nil {
+				return err
+			}
+			liked = true
+		default:
+			return result.Error
+		}
+
+		return tx.First(&post, post.ID).Error
+	}); err != nil {
+		if errors.Is(err, errLikePostNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+			return
+		}
+		log.Printf("WARN: failed to toggle like for post %s and user %d: %v", id, uid, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update like"})
 		return
 	}
 
-	// Check if user already liked
-	var existingLike models.UserLike
-	result := database.DB.Where("user_id = ? AND post_id = ?", uid, post.ID).First(&existingLike)
-
-	if result.Error == nil {
-		// Already liked → unlike
-		database.DB.Delete(&existingLike)
-		database.DB.Model(&models.Post{}).Where("id = ?", post.ID).
-			UpdateColumn("like_count", database.DB.Raw("GREATEST(COALESCE(like_count, 0) - 1, 0)"))
-		database.DB.First(&post, post.ID)
-		c.JSON(http.StatusOK, gin.H{"message": "Post unliked", "like_count": post.LikeCount, "liked": false})
-	} else {
-		// Not liked → like
-		database.DB.Create(&models.UserLike{UserID: uid, PostID: post.ID})
-		database.DB.Model(&models.Post{}).Where("id = ?", post.ID).
-			UpdateColumn("like_count", database.DB.Raw("COALESCE(like_count, 0) + 1"))
-		database.DB.First(&post, post.ID)
+	if liked {
 		c.JSON(http.StatusOK, gin.H{"message": "Post liked successfully", "like_count": post.LikeCount, "liked": true})
+		return
 	}
+	c.JSON(http.StatusOK, gin.H{"message": "Post unliked", "like_count": post.LikeCount, "liked": false})
 }
