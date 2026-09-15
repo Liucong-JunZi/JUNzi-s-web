@@ -1,6 +1,72 @@
 package controllers
 
-import "testing"
+import (
+	"bytes"
+	"mime/multipart"
+	"net/http/httptest"
+	"testing"
+)
+
+func multipartFileHeader(t *testing.T, filename string, content []byte) *multipart.FileHeader {
+	t.Helper()
+
+	var body bytes.Buffer
+	writer := multipart.NewWriter(&body)
+	part, err := writer.CreateFormFile("file", filename)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := part.Write(content); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	req := httptest.NewRequest("POST", "/", &body)
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	if err := req.ParseMultipartForm(2 << 20); err != nil {
+		t.Fatal(err)
+	}
+	return req.MultipartForm.File["file"][0]
+}
+
+func TestValidateAttachmentContent(t *testing.T) {
+	tests := []struct {
+		name        string
+		filename    string
+		content     []byte
+		wantType    string
+		wantInvalid bool
+	}{
+		{name: "pdf", filename: "report.pdf", content: []byte("%PDF-1.7\n"), wantType: "application/pdf"},
+		{name: "zip", filename: "archive.zip", content: []byte("PK\x03\x04"), wantType: "application/zip"},
+		{name: "markdown", filename: "notes.md", content: []byte("# Notes\n"), wantType: "text/plain; charset=utf-8"},
+		{name: "html extension", filename: "page.html", content: []byte("<html></html>"), wantInvalid: true},
+		{name: "svg extension", filename: "image.svg", content: []byte("<svg></svg>"), wantInvalid: true},
+		{name: "javascript extension", filename: "script.js", content: []byte("alert(1)"), wantInvalid: true},
+		{name: "mismatched signature", filename: "page.pdf", content: []byte("<html></html>"), wantInvalid: true},
+		{name: "empty text file", filename: "empty.txt", content: nil, wantInvalid: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotType, err := validateAttachmentContent(multipartFileHeader(t, tt.filename, tt.content))
+			if tt.wantInvalid {
+				if err == nil {
+					t.Fatalf("validateAttachmentContent() accepted %q", tt.filename)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("validateAttachmentContent() error = %v", err)
+			}
+			if gotType != tt.wantType {
+				t.Fatalf("validateAttachmentContent() type = %q, want %q", gotType, tt.wantType)
+			}
+		})
+	}
+}
 
 func TestParsePublicObjectPath(t *testing.T) {
 	tests := []struct {

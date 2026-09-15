@@ -6,6 +6,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -21,7 +22,7 @@ func NewUploadController(cfg *config.Config) *UploadController {
 	return &UploadController{cfg: cfg}
 }
 
-// UploadFile handles file upload
+// UploadFile handles safe document attachment uploads.
 func (uc *UploadController) UploadFile(c *gin.Context) {
 	file, err := c.FormFile("file")
 	if err != nil {
@@ -29,11 +30,20 @@ func (uc *UploadController) UploadFile(c *gin.Context) {
 		return
 	}
 
-	// Validate file size (max 10MB)
+	// Validate file size (max 10MB).
 	if file.Size > 10*1024*1024 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "File size exceeds 10MB limit"})
 		return
 	}
+
+	contentType, err := validateAttachmentContent(file)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	// Do not trust the multipart header supplied by the client. Store the
+	// canonical type determined from the extension and file signature.
+	file.Header.Set("Content-Type", contentType)
 
 	result, err := storage.UploadFile(c.Request.Context(), &uc.cfg.MinIO, file)
 	if err != nil {
@@ -133,6 +143,11 @@ func (uc *UploadController) streamFile(c *gin.Context, objectName string) {
 	if contentType == "" {
 		contentType = "application/octet-stream"
 	}
+	c.Header("X-Content-Type-Options", "nosniff")
+	if !isInlineImageContentType(contentType) {
+		// Uploaded documents must never be rendered in the site's origin.
+		c.Header("Content-Disposition", "attachment")
+	}
 
 	if info.ETag != "" {
 		c.Header("ETag", info.ETag)
@@ -142,6 +157,64 @@ func (uc *UploadController) streamFile(c *gin.Context, objectName string) {
 	}
 	c.Header("Cache-Control", "public, max-age=31536000, immutable")
 	c.DataFromReader(http.StatusOK, info.Size, contentType, object, nil)
+}
+
+var attachmentContentTypes = map[string]string{
+	".csv":  "text/plain; charset=utf-8",
+	".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+	".md":   "text/plain; charset=utf-8",
+	".pdf":  "application/pdf",
+	".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+	".txt":  "text/plain; charset=utf-8",
+	".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+	".zip":  "application/zip",
+}
+
+// validateAttachmentContent accepts only document formats that are safe to
+// expose as downloads. It intentionally excludes HTML, SVG, JavaScript and
+// other browser-renderable active content.
+func validateAttachmentContent(fileHeader *multipart.FileHeader) (string, error) {
+	ext := strings.ToLower(filepath.Ext(fileHeader.Filename))
+	canonicalType, ok := attachmentContentTypes[ext]
+	if !ok {
+		return "", fmt.Errorf("unsupported file type; allowed types are PDF, ZIP, Markdown, text, CSV, DOCX, XLSX, and PPTX")
+	}
+
+	src, err := fileHeader.Open()
+	if err != nil {
+		return "", fmt.Errorf("failed to open file for validation")
+	}
+	defer src.Close()
+
+	buf := make([]byte, 512)
+	n, err := src.Read(buf)
+	if err != nil {
+		return "", fmt.Errorf("failed to read file content")
+	}
+	if n == 0 {
+		return "", fmt.Errorf("file is empty")
+	}
+
+	detectedType := http.DetectContentType(buf[:n])
+	switch {
+	case ext == ".pdf" && detectedType == "application/pdf":
+	case ext == ".zip" && detectedType == "application/zip":
+	case (ext == ".docx" || ext == ".xlsx" || ext == ".pptx") && detectedType == "application/zip":
+	case (ext == ".csv" || ext == ".md" || ext == ".txt") && strings.HasPrefix(detectedType, "text/plain"):
+	default:
+		return "", fmt.Errorf("file content does not match the .%s file type", strings.TrimPrefix(ext, "."))
+	}
+
+	return canonicalType, nil
+}
+
+func isInlineImageContentType(contentType string) bool {
+	switch strings.ToLower(strings.TrimSpace(strings.SplitN(contentType, ";", 2)[0])) {
+	case "image/gif", "image/jpeg", "image/png", "image/webp":
+		return true
+	default:
+		return false
+	}
 }
 
 func parsePublicObjectPath(rawPath, bucket string) (string, bool) {
