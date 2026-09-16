@@ -104,6 +104,8 @@
   "login": {
     "title": "欢迎回来",
     "description": "登录后可以评论和点赞",
+    "oauthFailed": "GitHub 登录失败，请重试。",
+    "tryAgain": "重新登录",
     "continueWithGithub": "用 GitHub 登录",
     "terms": "登录即表示你同意我们的服务条款和隐私政策。",
     "termsText": "登录即表示你同意我们的服务条款和隐私政策。",

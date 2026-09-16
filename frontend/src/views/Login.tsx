@@ -23,6 +23,7 @@ export function Login() {
   const location = useLocation();
   const { setUser, isAuthenticated } = useAuthStore();
   const [isProcessing, setIsProcessing] = useState(false);
+  const oauthError = searchParams.get('oauth_error');
 
   // Handle session restoration from OAuth callback
   const handleCallback = useCallback(async () => {
@@ -67,6 +68,19 @@ export function Login() {
 
   if (isAuthenticated) {
     return null;
+  }
+
+  if (oauthError) {
+    return (
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-md mx-auto text-center">
+          <p className="text-destructive">{t('login.oauthFailed')}</p>
+          <Button className="mt-4" onClick={() => navigate('/login')}>
+            {t('login.tryAgain')}
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   const fromCallback = searchParams.get('callback');

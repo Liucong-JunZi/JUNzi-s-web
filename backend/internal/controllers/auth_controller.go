@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"strings"
@@ -101,6 +102,41 @@ func setCookie(c *gin.Context, name, value string, maxAge int, httpOnly bool) {
 	})
 }
 
+// githubOAuthHTTPClient keeps the OAuth token exchange working on networks
+// where github.com is filtered but api.github.com remains reachable. The
+// request URL and TLS SNI stay github.com; only the TCP destination uses an
+// address resolved from the reachable GitHub API hostname.
+func githubOAuthHTTPClient() *http.Client {
+	baseTransport, ok := http.DefaultTransport.(*http.Transport)
+	if !ok {
+		return &http.Client{Timeout: 20 * time.Second}
+	}
+
+	transport := baseTransport.Clone()
+	dialer := &net.Dialer{Timeout: 10 * time.Second}
+	transport.DialContext = func(ctx context.Context, network, address string) (net.Conn, error) {
+		host, port, err := net.SplitHostPort(address)
+		if err == nil && strings.EqualFold(host, "github.com") {
+			if ips, lookupErr := net.DefaultResolver.LookupIP(ctx, "ip", "api.github.com"); lookupErr == nil {
+				for _, ip := range ips {
+					conn, dialErr := dialer.DialContext(ctx, network, net.JoinHostPort(ip.String(), port))
+					if dialErr == nil {
+						return conn, nil
+					}
+				}
+			}
+		}
+		return dialer.DialContext(ctx, network, address)
+	}
+
+	return &http.Client{Transport: transport, Timeout: 20 * time.Second}
+}
+
+func (ac *AuthController) redirectOAuthError(c *gin.Context) {
+	frontendURL := strings.TrimRight(ac.frontendURL, "/")
+	c.Redirect(http.StatusSeeOther, frontendURL+"/login?oauth_error=oauth_failed")
+}
+
 // generateCSRFToken generates a random CSRF token encoded as base64.
 func generateCSRFToken() (string, error) {
 	bytes := make([]byte, 32)
@@ -183,22 +219,27 @@ func (ac *AuthController) GitHubRedirect(c *gin.Context) {
 
 // GitHubCallback handles GitHub OAuth callback
 func (ac *AuthController) GitHubCallback(c *gin.Context) {
+	fail := func(reason string) {
+		log.Printf("[WARN] GitHub OAuth callback failed: %s", reason)
+		ac.redirectOAuthError(c)
+	}
+
 	code := c.Query("code")
 	if code == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Code not provided"})
+		fail("code not provided")
 		return
 	}
 
 	// Validate state for CSRF protection
 	state := c.Query("state")
 	if state == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "State not provided"})
+		fail("state not provided")
 		return
 	}
 
 	cookieState, err := c.Cookie("oauth_state")
 	if err != nil || cookieState != state {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid state"})
+		fail("invalid state cookie")
 		return
 	}
 	setCookie(c, "oauth_state", "", -1, true)
@@ -206,43 +247,50 @@ func (ac *AuthController) GitHubCallback(c *gin.Context) {
 	ctx := context.Background()
 	stateKey := "oauth_state:" + state
 	if err := cache.Client.Get(ctx, stateKey).Err(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid or expired state"})
+		fail("invalid or expired state")
 		return
 	}
 	// Delete used state
 	cache.Client.Del(ctx, stateKey)
 
-	// Exchange code for token
-	token, err := ac.oauthConf.Exchange(context.Background(), code)
+	// Exchange code for token. Some server networks can reach the GitHub API
+	// hostname but cannot establish a connection to github.com directly.
+	oauthCtx, cancelOAuth := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancelOAuth()
+	oauthCtx = context.WithValue(oauthCtx, oauth2.HTTPClient, githubOAuthHTTPClient())
+	token, err := ac.oauthConf.Exchange(oauthCtx, code)
 	if err != nil {
 		audit.Log("login_failed", "OAuth token exchange failed", c)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to exchange token"})
+		log.Printf("[WARN] GitHub OAuth token exchange failed: %v", err)
+		fail("token exchange")
 		return
 	}
 
 	// Get user info from GitHub
-	client := ac.oauthConf.Client(context.Background(), token)
+	userCtx, cancelUser := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancelUser()
+	client := ac.oauthConf.Client(userCtx, token)
 	resp, err := client.Get("https://api.github.com/user")
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user info"})
+		fail("failed to get user info")
 		return
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user info from GitHub"})
+		fail("GitHub user info request failed")
 		return
 	}
 
 	var ghUser GitHubUser
 	if err := json.NewDecoder(resp.Body).Decode(&ghUser); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse user info"})
+		fail("failed to parse user info")
 		return
 	}
 
 	// Validate required fields from GitHub response
 	if ghUser.ID == 0 || ghUser.Login == "" {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user info received from GitHub"})
+		fail("invalid GitHub user info")
 		return
 	}
 
@@ -261,11 +309,11 @@ func (ac *AuthController) GitHubCallback(c *gin.Context) {
 			Role:      "user",
 		}
 		if err := database.DB.Create(&user).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+			fail("failed to create user")
 			return
 		}
 	} else if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+		fail("database error")
 		return
 	}
 
@@ -282,7 +330,7 @@ func (ac *AuthController) GitHubCallback(c *gin.Context) {
 
 	accessTokenString, err := accessToken.SignedString([]byte(ac.cfg.JWT.Secret))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate access token"})
+		fail("failed to generate access token")
 		return
 	}
 
@@ -298,7 +346,7 @@ func (ac *AuthController) GitHubCallback(c *gin.Context) {
 
 	refreshTokenString, err := refreshToken.SignedString([]byte(ac.cfg.JWT.Secret))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate refresh token"})
+		fail("failed to generate refresh token")
 		return
 	}
 
@@ -309,7 +357,7 @@ func (ac *AuthController) GitHubCallback(c *gin.Context) {
 	// Generate CSRF token for double-submit cookie pattern
 	csrfToken, err := generateCSRFToken()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate CSRF token"})
+		fail("failed to generate CSRF token")
 		return
 	}
 	setCookie(c, "csrf_token", csrfToken, 3600, false) // not HttpOnly so JS can read it
@@ -317,8 +365,8 @@ func (ac *AuthController) GitHubCallback(c *gin.Context) {
 	audit.Log("login_success", fmt.Sprintf("user_id=%d github_login=%s", user.ID, ghUser.Login), c)
 
 	// Redirect to frontend
-	frontendURL := fmt.Sprintf("%s/auth/callback", ac.frontendURL)
-	c.Redirect(http.StatusTemporaryRedirect, frontendURL)
+	frontendURL := strings.TrimRight(ac.frontendURL, "/")
+	c.Redirect(http.StatusSeeOther, frontendURL+"/auth/callback")
 }
 
 // GetCurrentUser returns current user info

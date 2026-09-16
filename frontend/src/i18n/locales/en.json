@@ -104,6 +104,8 @@
   "login": {
     "title": "Welcome Back",
     "description": "Login to comment and like posts",
+    "oauthFailed": "GitHub login failed. Please try again.",
+    "tryAgain": "Try again",
     "continueWithGithub": "Continue with GitHub",
     "terms": "By signing in, you agree to our Terms of Service and Privacy Policy.",
     "termsText": "By signing in, you agree to our Terms of Service and Privacy Policy.",
