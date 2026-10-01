@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Badge } from '../components/ui/badge';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
-import { Search, Calendar } from 'lucide-react';
+import { Search, Calendar, Rss } from 'lucide-react';
 
 export function Blog() {
   const { t } = useTranslation();
@@ -64,11 +64,20 @@ export function Blog() {
   return (
     <div className="container mx-auto px-4 py-12" data-testid="blog-page">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-4">{t('blog.title')}</h1>
-        <p className="text-muted-foreground">
-          {t('blog.description')}
-        </p>
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-4xl font-bold mb-4">{t('blog.title')}</h1>
+          <p className="text-muted-foreground">
+            {t('blog.description')}
+          </p>
+        </div>
+        <a
+          href="/feed.xml"
+          className="inline-flex w-fit items-center gap-2 rounded-md border px-3 py-2 text-sm text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+        >
+          <Rss className="h-4 w-4" aria-hidden="true" />
+          {t('blog.rssSubscribe')}
+        </a>
       </div>
 
       {/* Search and Filter */}

@@ -40,6 +40,7 @@
   "blog": {
     "title": "Blog",
     "description": "Learning notes, tinkering logs, and occasional thoughts.",
+    "rssSubscribe": "Subscribe via RSS",
     "searchPlaceholder": "Search...",
     "searchBtn": "Search",
     "clearFilter": "Clear filter: {{tag}}",

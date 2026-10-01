@@ -55,6 +55,7 @@ func Setup(cfg *config.Config) *gin.Engine {
 	// Initialize controllers
 	authController := controllers.NewAuthController(cfg)
 	postController := controllers.NewPostController()
+	feedController := controllers.NewFeedController()
 	projectController := controllers.NewProjectController()
 	resumeController := controllers.NewResumeController()
 	commentController := controllers.NewCommentController()
@@ -66,6 +67,7 @@ func Setup(cfg *config.Config) *gin.Engine {
 	// Backward-compatible proxy for image URLs generated before the API file
 	// proxy was introduced.
 	router.GET("/uploads/*objectPath", uploadController.ServeLegacyFile)
+	router.GET("/feed.xml", feedController.RSS)
 
 	// API routes
 	api := router.Group("/api")

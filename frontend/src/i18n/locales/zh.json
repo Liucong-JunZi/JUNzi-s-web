@@ -40,6 +40,7 @@
   "blog": {
     "title": "博客",
     "description": "学习笔记、折腾记录、和偶尔的想法。",
+    "rssSubscribe": "RSS 订阅",
     "searchPlaceholder": "搜文章...",
     "searchBtn": "搜索",
     "clearFilter": "清除筛选: {{tag}}",
