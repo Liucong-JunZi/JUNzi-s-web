@@ -11,6 +11,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -102,11 +103,10 @@ func setCookie(c *gin.Context, name, value string, maxAge int, httpOnly bool) {
 	})
 }
 
-// githubOAuthHTTPClient keeps the OAuth token exchange working on networks
-// where github.com is filtered but api.github.com remains reachable. The
-// request URL and TLS SNI stay github.com; only the TCP destination uses an
-// address resolved from the reachable GitHub API hostname.
-func githubOAuthHTTPClient() *http.Client {
+// githubOAuthHTTPClient uses a configured outbound HTTP CONNECT proxy when
+// available. Without one, it retains the direct-dial fallback for networks
+// where api.github.com is reachable but github.com is filtered.
+func githubOAuthHTTPClient(proxyURL string) *http.Client {
 	baseTransport, ok := http.DefaultTransport.(*http.Transport)
 	if !ok {
 		return &http.Client{Timeout: 20 * time.Second}
@@ -114,6 +114,15 @@ func githubOAuthHTTPClient() *http.Client {
 
 	transport := baseTransport.Clone()
 	dialer := &net.Dialer{Timeout: 10 * time.Second}
+	if proxyURL != "" {
+		parsedProxy, err := url.Parse(proxyURL)
+		if err == nil {
+			transport.Proxy = http.ProxyURL(parsedProxy)
+			transport.DialContext = dialer.DialContext
+			return &http.Client{Transport: transport, Timeout: 20 * time.Second}
+		}
+	}
+
 	transport.DialContext = func(ctx context.Context, network, address string) (net.Conn, error) {
 		host, port, err := net.SplitHostPort(address)
 		if err == nil && strings.EqualFold(host, "github.com") {
@@ -253,11 +262,13 @@ func (ac *AuthController) GitHubCallback(c *gin.Context) {
 	// Delete used state
 	cache.Client.Del(ctx, stateKey)
 
-	// Exchange code for token. Some server networks can reach the GitHub API
-	// hostname but cannot establish a connection to github.com directly.
+	// Use the same outbound route for token exchange and the subsequent GitHub
+	// user API request. The server can set GITHUB_OAUTH_PROXY to a trusted
+	// HTTP CONNECT proxy when direct GitHub access is blocked.
+	oauthHTTPClient := githubOAuthHTTPClient(ac.cfg.GitHub.ProxyURL)
 	oauthCtx, cancelOAuth := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancelOAuth()
-	oauthCtx = context.WithValue(oauthCtx, oauth2.HTTPClient, githubOAuthHTTPClient())
+	oauthCtx = context.WithValue(oauthCtx, oauth2.HTTPClient, oauthHTTPClient)
 	token, err := ac.oauthConf.Exchange(oauthCtx, code)
 	if err != nil {
 		audit.Log("login_failed", "OAuth token exchange failed", c)
@@ -269,6 +280,7 @@ func (ac *AuthController) GitHubCallback(c *gin.Context) {
 	// Get user info from GitHub
 	userCtx, cancelUser := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancelUser()
+	userCtx = context.WithValue(userCtx, oauth2.HTTPClient, oauthHTTPClient)
 	client := ac.oauthConf.Client(userCtx, token)
 	resp, err := client.Get("https://api.github.com/user")
 	if err != nil {

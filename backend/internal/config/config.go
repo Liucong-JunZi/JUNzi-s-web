@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"strings"
 
@@ -51,6 +52,7 @@ type GitHubConfig struct {
 	ClientID     string
 	ClientSecret string
 	CallbackURL  string
+	ProxyURL     string
 }
 
 type JWTConfig struct {
@@ -92,6 +94,7 @@ func Load() (*Config, error) {
 			ClientID:     getEnv("GITHUB_CLIENT_ID", ""),
 			ClientSecret: getEnv("GITHUB_CLIENT_SECRET", ""),
 			CallbackURL:  getEnv("GITHUB_CALLBACK_URL", "http://localhost:8080/api/auth/github/callback"),
+			ProxyURL:     getEnv("GITHUB_OAUTH_PROXY", ""),
 		},
 		JWT: JWTConfig{
 			Secret: getEnv("JWT_SECRET", ""),
@@ -102,6 +105,13 @@ func Load() (*Config, error) {
 }
 
 func validate(cfg *Config) error {
+	if cfg.GitHub.ProxyURL != "" {
+		proxyURL, err := url.Parse(cfg.GitHub.ProxyURL)
+		if err != nil || (proxyURL.Scheme != "http" && proxyURL.Scheme != "https") || proxyURL.Host == "" {
+			return fmt.Errorf("GITHUB_OAUTH_PROXY must be a valid http:// or https:// proxy URL")
+		}
+	}
+
 	if cfg.JWT.Secret == "" {
 		return fmt.Errorf("JWT_SECRET environment variable must be set")
 	}
