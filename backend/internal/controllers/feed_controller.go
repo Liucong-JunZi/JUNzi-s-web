@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"html"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -13,6 +15,14 @@ import (
 )
 
 const defaultFeedSiteURL = "https://junziliucong.online"
+
+var (
+	feedImagePattern       = regexp.MustCompile(`!\[([^\]]*)\]\([^)]+\)`)
+	feedLinkPattern        = regexp.MustCompile(`\[([^\]]+)\]\([^)]+\)`)
+	feedHTMLPattern        = regexp.MustCompile(`<[^>]*>`)
+	feedMarkdownPrefix     = regexp.MustCompile(`(?m)^\s{0,3}(?:#{1,6}\s+|>\s?|[-*+]\s+|\d+\.\s+)`)
+	feedMarkdownFormatting = regexp.MustCompile("[*_~`]")
+)
 
 type rssFeed struct {
 	XMLName xml.Name   `xml:"rss"`
@@ -99,13 +109,19 @@ func (fc *FeedController) RSS(c *gin.Context) {
 }
 
 func feedDescription(post models.Post) string {
-	if summary := strings.TrimSpace(post.Summary); summary != "" {
-		return summary
+	description := strings.TrimSpace(post.Summary)
+	if description == "" {
+		description = post.Content
 	}
-	content := strings.TrimSpace(post.Content)
-	runes := []rune(content)
+	description = feedImagePattern.ReplaceAllString(description, "$1")
+	description = feedLinkPattern.ReplaceAllString(description, "$1")
+	description = feedHTMLPattern.ReplaceAllString(description, " ")
+	description = feedMarkdownPrefix.ReplaceAllString(description, "")
+	description = feedMarkdownFormatting.ReplaceAllString(description, "")
+	description = strings.Join(strings.Fields(html.UnescapeString(description)), " ")
+	runes := []rune(description)
 	if len(runes) > 300 {
 		return string(runes[:300]) + "…"
 	}
-	return content
+	return description
 }
