@@ -25,9 +25,6 @@ export function AsciiPetersenBackground() {
     const ctx = canvas?.getContext('2d');
     if (!canvas || !ctx) return;
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const favicon = new Image();
-    favicon.src = '/favicon.png';
-    favicon.decoding = 'async';
     let frame = 0;
     let last = -Infinity;
     let elapsed = 0;
@@ -50,22 +47,17 @@ export function AsciiPetersenBackground() {
       const index = Math.floor(phase) % layouts.length;
       const f = (phase % 1);
       const blend = f * f * (3 - 2 * f);
-      // Continuous spin plus an opposing inner twist makes the graph visibly rotate and breathe.
-      const rotation = t * 0.22 + 0.2;
-      const scale = Math.min(width * 0.43, height * 0.39, 410);
+      // Keep the graph flat and still; only the inner pentagram rotates in place.
+      const scale = Math.min(width * 0.46, height * 0.42, 440);
       const points = layouts[index].map((p, i) => {
         const q = layouts[(index + 1) % layouts.length][i];
         let [x, y] = p.slice(0, 2).map((v, j) => v + (q[j] - v) * blend) as [number, number];
         const z = p[2] + (q[2] - p[2]) * blend;
-        const local = (i < 5 ? 1 : -1) * t * 0.42;
+        const local = i >= 5 ? t * 0.62 : 0;
         const twistedX = x * Math.cos(local) - y * Math.sin(local);
         const twistedY = x * Math.sin(local) + y * Math.cos(local);
         x = twistedX; y = twistedY;
-        const rx = x * Math.cos(rotation) - z * Math.sin(rotation);
-        const rz = x * Math.sin(rotation) + z * Math.cos(rotation);
-        const ry = y * Math.cos(0.3) - rz * Math.sin(0.3);
-        const perspective = 3.8 / (3.8 + rz);
-        return [width / 2 + rx * scale * perspective, height / 2 + ry * scale * perspective, rz];
+        return [width / 2 + x * scale, height / 2 + y * scale, z];
       });
       const cells = new Map<string, { x: number; y: number; char: string }>();
       const put = (x: number, y: number, char: string) => {
@@ -94,17 +86,15 @@ export function AsciiPetersenBackground() {
       // Make the ten vertices unmistakable: a bright ring, a bold marker, and the site icon.
       for (const p of points) {
         ctx.beginPath();
-        ctx.arc(p[0], p[1] - 4, 10, 0, Math.PI * 2);
-        ctx.fillStyle = dark ? 'rgba(197,237,255,.28)' : 'rgba(23,59,82,.16)';
+        ctx.arc(p[0], p[1] - 4, 13, 0, Math.PI * 2);
+        ctx.fillStyle = dark ? 'rgba(197,237,255,.42)' : 'rgba(23,59,82,.24)';
         ctx.fill();
         ctx.strokeStyle = dark ? '#e4f8ff' : '#173b52';
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = 2.5;
         ctx.stroke();
-        if (favicon.complete && favicon.naturalWidth > 0) {
-          ctx.globalAlpha = dark ? 0.95 : 0.82;
-          ctx.drawImage(favicon, p[0] - 6, p[1] - 10, 12, 12);
-          ctx.globalAlpha = 1;
-        }
+        ctx.fillStyle = dark ? '#e4f8ff' : '#173b52';
+        ctx.font = 'bold 15px monospace';
+        ctx.fillText('@', p[0], p[1] + 1);
       }
       if (!motion.matches) frame = requestAnimationFrame(draw);
     };
@@ -134,5 +124,5 @@ export function AsciiPetersenBackground() {
       motion.removeEventListener('change', start);
     };
   }, []);
-  return <canvas ref={ref} aria-hidden="true" className="pointer-events-none fixed inset-0 z-0 h-full w-full opacity-[0.34] dark:opacity-[0.32]" data-testid="ascii-petersen-background" />;
+  return <canvas ref={ref} aria-hidden="true" className="pointer-events-none fixed inset-0 z-0 h-full w-full opacity-[0.52] dark:opacity-[0.46]" data-testid="ascii-petersen-background" />;
 }
