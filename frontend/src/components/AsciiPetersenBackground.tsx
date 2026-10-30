@@ -25,6 +25,9 @@ export function AsciiPetersenBackground() {
     const ctx = canvas?.getContext('2d');
     if (!canvas || !ctx) return;
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const favicon = new Image();
+    favicon.src = '/favicon.png';
+    favicon.decoding = 'async';
     let frame = 0;
     let last = -Infinity;
     let elapsed = 0;
@@ -47,11 +50,17 @@ export function AsciiPetersenBackground() {
       const index = Math.floor(phase) % layouts.length;
       const f = (phase % 1);
       const blend = f * f * (3 - 2 * f);
-      const rotation = t * 0.09 + 0.2;
+      // Continuous spin plus an opposing inner twist makes the graph visibly rotate and breathe.
+      const rotation = t * 0.22 + 0.2;
       const scale = Math.min(width * 0.43, height * 0.39, 410);
       const points = layouts[index].map((p, i) => {
         const q = layouts[(index + 1) % layouts.length][i];
-        const [x, y, z] = p.map((v, j) => v + (q[j] - v) * blend) as Point;
+        let [x, y] = p.slice(0, 2).map((v, j) => v + (q[j] - v) * blend) as [number, number];
+        const z = p[2] + (q[2] - p[2]) * blend;
+        const local = (i < 5 ? 1 : -1) * t * 0.42;
+        const twistedX = x * Math.cos(local) - y * Math.sin(local);
+        const twistedY = x * Math.sin(local) + y * Math.cos(local);
+        x = twistedX; y = twistedY;
         const rx = x * Math.cos(rotation) - z * Math.sin(rotation);
         const rz = x * Math.sin(rotation) + z * Math.cos(rotation);
         const ry = y * Math.cos(0.3) - rz * Math.sin(0.3);
@@ -77,10 +86,26 @@ export function AsciiPetersenBackground() {
           put(p[0] + x * cellX, p[1] + y * cellY, x === 0 && y === 0 ? '@' : 'o');
         }
       }
-      ctx.fillStyle = document.documentElement.classList.contains('dark') ? '#9ab8ca' : '#405b70';
-      ctx.font = '12px monospace';
+      const dark = document.documentElement.classList.contains('dark');
+      ctx.fillStyle = dark ? '#c5edff' : '#173b52';
+      ctx.font = 'bold 12px monospace';
       ctx.textAlign = 'center';
       for (const cell of cells.values()) ctx.fillText(cell.char, cell.x, cell.y);
+      // Make the ten vertices unmistakable: a bright ring, a bold marker, and the site icon.
+      for (const p of points) {
+        ctx.beginPath();
+        ctx.arc(p[0], p[1] - 4, 10, 0, Math.PI * 2);
+        ctx.fillStyle = dark ? 'rgba(197,237,255,.28)' : 'rgba(23,59,82,.16)';
+        ctx.fill();
+        ctx.strokeStyle = dark ? '#e4f8ff' : '#173b52';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        if (favicon.complete && favicon.naturalWidth > 0) {
+          ctx.globalAlpha = dark ? 0.95 : 0.82;
+          ctx.drawImage(favicon, p[0] - 6, p[1] - 10, 12, 12);
+          ctx.globalAlpha = 1;
+        }
+      }
       if (!motion.matches) frame = requestAnimationFrame(draw);
     };
     const start = () => {
@@ -109,5 +134,5 @@ export function AsciiPetersenBackground() {
       motion.removeEventListener('change', start);
     };
   }, []);
-  return <canvas ref={ref} aria-hidden="true" className="pointer-events-none fixed inset-0 z-0 h-full w-full opacity-[0.18] dark:opacity-[0.15]" data-testid="ascii-petersen-background" />;
+  return <canvas ref={ref} aria-hidden="true" className="pointer-events-none fixed inset-0 z-0 h-full w-full opacity-[0.34] dark:opacity-[0.32]" data-testid="ascii-petersen-background" />;
 }

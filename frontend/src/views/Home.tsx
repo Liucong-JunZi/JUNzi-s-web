@@ -12,7 +12,7 @@ export function Home() {
     <div className="container mx-auto px-4 py-12" data-display-headings>
       {/* Hero Section */}
       <section className="text-center mb-16">
-        <h1 className="text-4xl md:text-6xl font-bold mb-6">
+        <h1 className="home-hero-title text-4xl md:text-6xl font-bold mb-6">
           {t('home.welcome')}
         </h1>
         <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
