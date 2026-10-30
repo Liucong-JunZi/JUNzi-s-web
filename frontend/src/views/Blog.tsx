@@ -62,7 +62,7 @@ export function Blog() {
   const totalPages = Math.ceil(total / limit);
 
   return (
-    <div className="container mx-auto px-4 py-12" data-testid="blog-page">
+    <div className="container mx-auto px-4 py-12" data-testid="blog-page" data-display-headings>
       {/* Header */}
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>

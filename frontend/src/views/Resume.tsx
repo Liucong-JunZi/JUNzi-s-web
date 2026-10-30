@@ -109,7 +109,7 @@ export function Resume() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="container mx-auto px-4 py-12" data-display-headings>
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <div>

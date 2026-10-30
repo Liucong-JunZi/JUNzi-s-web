@@ -10,7 +10,7 @@ export function FriendLinks() {
   const links = friendLinks.filter((link) => isSafeFriendUrl(link.url));
 
   return (
-    <div className="container mx-auto px-4 py-12" data-testid="friend-links-page">
+    <div className="container mx-auto px-4 py-12" data-testid="friend-links-page" data-display-headings>
       <header className="mb-10 text-center">
         <h1 className="text-4xl font-bold mb-4">{t('friends.title')}</h1>
         <p className="text-muted-foreground">{t('friends.description')}</p>

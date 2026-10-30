@@ -47,7 +47,7 @@ test('site avatars, RSS, fallbacks and unsafe URL filtering', async ({ page }) =
   await expect(page.getByRole('heading', { name: 'Test Friend' })).toBeVisible();
   const image = page.locator('img[src="https://friend.example/avatar.svg"]');
   await expect(image).toBeVisible();
-  expect(await image.evaluate((img: HTMLImageElement) => img.naturalWidth > 0)).toBeTruthy();
+  await expect.poll(() => image.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
   const rss = page.locator('a[href="https://friend.example/feed.xml"]');
   await expect(rss).toHaveAttribute('target', '_blank');
   await expect(rss).toHaveAttribute('rel', 'noopener noreferrer');
