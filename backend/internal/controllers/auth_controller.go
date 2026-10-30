@@ -103,9 +103,9 @@ func setCookie(c *gin.Context, name, value string, maxAge int, httpOnly bool) {
 	})
 }
 
-// githubOAuthHTTPClient uses a configured outbound HTTP CONNECT proxy when
-// available. Without one, it retains the direct-dial fallback for networks
-// where api.github.com is reachable but github.com is filtered.
+// githubOAuthHTTPClient supports an optional outbound proxy. Direct requests
+// must resolve their original hostname: GitHub API IPs do not necessarily serve
+// github.com OAuth endpoints, even when the TLS handshake succeeds.
 func githubOAuthHTTPClient(proxyURL string) *http.Client {
 	baseTransport, ok := http.DefaultTransport.(*http.Transport)
 	if !ok {
@@ -123,20 +123,7 @@ func githubOAuthHTTPClient(proxyURL string) *http.Client {
 		}
 	}
 
-	transport.DialContext = func(ctx context.Context, network, address string) (net.Conn, error) {
-		host, port, err := net.SplitHostPort(address)
-		if err == nil && strings.EqualFold(host, "github.com") {
-			if ips, lookupErr := net.DefaultResolver.LookupIP(ctx, "ip", "api.github.com"); lookupErr == nil {
-				for _, ip := range ips {
-					conn, dialErr := dialer.DialContext(ctx, network, net.JoinHostPort(ip.String(), port))
-					if dialErr == nil {
-						return conn, nil
-					}
-				}
-			}
-		}
-		return dialer.DialContext(ctx, network, address)
-	}
+	transport.DialContext = dialer.DialContext
 
 	return &http.Client{Transport: transport, Timeout: 20 * time.Second}
 }
