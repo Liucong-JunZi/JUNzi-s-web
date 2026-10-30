@@ -130,7 +130,7 @@ export function Blog() {
                   />
                 )}
                 <CardHeader>
-                  <CardTitle className="line-clamp-2">{post.title}</CardTitle>
+                  <CardTitle className="display-title line-clamp-2">{post.title}</CardTitle>
                   <CardDescription className="line-clamp-3">
                     {post.summary || post.content.substring(0, 150)}
                   </CardDescription>

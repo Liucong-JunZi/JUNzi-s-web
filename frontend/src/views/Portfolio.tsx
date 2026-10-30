@@ -103,7 +103,7 @@ export function Portfolio() {
               )}
               <CardHeader>
                 <div className="flex items-start justify-between">
-                  <CardTitle className="line-clamp-1">{project.title}</CardTitle>
+                  <CardTitle className="display-title line-clamp-2">{project.title}</CardTitle>
                   <Badge className={`${getStatusColor(project.status)} text-white ml-2`}>
                     {getStatusLabel(project.status)}
                   </Badge>

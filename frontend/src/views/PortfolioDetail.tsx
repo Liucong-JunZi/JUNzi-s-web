@@ -121,7 +121,7 @@ export function PortfolioDetail() {
         {/* Header */}
         <header className="mb-8">
           <div className="flex items-center gap-3 mb-4">
-            <h1 className="text-4xl font-bold">{project.title}</h1>
+            <h1 className="display-title text-4xl">{project.title}</h1>
             <Badge className={`${getStatusColor(project.status)} text-white`}>
               {getStatusLabel(project.status)}
             </Badge>

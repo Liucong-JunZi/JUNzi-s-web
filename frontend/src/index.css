@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* Self-hosted OFL fonts. Latin is handled by Great Vibes; Chinese falls
-   through to Liu Jian Mao Cao. Body text and controls stay in system fonts. */
+   through to LXGW WenKai. Body text and controls stay in system fonts. */
 @font-face {
   font-family: 'Great Vibes';
   src: url('/fonts/great-vibes-latin-400-normal.woff2') format('woff2');
@@ -14,8 +14,8 @@
 }
 
 @font-face {
-  font-family: 'Liu Jian Mao Cao';
-  src: url('/fonts/liu-jian-mao-cao-chinese-simplified-400-normal.woff2') format('woff2');
+  font-family: 'LXGW WenKai';
+  src: url('/fonts/lxgw-wenkai-500-normal.woff2') format('woff2');
   font-style: normal;
   font-weight: 400;
   font-display: swap;
@@ -81,8 +81,9 @@
 
 /* Only public page/section headings, never prose, admin UI or navigation. */
 [data-display-headings] h1,
-[data-display-headings] h2 {
-  font-family: 'Great Vibes', 'Liu Jian Mao Cao', 'KaiTi', serif;
+[data-display-headings] h2,
+.display-title {
+  font-family: 'Great Vibes', 'LXGW WenKai', 'KaiTi', serif;
   font-weight: 400;
   font-synthesis: none;
   line-height: 1.5;

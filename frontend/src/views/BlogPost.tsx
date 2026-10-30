@@ -174,7 +174,7 @@ export function BlogPost() {
       {/* Post Header */}
       <article className="max-w-4xl mx-auto mb-12">
         <header className="mb-8">
-          <h1 className="text-4xl font-bold mb-4" data-testid="post-title">{post.title}</h1>
+          <h1 className="display-title text-4xl mb-4" data-testid="post-title">{post.title}</h1>
           <div className="flex flex-wrap items-center gap-4 text-muted-foreground mb-4">
             <div className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
