@@ -7,6 +7,7 @@ import { BlogPost } from './views/BlogPost';
 import { Portfolio } from './views/Portfolio';
 import { PortfolioDetail } from './views/PortfolioDetail';
 import { Resume } from './views/Resume';
+import { FriendLinks } from './views/FriendLinks';
 import { Login } from './views/Login';
 import { AuthCallback } from './views/AuthCallback';
 import { NotFound } from './views/NotFound';
@@ -31,6 +32,7 @@ function App() {
           <Route path="portfolio" element={<Portfolio />} />
           <Route path="portfolio/:id" element={<PortfolioDetail />} />
           <Route path="resume" element={<Resume />} />
+          <Route path="friends" element={<FriendLinks />} />
           <Route path="login" element={<Login />} />
 
           {/* Auth Callback Route */}

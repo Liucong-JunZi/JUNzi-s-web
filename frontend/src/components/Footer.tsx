@@ -78,6 +78,11 @@ export function Footer() {
                   {t('nav.resume')}
                 </Link>
               </li>
+              <li>
+                <Link to="/friends" className="text-muted-foreground hover:text-primary">
+                  {t('nav.friends')}
+                </Link>
+              </li>
             </ul>
           </div>
 

@@ -4,9 +4,17 @@
     "blog": "Blog",
     "portfolio": "Projects",
     "resume": "Resume",
+    "friends": "Friends",
     "login": "Login",
     "dashboard": "Dashboard",
     "logout": "Log out"
+  },
+  "friends": {
+    "title": "Friends",
+    "description": "Meet friends around the web and discover sites worth reading.",
+    "empty": "Friend links are coming soon.",
+    "rss": "RSS feed",
+    "rssLabel": "Subscribe to {{name}} via RSS"
   },
   "home": {
     "welcome": "Hi, I'm Liu Cong",

@@ -4,9 +4,17 @@
     "blog": "博客",
     "portfolio": "作品集",
     "resume": "简历",
+    "friends": "友情链接",
     "login": "登录",
     "dashboard": "控制台",
     "logout": "退出登录"
+  },
+  "friends": {
+    "title": "友情链接",
+    "description": "与朋友们在互联网相遇，分享值得阅读的网站。",
+    "empty": "友链正在整理中，敬请期待。",
+    "rss": "RSS 订阅",
+    "rssLabel": "订阅 {{name}} 的 RSS"
   },
   "home": {
     "welcome": "你好，我是刘聪",

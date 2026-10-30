@@ -37,6 +37,7 @@ export function Header() {
     { to: '/blog', label: t('nav.blog') },
     { to: '/portfolio', label: t('nav.portfolio') },
     { to: '/resume', label: t('nav.resume') },
+    { to: '/friends', label: t('nav.friends') },
   ];
 
   const toggleLanguage = () => {
