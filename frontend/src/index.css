@@ -1,5 +1,5 @@
 /* Linhai LiShu Web embedding: https://fonts.zeoseven.com/items/229/ */
-@import url('https://fontsapi.zeoseven.com/229/main/result.css');
+@import url('/fonts/linhai/font.css');
 
 @tailwind base;
 @tailwind components;
