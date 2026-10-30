@@ -83,19 +83,10 @@ export function AsciiPetersenBackground() {
       ctx.font = 'bold 12px monospace';
       ctx.textAlign = 'center';
       for (const cell of cells.values()) ctx.fillText(cell.char, cell.x, cell.y);
-      // Make the ten vertices unmistakable: a bright ring, a bold marker, and the site icon.
-      for (const p of points) {
-        ctx.beginPath();
-        ctx.arc(p[0], p[1] - 4, 13, 0, Math.PI * 2);
-        ctx.fillStyle = dark ? 'rgba(197,237,255,.42)' : 'rgba(23,59,82,.24)';
-        ctx.fill();
-        ctx.strokeStyle = dark ? '#e4f8ff' : '#173b52';
-        ctx.lineWidth = 2.5;
-        ctx.stroke();
-        ctx.fillStyle = dark ? '#e4f8ff' : '#173b52';
-        ctx.font = 'bold 15px monospace';
-        ctx.fillText('@', p[0], p[1] + 1);
-      }
+      // Vertices are pure ASCII only: no favicon, image, circle, or decorative icon.
+      ctx.fillStyle = dark ? '#e4f8ff' : '#173b52';
+      ctx.font = 'bold 17px monospace';
+      for (const p of points) ctx.fillText('O', p[0], p[1] + 1);
       if (!motion.matches) frame = requestAnimationFrame(draw);
     };
     const start = () => {
