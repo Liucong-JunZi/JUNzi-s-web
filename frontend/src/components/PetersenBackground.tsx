@@ -58,9 +58,9 @@ export function PetersenBackground() {
       });
       const dark = document.documentElement.classList.contains('dark');
       const gradient = ctx.createLinearGradient(width / 2 - scale, height / 2 - scale, width / 2 + scale, height / 2 + scale);
-      gradient.addColorStop(0, dark ? '#79C7BE' : '#3D8D89');
-      gradient.addColorStop(0.5, dark ? '#82B7C7' : '#518697');
-      gradient.addColorStop(1, dark ? '#8BA6D0' : '#647FA5');
+      gradient.addColorStop(0, dark ? '#93c5fd' : '#2563a6');
+      gradient.addColorStop(0.5, dark ? '#67e8f9' : '#178c9c');
+      gradient.addColorStop(1, dark ? '#a5b4fc' : '#6475b8');
       ctx.lineCap = 'round';
       ctx.strokeStyle = gradient;
       // Soft underlay, followed by a crisp stroke; no vertex decorations.
@@ -75,7 +75,6 @@ export function PetersenBackground() {
         ctx.stroke();
       }
       // A few short traveling highlights emphasize connections, not vertices.
-      ctx.strokeStyle = dark ? '#C6E9E3' : '#286D69';
       edges.forEach(([a, b], i) => {
         if (i % 3 !== 1) return;
         const p = points[a], q = points[b];
