@@ -18,7 +18,7 @@ const layouts: Point[][] = [0, 1, 2].map((layout) =>
   }),
 );
 
-export function AsciiPetersenBackground() {
+export function PetersenBackground() {
   const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     const canvas = ref.current;
@@ -31,8 +31,7 @@ export function AsciiPetersenBackground() {
     let previous: number | undefined;
     let width = 0;
     let height = 0;
-    const cellX = 9;
-    const cellY = 13;
+
     const draw = (time: number) => {
       if (previous !== undefined) elapsed += Math.min(time - previous, 100);
       previous = time;
@@ -58,61 +57,35 @@ export function AsciiPetersenBackground() {
         return [width / 2 + x * scale, height / 2 + y * scale, z];
       });
       const dark = document.documentElement.classList.contains('dark');
-      ctx.font = '12px monospace';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      // A sparse, deterministic character field: gentle breathing, not random flicker.
-      const ambientChars = ['.', ':', '+', '.', '*', ':'];
-      for (let row = 0; row < Math.ceil(height / 52); row++) {
-        for (let col = 0; col < Math.ceil(width / 54); col++) {
-          const seed = (col * 73 + row * 137 + col * row * 19) % 101;
-          if (seed > 13) continue;
-          const x = col * 54 + 12 + seed;
-          const y = row * 52 + 16 + seed;
-          const distance = Math.hypot((x - width / 2) / scale, (y - height / 2) / scale);
-          if (distance < 0.65) continue;
-          const fade = Math.max(0, 1 - Math.abs(distance - 1.1) / 1.5);
-          ctx.globalAlpha = fade * (0.12 + 0.07 * (1 + Math.sin(t * 0.45 + seed)));
-          ctx.fillStyle = dark ? '#9dc9d8' : '#436879';
-          ctx.fillText(ambientChars[seed % ambientChars.length], x, y);
+      const gradient = ctx.createLinearGradient(width / 2 - scale, height / 2 - scale, width / 2 + scale, height / 2 + scale);
+      gradient.addColorStop(0, dark ? '#93c5fd' : '#2563a6');
+      gradient.addColorStop(0.5, dark ? '#67e8f9' : '#178c9c');
+      gradient.addColorStop(1, dark ? '#a5b4fc' : '#6475b8');
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = gradient;
+      // Soft underlay, followed by a crisp stroke; no vertex decorations.
+      for (const [lineWidth, alpha] of [[7, 0.06], [1.5, 0.8]]) {
+        ctx.lineWidth = lineWidth;
+        ctx.globalAlpha = alpha;
+        ctx.beginPath();
+        for (const [a, b] of edges) {
+          ctx.moveTo(points[a][0], points[a][1]);
+          ctx.lineTo(points[b][0], points[b][1]);
         }
+        ctx.stroke();
       }
-      ctx.globalAlpha = 1;
-      const cells = new Map<string, { x: number; y: number; char: string }>();
-      const put = (x: number, y: number, char: string) => {
-        const col = Math.round(x / cellX), row = Math.round(y / cellY);
-        cells.set(`${col},${row}`, { x: col * cellX, y: row * cellY, char });
-      };
-      for (const [a, b] of edges) {
+      // A few short traveling highlights emphasize connections, not vertices.
+      edges.forEach(([a, b], i) => {
+        if (i % 3 !== 1) return;
         const p = points[a], q = points[b];
-        const steps = Math.ceil(Math.hypot(q[0] - p[0], q[1] - p[1]) / 5);
-        for (let k = 0; k <= steps; k++) {
-          const f = k / Math.max(steps, 1);
-          const dx = q[0] - p[0], dy = q[1] - p[1];
-          const char = Math.abs(dy) < Math.abs(dx) * 0.35 ? '-' : Math.abs(dx) < Math.abs(dy) * 0.35 ? '|' : dx * dy > 0 ? '\\' : '/';
-          put(p[0] + dx * f, p[1] + dy * f, char);
-        }
-      }
-      for (const p of points) put(p[0], p[1], '+');
-      ctx.fillStyle = dark ? '#c5edff' : '#173b52';
-      ctx.font = '12px monospace';
-      ctx.textAlign = 'center';
-      for (const cell of cells.values()) ctx.fillText(cell.char, cell.x, cell.y);
-      // Short character pulses travel along edges without changing the graph topology.
-      ctx.fillStyle = dark ? '#e3f7ff' : '#245d72';
-      const pulseChars = ['.', ':', '*', ':', '.'];
-      edges.forEach(([a, b], edgeIndex) => {
-        const p = points[a], q = points[b];
-        const progress = (t * 0.055 + edgeIndex * 0.173) % 1;
-        pulseChars.forEach((char, i) => {
-          const f = progress + (i - 2) * 0.025;
-          if (f < 0.06 || f > 0.94) return;
-          ctx.globalAlpha = i === 2 ? 0.95 : 0.5;
-          const x = Math.round((p[0] + (q[0] - p[0]) * f) / cellX) * cellX;
-          const y = Math.round((p[1] + (q[1] - p[1]) * f) / cellY) * cellY;
-          ctx.clearRect(x - cellX / 2, y - cellY / 2, cellX, cellY);
-          ctx.fillText(char, x, y);
-        });
+        const f = (t * 0.045 + i * 0.173) % 1;
+        const tail = Math.max(0, f - 0.08);
+        ctx.globalAlpha = Math.sin(f * Math.PI) * 0.8;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(p[0] + (q[0] - p[0]) * tail, p[1] + (q[1] - p[1]) * tail);
+        ctx.lineTo(p[0] + (q[0] - p[0]) * f, p[1] + (q[1] - p[1]) * f);
+        ctx.stroke();
       });
       ctx.globalAlpha = 1;
 
@@ -144,5 +117,5 @@ export function AsciiPetersenBackground() {
       motion.removeEventListener('change', start);
     };
   }, []);
-  return <canvas ref={ref} aria-hidden="true" className="pointer-events-none fixed inset-0 z-0 h-full w-full opacity-[0.42] dark:opacity-[0.40]" data-testid="ascii-petersen-background" />;
+  return <canvas ref={ref} aria-hidden="true" className="pointer-events-none fixed inset-0 z-0 h-full w-full opacity-[0.42] dark:opacity-[0.40]" data-testid="petersen-background" />;
 }
