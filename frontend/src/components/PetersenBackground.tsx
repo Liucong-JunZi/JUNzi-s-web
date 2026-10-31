@@ -50,7 +50,7 @@ export function PetersenBackground() {
         const q = i < 5 ? p : layouts[(index + 1) % layouts.length][i];
         let [x, y] = p.slice(0, 2).map((v, j) => v + (q[j] - v) * blend) as [number, number];
         const z = p[2] + (q[2] - p[2]) * blend;
-        const local = i >= 5 ? t * 0.28 : 0;
+        const local = i >= 5 ? t * 0.16 : 0;
         const twistedX = x * Math.cos(local) - y * Math.sin(local);
         const twistedY = x * Math.sin(local) + y * Math.cos(local);
         x = twistedX; y = twistedY;
