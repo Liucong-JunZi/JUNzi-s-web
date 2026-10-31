@@ -51,16 +51,11 @@ export function Header() {
   };
 
   const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : theme === 'dark' ? 'system' : 'light';
-    setTheme(newTheme);
     const root = window.document.documentElement;
+    const newTheme = root.classList.contains('dark') ? 'light' : 'dark';
+    setTheme(newTheme);
     root.classList.remove('light', 'dark');
-    if (newTheme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      root.classList.add(systemTheme);
-    } else {
-      root.classList.add(newTheme);
-    }
+    root.classList.add(newTheme);
   };
 
   return (
