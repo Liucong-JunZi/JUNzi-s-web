@@ -43,17 +43,15 @@ export function AsciiPetersenBackground() {
       last = time;
       const t = motion.matches ? 0 : elapsed / 1000;
       ctx.clearRect(0, 0, width, height);
-      const phase = t / 12;
-      const index = Math.floor(phase) % layouts.length;
-      const f = (phase % 1);
-      const blend = f * f * (3 - 2 * f);
+      const index = 0;
+      const blend = (1 - Math.cos(t / 24 * Math.PI * 2)) * 0.16;
       // Keep the graph flat and still; only the inner pentagram rotates in place.
-      const scale = Math.min(width * 0.46, height * 0.42, 440);
+      const scale = Math.min(width * 0.42, height * 0.38, 390);
       const points = layouts[index].map((p, i) => {
-        const q = layouts[(index + 1) % layouts.length][i];
+        const q = i < 5 ? p : layouts[(index + 1) % layouts.length][i];
         let [x, y] = p.slice(0, 2).map((v, j) => v + (q[j] - v) * blend) as [number, number];
         const z = p[2] + (q[2] - p[2]) * blend;
-        const local = i >= 5 ? t * 0.62 : 0;
+        const local = i >= 5 ? t * 0.16 : 0;
         const twistedX = x * Math.cos(local) - y * Math.sin(local);
         const twistedY = x * Math.sin(local) + y * Math.cos(local);
         x = twistedX; y = twistedY;
@@ -69,24 +67,18 @@ export function AsciiPetersenBackground() {
         const steps = Math.ceil(Math.hypot(q[0] - p[0], q[1] - p[1]) / 5);
         for (let k = 0; k <= steps; k++) {
           const f = k / Math.max(steps, 1);
-          const depth = p[2] * (1 - f) + q[2] * f;
-          put(p[0] + (q[0] - p[0]) * f, p[1] + (q[1] - p[1]) * f, depth > 0.35 ? ':' : depth < -0.35 ? '+' : '*');
+          const dx = q[0] - p[0], dy = q[1] - p[1];
+          const char = Math.abs(dy) < Math.abs(dx) * 0.35 ? '-' : Math.abs(dx) < Math.abs(dy) * 0.35 ? '|' : dx * dy > 0 ? '\\' : '/';
+          put(p[0] + dx * f, p[1] + dy * f, char);
         }
       }
-      for (const p of points) {
-        for (let x = -1; x <= 1; x++) for (let y = -1; y <= 1; y++) {
-          put(p[0] + x * cellX, p[1] + y * cellY, x === 0 && y === 0 ? '@' : 'o');
-        }
-      }
+      for (const p of points) put(p[0], p[1], '+');
       const dark = document.documentElement.classList.contains('dark');
       ctx.fillStyle = dark ? '#c5edff' : '#173b52';
-      ctx.font = 'bold 12px monospace';
+      ctx.font = '12px monospace';
       ctx.textAlign = 'center';
       for (const cell of cells.values()) ctx.fillText(cell.char, cell.x, cell.y);
-      // Vertices are pure ASCII only: no favicon, image, circle, or decorative icon.
-      ctx.fillStyle = dark ? '#e4f8ff' : '#173b52';
-      ctx.font = 'bold 17px monospace';
-      for (const p of points) ctx.fillText('O', p[0], p[1] + 1);
+
       if (!motion.matches) frame = requestAnimationFrame(draw);
     };
     const start = () => {
@@ -115,5 +107,5 @@ export function AsciiPetersenBackground() {
       motion.removeEventListener('change', start);
     };
   }, []);
-  return <canvas ref={ref} aria-hidden="true" className="pointer-events-none fixed inset-0 z-0 h-full w-full opacity-[0.52] dark:opacity-[0.46]" data-testid="ascii-petersen-background" />;
+  return <canvas ref={ref} aria-hidden="true" className="pointer-events-none fixed inset-0 z-0 h-full w-full opacity-[0.42] dark:opacity-[0.40]" data-testid="ascii-petersen-background" />;
 }
