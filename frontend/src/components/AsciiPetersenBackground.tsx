@@ -57,6 +57,27 @@ export function AsciiPetersenBackground() {
         x = twistedX; y = twistedY;
         return [width / 2 + x * scale, height / 2 + y * scale, z];
       });
+      const dark = document.documentElement.classList.contains('dark');
+      ctx.font = '12px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      // A sparse, deterministic character field: gentle breathing, not random flicker.
+      const ambientChars = ['.', ':', '+', '.', '*', ':'];
+      for (let row = 0; row < Math.ceil(height / 52); row++) {
+        for (let col = 0; col < Math.ceil(width / 54); col++) {
+          const seed = (col * 73 + row * 137 + col * row * 19) % 101;
+          if (seed > 13) continue;
+          const x = col * 54 + 12 + seed;
+          const y = row * 52 + 16 + seed;
+          const distance = Math.hypot((x - width / 2) / scale, (y - height / 2) / scale);
+          if (distance < 0.65) continue;
+          const fade = Math.max(0, 1 - Math.abs(distance - 1.1) / 1.5);
+          ctx.globalAlpha = fade * (0.12 + 0.07 * (1 + Math.sin(t * 0.45 + seed)));
+          ctx.fillStyle = dark ? '#9dc9d8' : '#436879';
+          ctx.fillText(ambientChars[seed % ambientChars.length], x, y);
+        }
+      }
+      ctx.globalAlpha = 1;
       const cells = new Map<string, { x: number; y: number; char: string }>();
       const put = (x: number, y: number, char: string) => {
         const col = Math.round(x / cellX), row = Math.round(y / cellY);
@@ -73,11 +94,27 @@ export function AsciiPetersenBackground() {
         }
       }
       for (const p of points) put(p[0], p[1], '+');
-      const dark = document.documentElement.classList.contains('dark');
       ctx.fillStyle = dark ? '#c5edff' : '#173b52';
       ctx.font = '12px monospace';
       ctx.textAlign = 'center';
       for (const cell of cells.values()) ctx.fillText(cell.char, cell.x, cell.y);
+      // Short character pulses travel along edges without changing the graph topology.
+      ctx.fillStyle = dark ? '#e3f7ff' : '#245d72';
+      const pulseChars = ['.', ':', '*', ':', '.'];
+      edges.forEach(([a, b], edgeIndex) => {
+        const p = points[a], q = points[b];
+        const progress = (t * 0.055 + edgeIndex * 0.173) % 1;
+        pulseChars.forEach((char, i) => {
+          const f = progress + (i - 2) * 0.025;
+          if (f < 0.06 || f > 0.94) return;
+          ctx.globalAlpha = i === 2 ? 0.95 : 0.5;
+          const x = Math.round((p[0] + (q[0] - p[0]) * f) / cellX) * cellX;
+          const y = Math.round((p[1] + (q[1] - p[1]) * f) / cellY) * cellY;
+          ctx.clearRect(x - cellX / 2, y - cellY / 2, cellX, cellY);
+          ctx.fillText(char, x, y);
+        });
+      });
+      ctx.globalAlpha = 1;
 
       if (!motion.matches) frame = requestAnimationFrame(draw);
     };
