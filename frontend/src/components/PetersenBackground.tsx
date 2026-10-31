@@ -81,7 +81,7 @@ export function PetersenBackground() {
         const f = (t * 0.045 + i * 0.173) % 1;
         const tail = Math.max(0, f - 0.08);
         ctx.globalAlpha = Math.sin(f * Math.PI) * 0.8;
-        ctx.lineWidth = 2.5;
+        ctx.lineWidth = 1.5;
         ctx.beginPath();
         ctx.moveTo(p[0] + (q[0] - p[0]) * tail, p[1] + (q[1] - p[1]) * tail);
         ctx.lineTo(p[0] + (q[0] - p[0]) * f, p[1] + (q[1] - p[1]) * f);
