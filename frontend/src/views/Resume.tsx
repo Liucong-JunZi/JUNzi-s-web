@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { usePageMeta } from '../hooks/usePageMeta';
 import '../i18n';
 import { resumeAPI } from '../api';
 import type { ResumeItem } from '../types';
@@ -10,6 +11,7 @@ import { Download, Briefcase, GraduationCap, FolderKanban, MapPin } from 'lucide
 
 export function Resume() {
   const { t } = useTranslation();
+  usePageMeta({ title: t('resume.title'), canonical: 'https://junziliucong.online/resume' });
   const [resumeItems, setResumeItems] = useState<ResumeItem[]>([]);
   const [loading, setLoading] = useState(true);
 

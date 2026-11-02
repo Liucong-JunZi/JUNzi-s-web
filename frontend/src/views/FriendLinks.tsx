@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { usePageMeta } from '../hooks/usePageMeta';
 import { ExternalLink, Link2, Rss } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import { Card, CardContent } from '../components/ui/card';
@@ -7,6 +8,7 @@ import { friendLinks, isSafeFriendUrl } from '../data/friendLinks';
 
 export function FriendLinks() {
   const { t } = useTranslation();
+  usePageMeta({ title: t('friendLinks.title'), canonical: 'https://junziliucong.online/friends' });
   const links = friendLinks.filter((link) => isSafeFriendUrl(link.url));
 
   return (

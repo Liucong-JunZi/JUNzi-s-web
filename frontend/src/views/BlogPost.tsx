@@ -12,6 +12,7 @@ import { Textarea } from '../components/ui/textarea';
 import { Calendar, Clock, Heart, MessageCircle, ArrowLeft } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useToast } from '../hooks/use-toast';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 export function BlogPost() {
   const { t } = useTranslation();
@@ -26,6 +27,12 @@ export function BlogPost() {
   const [liked, setLiked] = useState(false);
   const { isAuthenticated } = useAuthStore();
   const { toast } = useToast();
+  usePageMeta({
+    title: post?.title ?? 'Blog',
+    description: post?.summary || undefined,
+    canonical: post ? `https://junziliucong.online/blog/${post.slug}` : undefined,
+    type: 'article',
+  });
 
   const fetchPost = useCallback(async () => {
     setLoading(true);

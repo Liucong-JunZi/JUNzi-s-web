@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { usePageMeta } from '../hooks/usePageMeta';
 import '../i18n';
 import { projectsAPI } from '../api';
 import type { Project } from '../types';
@@ -20,6 +21,7 @@ function GithubIcon({ className }: { className?: string }) {
 
 export function Portfolio() {
   const { t } = useTranslation();
+  usePageMeta({ title: t('portfolio.title'), canonical: 'https://junziliucong.online/portfolio' });
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
 

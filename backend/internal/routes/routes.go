@@ -2,6 +2,7 @@ package routes
 
 import (
 	"log"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -70,6 +71,12 @@ func Setup(cfg *config.Config) *gin.Engine {
 	router.GET("/feed.xml", feedController.RSS)
 	router.GET("/robots.txt", controllers.Robots)
 	router.GET("/sitemap.xml", controllers.Sitemap)
+	pageMetaClient := &http.Client{Timeout: 5 * time.Second}
+	router.GET("/", controllers.HomeMeta(pageMetaClient))
+	router.GET("/blog", controllers.BlogIndexMeta(pageMetaClient))
+	router.GET("/blog/:slug", controllers.BlogPostMeta(pageMetaClient))
+	router.GET("/portfolio", controllers.PortfolioIndexMeta(pageMetaClient))
+	router.GET("/portfolio/:id", controllers.PortfolioDetailMeta(pageMetaClient))
 
 	// API routes
 	api := router.Group("/api")

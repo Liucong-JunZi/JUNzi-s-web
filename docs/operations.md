@@ -114,9 +114,37 @@ all nine current public URLs (five static, two posts, two projects), excluding
 the deleted Top-k article; all listed routes returned HTTP 200. Both host and
 frontend-container Nginx configurations passed `nginx -t`.
 
-This repair provides crawl discovery, **not SSR or prerendering**. Article
-content is still client-rendered; per-page HTML metadata, SSR/prerendering and
-search-engine indexing verification remain separate work.
+This repair provides crawl discovery, **not full SSR**. Article body text is
+still client-rendered, but page-level HTML metadata (title, description,
+canonical, `og:*`, Twitter card) is now injected server-side for `/`, `/blog`,
+`/blog/:slug`, `/portfolio`, and `/portfolio/:id`, so link previews and
+non-executing crawlers receive correct per-page metadata. Unknown slugs and
+project IDs return HTTP 404 with `noindex`. Client-side navigations update the
+same metadata via `frontend/src/hooks/usePageMeta.ts`.
+
+### Head-injection design
+
+The backend fetches the built SPA shell from the frontend container at
+`FRONTEND_INTERNAL_URL` (default `http://frontend`), caching it for 60 seconds with
+a 512 KiB read cap and a 5 s timeout. It must request `/index.html` directly:
+requesting `/` would loop, because `/` is itself proxied back to the backend.
+Responses are `public, max-age=300`. Values are HTML-escaped before insertion and
+the existing `<title>`/description/`og:*`/Twitter/canonical tags are removed to
+avoid duplicates. If the shell cannot be fetched the handler returns 502.
+
+Remaining gaps: article body is not server-rendered, there is no per-language
+variation, no structured data (`Article` JSON-LD), and search-engine indexing has
+not been verified.
+
+SEO deployment artifacts: host Nginx backup `/root/junzi.conf.before-seo`;
+rollback images `junziweb-backend:before-seo`,
+`junziweb-frontend:before-seo`, `junziweb-backend:before-meta`,
+`junziweb-frontend:before-page-meta`, `junziweb-frontend:before-seo-assets`;
+build contexts `/root/backend-seo`, `/root/backend-meta`, `/root/frontend-seo`,
+`/root/frontend-seo-assets`. Verified with `go test ./...` in the repository and
+in the isolated production-source snapshot, an E2E client-navigation test, and a
+live check of 7 routes (status, single title, description, canonical, og:type,
+noindex on 404, SPA shell intact).
 
 ## WebDAV service
 

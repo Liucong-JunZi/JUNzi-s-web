@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { usePageMeta } from '../hooks/usePageMeta';
 import '../i18n';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
@@ -7,6 +8,7 @@ import { FileText, Briefcase, User } from 'lucide-react';
 
 export function Home() {
   const { t } = useTranslation();
+  usePageMeta({ title: 'JUNzi · Liu Cong', canonical: 'https://junziliucong.online/' });
 
   return (
     <div className="container mx-auto px-4 py-12" data-display-headings>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { usePageMeta } from '../hooks/usePageMeta';
 import '../i18n';
 import { projectsAPI } from '../api';
 import type { Project } from '../types';
@@ -22,6 +23,12 @@ export function PortfolioDetail() {
   const { id } = useParams<{ id: string }>();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
+  usePageMeta({
+    title: project?.title ?? t('portfolio.title'),
+    description: project?.description || undefined,
+    canonical: id ? `https://junziliucong.online/portfolio/${id}` : undefined,
+    type: 'article',
+  });
 
   const fetchProject = useCallback(async () => {
     setLoading(true);

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { usePageMeta } from '../hooks/usePageMeta';
 import '../i18n';
 import { postsAPI } from '../api';
 import type { Post } from '../types';
@@ -12,6 +13,7 @@ import { Search, Calendar, Rss } from 'lucide-react';
 
 export function Blog() {
   const { t } = useTranslation();
+  usePageMeta({ title: t('blog.title'), canonical: 'https://junziliucong.online/blog' });
   const [searchParams, setSearchParams] = useSearchParams();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
