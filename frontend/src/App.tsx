@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { AdminRoute } from './components/ProtectedRoute';
 import { Home } from './views/Home';
@@ -20,9 +20,9 @@ import { AdminResume } from './views/admin/AdminResume';
 import { AdminComments } from './views/admin/AdminComments';
 import { Toaster } from './components/ui/toaster';
 
-function App() {
+export function AppRoutes() {
   return (
-    <Router>
+    <>
       <Routes>
         <Route path="/" element={<Layout />}>
           {/* Public Routes */}
@@ -117,8 +117,8 @@ function App() {
         </Route>
       </Routes>
       <Toaster />
-    </Router>
+    </>
   );
 }
 
-export default App;
+export default AppRoutes;

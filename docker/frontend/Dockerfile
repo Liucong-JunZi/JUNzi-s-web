@@ -28,8 +28,9 @@ RUN pnpm build
 # ==================== 生产阶段 ====================
 FROM nginx:1.27-alpine AS production
 
-# 复制 nginx 配置
+# 复制 nginx 配置（含 SSR 反向代理）
 COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
+COPY docker/nginx/ssr_proxy.conf /etc/nginx/ssr_proxy.conf
 
 # 复制构建产物
 COPY --from=builder /app/dist /usr/share/nginx/html

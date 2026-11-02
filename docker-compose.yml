@@ -130,6 +130,29 @@ services:
       timeout: 10s
       retries: 3
 
+  # Server-side rendering for public pages
+  ssr:
+    build:
+      context: .
+      dockerfile: docker/ssr/Dockerfile
+    container_name: junzi-ssr
+    restart: unless-stopped
+    environment:
+      - API_BASE_URL=http://backend:8080/api
+      - SITE_URL=${FRONTEND_URL:-https://junziliucong.online}
+      - PORT=3001
+    depends_on:
+      - backend
+    mem_limit: 192m
+    networks:
+      - junzi-frontend
+      - junzi-backend
+    logging:
+      driver: json-file
+      options:
+        max-size: 5m
+        max-file: "2"
+
   # Frontend (React + Nginx)
   frontend:
     build:
@@ -143,6 +166,7 @@ services:
       - "127.0.0.1:3000:80"
     depends_on:
       - backend
+      - ssr
     # Frontend is only on junzi-frontend network — cannot reach MySQL, Redis, or MinIO.
     # Network segmentation ensures infrastructure services are isolated from the edge.
     networks:

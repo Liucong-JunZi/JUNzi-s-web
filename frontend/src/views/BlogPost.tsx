@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import '../i18n';
 import { postsAPI, commentsAPI } from '../api';
 import type { Post, Comment as CommentType } from '../types';
+import { ssrValue } from '../ssr/data';
 import { SafeMarkdown } from '../components/SafeMarkdown';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
@@ -13,13 +14,15 @@ import { Calendar, Clock, Heart, MessageCircle, ArrowLeft } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useToast } from '../hooks/use-toast';
 import { usePageMeta } from '../hooks/usePageMeta';
+import { formatDay } from '../lib/date';
 
 export function BlogPost() {
   const { t } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
-  const [post, setPost] = useState<Post | null>(null);
+  const seededPost = ssrValue('post') as Post | undefined;
+  const [post, setPost] = useState<Post | null>(() => seededPost ?? null);
   const [comments, setComments] = useState<CommentType[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !seededPost);
   const [commentText, setCommentText] = useState('');
   const [commentPage, setCommentPage] = useState(1);
   const [commentTotal, setCommentTotal] = useState(0);
@@ -136,13 +139,7 @@ export function BlogPost() {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
+  const formatDate = (dateString: string) => formatDay(dateString);
 
   if (loading) {
     return (
@@ -295,13 +292,7 @@ export function BlogPost() {
 }
 
 function CommentItem({ comment }: { comment: CommentType }) {
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
+  const formatDate = (dateString: string) => formatDay(dateString);
 
   const getAuthorName = () => {
     if (comment.author) {

@@ -2,9 +2,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { usePageMeta } from '../hooks/usePageMeta';
+import { formatDay } from '../lib/date';
 import '../i18n';
 import { postsAPI } from '../api';
 import type { Post } from '../types';
+import { ssrValue } from '../ssr/data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Input } from '../components/ui/input';
@@ -15,9 +17,10 @@ export function Blog() {
   const { t } = useTranslation();
   usePageMeta({ title: t('blog.title'), canonical: 'https://junziliucong.online/blog' });
   const [searchParams, setSearchParams] = useSearchParams();
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [total, setTotal] = useState(0);
+  const seeded = ssrValue('posts');
+  const [posts, setPosts] = useState<Post[]>(() => (seeded?.posts as Post[] | undefined) ?? []);
+  const [loading, setLoading] = useState(() => !seeded);
+  const [total, setTotal] = useState(() => seeded?.total ?? 0);
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [submittedSearch, setSubmittedSearch] = useState('');
@@ -53,13 +56,7 @@ export function Blog() {
     setSubmittedSearch(searchQuery);
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
+  const formatDate = (dateString: string) => formatDay(dateString);
 
   const totalPages = Math.ceil(total / limit);
 

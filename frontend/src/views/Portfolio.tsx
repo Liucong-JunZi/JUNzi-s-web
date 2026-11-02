@@ -5,6 +5,7 @@ import { usePageMeta } from '../hooks/usePageMeta';
 import '../i18n';
 import { projectsAPI } from '../api';
 import type { Project } from '../types';
+import { ssrValue } from '../ssr/data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
@@ -22,8 +23,9 @@ function GithubIcon({ className }: { className?: string }) {
 export function Portfolio() {
   const { t } = useTranslation();
   usePageMeta({ title: t('portfolio.title'), canonical: 'https://junziliucong.online/portfolio' });
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
+  const seededProjects = ssrValue('projects') as Project[] | undefined;
+  const [projects, setProjects] = useState<Project[]>(() => seededProjects ?? []);
+  const [loading, setLoading] = useState(() => !seededProjects);
 
   useEffect(() => {
     fetchProjects();

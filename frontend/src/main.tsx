@@ -1,34 +1,26 @@
-import { StrictMode, useEffect } from 'react';
-import { createRoot } from 'react-dom/client';
+import { StrictMode } from 'react';
+import { hydrateRoot, createRoot } from 'react-dom/client';
 import './index.css';
 import './i18n';
-import App from './App';
-import { useThemeStore } from './store/themeStore';
+import { persistResolvedLanguage } from './i18n';
+import { BrowserRouter } from 'react-router-dom';
+import AppRoutes from './App';
+import { ThemeProvider } from './components/ThemeProvider';
 
-function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const { theme } = useThemeStore();
-
-  useEffect(() => {
-    const root = window.document.documentElement;
-    root.classList.remove('light', 'dark');
-
-    if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light';
-      root.classList.add(systemTheme);
-    } else {
-      root.classList.add(theme);
-    }
-  }, [theme]);
-
-  return <>{children}</>;
-}
-
-createRoot(document.getElementById('root')!).render(
+const container = document.getElementById('root')!;
+const tree = (
   <StrictMode>
     <ThemeProvider>
-      <App />
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
     </ThemeProvider>
   </StrictMode>
 );
+
+if (container.hasChildNodes()) {
+  hydrateRoot(container, tree);
+  persistResolvedLanguage();
+} else {
+  createRoot(container).render(tree);
+}

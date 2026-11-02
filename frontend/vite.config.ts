@@ -9,4 +9,9 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // The SSR bundle is copied into a dependency-free Node image, so bundle
+  // every dependency instead of externalizing node_modules.
+  ssr: {
+    noExternal: true,
+  },
 });

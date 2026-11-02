@@ -146,6 +146,67 @@ in the isolated production-source snapshot, an E2E client-navigation test, and a
 live check of 7 routes (status, single title, description, canonical, og:type,
 noindex on 404, SPA shell intact).
 
+## Server-side rendering (SSR)
+
+Public pages are rendered by a small Node service (`frontend/ssr/server.mjs`,
+container `junzi-ssr`, port 3001) and hydrated in the browser afterwards. Nginx
+serves `/assets` directly and proxies only HTML routes (`/`, `/resume`,
+`/friends`, `/blog*`, `/portfolio*`) to the SSR service.
+
+### How it fits together
+
+1. The request arrives at host Nginx, then the frontend container.
+2. The frontend Nginx proxies the page route to `junzi-ssr` (variable upstream
+   plus `resolver 127.0.0.11`, so a stopped SSR container cannot block Nginx
+   startup). Proxy failures fall back to the client-only `index.html` shell.
+3. The SSR service fetches data from the backend API with a 5 s timeout,
+   serializes renders (i18next holds one active language per process), renders
+   with `StaticRouter`, and injects `<title>`, description, canonical, `og:*`,
+   `twitter:*` and `noindex` for 404s.
+4. The same payload is embedded as `<script type="application/json"
+   id="__SSR_DATA__">`, which the client reads at module init so the first
+   client render matches the server markup. JSON data blocks are used instead of
+   an inline script because the CSP forbids `unsafe-inline` scripts.
+5. `main.tsx` calls `hydrateRoot` when `#root` already has children.
+6. `__SSR_LANG__` is chosen from the `lang` cookie, else `Accept-Language`;
+   `changeLanguage` writes the cookie so later visits negotiate consistently.
+
+Dates are formatted through `frontend/src/lib/date.ts` with a pinned timezone.
+Formatting with the host timezone produced different dates on the UTC server and
+in the visitor's browser, which caused hydration mismatches.
+
+The SSR template is snapshotted from the same client build
+(`dist-ssr/template.html`), so the hashed asset names it references always exist
+in the deployed frontend image.
+
+### Verification
+
+`e2e/playwright.ssr.config.ts` checks, against the deployed origin, that all
+seven public routes contain server-rendered text with no JavaScript, that each
+returns a single correct canonical/title, that hydration logs no errors or
+mismatches, that the app still reacts to clicks after hydration, and that
+unknown slugs return 404 with `noindex`. Local runs: `pnpm --dir e2e exec
+playwright test -c playwright.ssr.config.ts`. The existing friends, markdown and
+SEO suites still pass.
+
+### Deployment notes
+
+Rollback images: `junziweb-frontend:before-ssr`, `junziweb-frontend:before-seo-assets`,
+`junziweb-ssr` rebuilds from `/root/ssr-app`. The SSR container is attached to
+both `junziweb_junzi-frontend` and `junziweb_junzi-backend` networks and limited
+to 192 MiB; observed usage is roughly 37 MiB. Production runs it with
+`docker run`, because the production checkout keeps unrelated local changes.
+
+### Remaining limitations
+
+- Only the seven public routes are server-rendered; `/admin`, `/login` and
+  `/auth/callback` remain client-only.
+- Text is rendered in one language per request; there are no `/zh` URLs or
+  `hreflang` alternates.
+- No `Article` JSON-LD structured data yet.
+- Concurrent SSR renders are serialized, which is fine for this traffic level
+  but would need a worker pool or per-request i18n instances to scale.
+
 ## WebDAV service
 
 - Public endpoint: `https://junziliucong.online/dav/`.

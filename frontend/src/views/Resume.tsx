@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePageMeta } from '../hooks/usePageMeta';
+import { formatShortMonth } from '../lib/date';
 import '../i18n';
 import { resumeAPI } from '../api';
 import type { ResumeItem } from '../types';
+import { ssrValue } from '../ssr/data';
 import { SafeMarkdown } from '../components/SafeMarkdown';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
@@ -12,8 +14,9 @@ import { Download, Briefcase, GraduationCap, FolderKanban, MapPin } from 'lucide
 export function Resume() {
   const { t } = useTranslation();
   usePageMeta({ title: t('resume.title'), canonical: 'https://junziliucong.online/resume' });
-  const [resumeItems, setResumeItems] = useState<ResumeItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const seededResume = ssrValue('resume') as ResumeItem[] | undefined;
+  const [resumeItems, setResumeItems] = useState<ResumeItem[]>(() => seededResume ?? []);
+  const [loading, setLoading] = useState(() => !seededResume);
 
   useEffect(() => {
     fetchResume();
@@ -31,13 +34,7 @@ export function Resume() {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    if (!dateString) return '';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-    });
-  };
+  const formatDate = (dateString: string) => formatShortMonth(dateString);
 
   const getTypeIcon = (type: string) => {
     switch (type) {

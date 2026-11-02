@@ -2,9 +2,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { usePageMeta } from '../hooks/usePageMeta';
+import { formatMonth } from '../lib/date';
 import '../i18n';
 import { projectsAPI } from '../api';
 import type { Project } from '../types';
+import { ssrValue } from '../ssr/data';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
 import { ExternalLink, ArrowLeft, Calendar } from 'lucide-react';
@@ -21,8 +23,9 @@ function GithubIcon({ className }: { className?: string }) {
 export function PortfolioDetail() {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
-  const [project, setProject] = useState<Project | null>(null);
-  const [loading, setLoading] = useState(true);
+  const seededProject = ssrValue('project') as Project | undefined;
+  const [project, setProject] = useState<Project | null>(() => seededProject ?? null);
+  const [loading, setLoading] = useState(() => !seededProject);
   usePageMeta({
     title: project?.title ?? t('portfolio.title'),
     description: project?.description || undefined,
@@ -48,13 +51,7 @@ export function PortfolioDetail() {
     }
   }, [fetchProject, id]);
 
-  const formatDate = (dateString: string) => {
-    if (!dateString) return '';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-    });
-  };
+  const formatDate = (dateString: string) => formatMonth(dateString);
 
   // Helper to get field from project
   const getCoverImage = (project: Project) => project.cover_image;
