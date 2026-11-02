@@ -79,6 +79,45 @@ tail -n 100 /var/log/acme-renewal.log
 openssl x509 -in /etc/nginx/ssl/junzi.crt -noout -dates
 ```
 
+## Robots and sitemap routing
+
+`GET /robots.txt` and `GET /sitemap.xml` are public backend routes implemented
+in `backend/internal/controllers/seo_controller.go`. The origin comes from
+`FRONTEND_URL` (falling back to `https://junziliucong.online`), not the request
+Host header. Sitemap URLs include the five public static routes, published
+non-deleted blog posts, and projects with the same public statuses as the
+projects API. Actual update timestamps are used for content `lastmod`; static
+routes do not fabricate dates. Responses permit five minutes of client caching.
+Publishing or deleting content does not require a frontend rebuild.
+
+The frontend Nginx configuration has exact proxy locations for both routes;
+they must not fall through to `/index.html`. Production host Nginx also has
+exact locations proxying these paths directly to `http://127.0.0.1:8080`.
+Both layers need to keep these routes when redeployed. The robots policy is
+crawl guidance only, not authentication, and blocks `/admin`, `/api/`, `/dav/`
+and `/login`.
+
+Deployment backup and artifacts:
+
+- Host Nginx backup: `/root/junzi.conf.before-seo`.
+- Rollback images: `junziweb-backend:before-seo` and
+  `junziweb-frontend:before-seo`.
+- Replacement image build contexts: `/root/backend-seo` and `/root/frontend-seo`.
+- The deployed backend was built from an isolated snapshot of the production
+  backend source, with only the SEO controller and route additions overlaid.
+  The production checkout and its unrelated modifications were not overwritten.
+
+Verification: `go test ./...` passed in both the repository and the isolated
+production-source build. Public HTTPS endpoints return `text/plain` and
+`application/xml`, respectively. The sitemap parsed successfully and matched
+all nine current public URLs (five static, two posts, two projects), excluding
+the deleted Top-k article; all listed routes returned HTTP 200. Both host and
+frontend-container Nginx configurations passed `nginx -t`.
+
+This repair provides crawl discovery, **not SSR or prerendering**. Article
+content is still client-rendered; per-page HTML metadata, SSR/prerendering and
+search-engine indexing verification remain separate work.
+
 ## WebDAV service
 
 - Public endpoint: `https://junziliucong.online/dav/`.

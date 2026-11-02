@@ -68,6 +68,8 @@ func Setup(cfg *config.Config) *gin.Engine {
 	// proxy was introduced.
 	router.GET("/uploads/*objectPath", uploadController.ServeLegacyFile)
 	router.GET("/feed.xml", feedController.RSS)
+	router.GET("/robots.txt", controllers.Robots)
+	router.GET("/sitemap.xml", controllers.Sitemap)
 
 	// API routes
 	api := router.Group("/api")
