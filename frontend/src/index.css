@@ -162,6 +162,14 @@
   @apply bg-transparent p-0;
 }
 
+/* Long display equations scroll locally rather than widening the page. */
+.prose .katex-display {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.25rem 0;
+}
+
 .prose table {
   @apply w-full border-collapse my-4;
 }
