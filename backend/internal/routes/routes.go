@@ -74,10 +74,12 @@ func Setup(cfg *config.Config) *gin.Engine {
 	// API routes
 	api := router.Group("/api")
 	{
-		// Health check
-		api.GET("/health", func(c *gin.Context) {
+		// Health check. Container probes use HEAD, so register both methods.
+		health := func(c *gin.Context) {
 			c.JSON(200, gin.H{"status": "ok", "timestamp": time.Now().Unix()})
-		})
+		}
+		api.GET("/health", health)
+		api.HEAD("/health", health)
 
 		// Public routes
 		// Posts
