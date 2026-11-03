@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import i18n from '../i18n';
+import i18n, { changeLanguage as persistLanguage } from '../i18n';
 import { Menu, X, Sun, Moon, User as UserIcon, Languages } from 'lucide-react';
 import { Button } from './ui/button';
 import { useAuthStore } from '../store/authStore';
@@ -42,7 +42,7 @@ export function Header() {
 
   const toggleLanguage = () => {
     const newLang = i18n.language === 'en' ? 'zh' : 'en';
-    i18n.changeLanguage(newLang);
+    persistLanguage(newLang);
   };
 
   const isActive = (path: string) => {

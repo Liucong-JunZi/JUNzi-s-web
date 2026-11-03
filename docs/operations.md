@@ -168,8 +168,14 @@ serves `/assets` directly and proxies only HTML routes (`/`, `/resume`,
    client render matches the server markup. JSON data blocks are used instead of
    an inline script because the CSP forbids `unsafe-inline` scripts.
 5. `main.tsx` calls `hydrateRoot` when `#root` already has children.
-6. `__SSR_LANG__` is chosen from the `lang` cookie, else `Accept-Language`;
-   `changeLanguage` writes the cookie so later visits negotiate consistently.
+6. Language defaults to **English**; the browser language is not sniffed.
+   `__SSR_LANG__` comes from the `lang` cookie, and the header toggle writes both
+   the cookie and localStorage so the choice survives reloads. A visitor with an
+   older localStorage-only preference is switched after hydration
+   (`syncPreferredLanguage`), which cannot cause a mismatch.
+7. Theme defaults to **dark** (`themeStore`), and `index.html` plus the SSR
+   output set `<html class="dark">` so the first paint matches and there is no
+   light flash before hydration. Explicit light/system choices still win.
 
 Dates are formatted through `frontend/src/lib/date.ts` with a pinned timezone.
 Formatting with the host timezone produced different dates on the UTC server and

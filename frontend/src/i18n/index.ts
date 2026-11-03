@@ -76,6 +76,17 @@ export const changeLanguage = (lang: string) => {
 
 export const getCurrentLanguage = () => i18n.language;
 
+/**
+ * Applies an explicitly saved language after hydration. It runs only post
+ * hydration, so the server-rendered markup still matches; this keeps a visitor's
+ * earlier choice even when the server defaulted to English.
+ */
+export function syncPreferredLanguage() {
+  if (typeof window === 'undefined') return;
+  const stored = storedLanguage();
+  if (stored && stored !== normalize(i18n.language)) i18n.changeLanguage(stored);
+}
+
 /** Persist the language the server chose so later visits negotiate consistently. */
 export function persistResolvedLanguage() {
   if (typeof window === 'undefined') return;

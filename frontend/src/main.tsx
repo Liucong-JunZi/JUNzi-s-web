@@ -2,7 +2,7 @@ import { StrictMode } from 'react';
 import { hydrateRoot, createRoot } from 'react-dom/client';
 import './index.css';
 import './i18n';
-import { persistResolvedLanguage } from './i18n';
+import { persistResolvedLanguage, syncPreferredLanguage } from './i18n';
 import { BrowserRouter } from 'react-router-dom';
 import AppRoutes from './App';
 import { ThemeProvider } from './components/ThemeProvider';
@@ -21,6 +21,8 @@ const tree = (
 if (container.hasChildNodes()) {
   hydrateRoot(container, tree);
   persistResolvedLanguage();
+  syncPreferredLanguage();
 } else {
   createRoot(container).render(tree);
+  syncPreferredLanguage();
 }

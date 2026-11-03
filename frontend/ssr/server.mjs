@@ -35,11 +35,14 @@ async function api(path) {
   }
 }
 
+// Default to English, matching the site's original behaviour. The browser
+// language is intentionally not sniffed; visitors switch language themselves
+// and that choice is remembered in the `lang` cookie.
+const DEFAULT_LANGUAGE = 'en';
+
 function pickLanguage(req) {
   const cookie = /(?:^|;\s*)lang=(en|zh)/.exec(req.headers.cookie || '');
-  if (cookie) return cookie[1];
-  const header = String(req.headers['accept-language'] || '');
-  return /\bzh\b/i.test(header.split(',')[0] || '') ? 'zh' : 'en';
+  return cookie ? cookie[1] : DEFAULT_LANGUAGE;
 }
 
 const staticPages = {
@@ -112,7 +115,7 @@ function buildDocument(body, meta, lang, payload, notFound) {
 
   const data = JSON.stringify(payload).replace(/</g, '\\u003c');
   return template
-    .replace(/<html lang="[^"]*"/, `<html lang="${lang}"`)
+    .replace(/<html lang="[^"]*"( class="[^"]*")?/, `<html lang="${lang}" class="dark"`)
     .replace(/<title>.*?<\/title>/s, tags)
     .replace('<div id="root"></div>', `<div id="root">${body}</div>`)
     .replace(
