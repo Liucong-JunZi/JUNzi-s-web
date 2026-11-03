@@ -1,0 +1,17 @@
+# Memory-friendly MySQL settings for a small 2 GB host.
+#
+# The site stores well under 1 MB of data, but MySQL 8 defaults cost ~360 MB of
+# RSS: performance_schema builds instrumentation for 151 connections and the
+# InnoDB buffer pool defaults to 128 MB. These settings bring it to ~150 MB.
+[mysqld]
+# Biggest single win: no performance_schema instrumentation.
+performance_schema = OFF
+# 64 MB is plenty for <1 MB of tables. chunk_size must stay small, otherwise
+# the buffer pool is rounded up to the 128 MB default chunk.
+innodb_buffer_pool_size = 64M
+innodb_buffer_pool_chunk_size = 8M
+innodb_log_buffer_size = 8M
+max_connections = 100
+table_open_cache = 128
+# Skip reverse DNS lookups on connect.
+skip_name_resolve = ON

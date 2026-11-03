@@ -146,6 +146,30 @@ in the isolated production-source snapshot, an E2E client-navigation test, and a
 live check of 7 routes (status, single title, description, canonical, og:type,
 noindex on 404, SPA shell intact).
 
+## MySQL memory tuning
+
+The host has 2 GB of RAM, while `mysql:8.0` defaults cost ~360 MB of RSS even
+with under 1 MB of tables. `docker/mysql/tuning.cnf` is mounted read-only at
+`/etc/mysql/conf.d/zz-tuning.cnf` and brings the container to ~113 MB:
+
+| Setting | Default | Now | Why |
+|---|---|---|---|
+| `performance_schema` | ON | OFF | The default instruments 151 connections and was the largest single cost |
+| `innodb_buffer_pool_size` | 128M | 64M | Data is <1 MB |
+| `innodb_buffer_pool_chunk_size` | 128M | 8M | Otherwise a 64M pool is rounded back up to 128M |
+| `max_connections` | 151 | 100 | Generous headroom, far less per-connection state without `performance_schema` |
+
+Validate before deploying:
+`docker run --rm --entrypoint mysqld -v .../tuning.cnf:/etc/mysql/conf.d/zz-tuning.cnf:ro mysql:8.0.40 --validate-config`
+
+Apply with `docker compose up -d --no-deps mysql` (data lives in the
+`junziweb_mysql_data` volume, so recreating the container is safe). Verify with
+`free -m`, `docker stats`, `/api/health`, the article page and the SSR suite.
+
+Rollback: `cp /root/mysql-tune-backup-*/docker-compose.yml /root/JUNziweb/` then
+recreate the container; remove `docker/mysql/tuning.cnf` if it should not be
+mounted.
+
 ## Server-side rendering (SSR)
 
 Public pages are rendered by a small Node service (`frontend/ssr/server.mjs`,

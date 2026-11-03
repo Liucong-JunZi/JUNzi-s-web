@@ -24,6 +24,8 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
       - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      # Small-host tuning: ~360 MB -> ~150 MB RSS, see docker/mysql/tuning.cnf.
+      - ./docker/mysql/tuning.cnf:/etc/mysql/conf.d/zz-tuning.cnf:ro
     networks:
       - junzi-backend
     healthcheck:
