@@ -29,7 +29,7 @@ export function Blog() {
   const tag = searchParams.get('tag') || undefined;
 
   const fetchPosts = useCallback(async () => {
-    setLoading(true);
+    if (!seeded || page !== 1 || submittedSearch) setLoading(true);
     try {
       const response = await postsAPI.getAll({
         page,
@@ -44,7 +44,7 @@ export function Blog() {
     } finally {
       setLoading(false);
     }
-  }, [page, submittedSearch, tag]);
+  }, [page, submittedSearch, tag, seeded]);
 
   useEffect(() => {
     fetchPosts();

@@ -4,6 +4,7 @@
  * first client render matches the server markup exactly.
  */
 export interface SSRPayload {
+  url?: string;
   post?: unknown;
   posts?: { posts: unknown[]; total: number };
   project?: unknown;
@@ -35,5 +36,9 @@ export function getSSRData(): SSRPayload {
 }
 
 export function ssrValue<K extends keyof SSRPayload>(key: K): SSRPayload[K] {
+  if (typeof window !== 'undefined' && current.url) {
+    const initial = new URL(current.url, window.location.origin);
+    if (initial.pathname !== window.location.pathname || initial.search !== window.location.search) return undefined;
+  }
   return current[key];
 }

@@ -8,7 +8,7 @@ const supported = ['en', 'zh'];
 function readCookie(name: string): string | undefined {
   if (typeof document === 'undefined') return undefined;
   const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
-  return match ? decodeURIComponent(match[1]) : undefined;
+  try { return match ? decodeURIComponent(match[1]) : undefined; } catch { return undefined; }
 }
 
 function normalize(lang?: string | null): string | undefined {
@@ -71,7 +71,8 @@ export const changeLanguage = (lang: string) => {
   if (typeof document !== 'undefined') {
     document.cookie = `lang=${next}; path=/; max-age=31536000; SameSite=Lax`;
   }
-  i18n.changeLanguage(next);
+  if (typeof document !== 'undefined') document.documentElement.lang = next;
+  void i18n.changeLanguage(next);
 };
 
 export const getCurrentLanguage = () => i18n.language;
@@ -83,19 +84,6 @@ export const getCurrentLanguage = () => i18n.language;
  */
 export function syncPreferredLanguage() {
   if (typeof window === 'undefined') return;
-  const stored = storedLanguage();
-  if (stored && stored !== normalize(i18n.language)) i18n.changeLanguage(stored);
-}
-
-/** Persist the language the server chose so later visits negotiate consistently. */
-export function persistResolvedLanguage() {
-  if (typeof window === 'undefined') return;
-  const lang = serverLanguage();
-  if (!lang) return;
-  try {
-    if (window.localStorage.getItem('language') !== lang) window.localStorage.setItem('language', lang);
-  } catch {
-    /* storage unavailable */
-  }
-  document.cookie = `lang=${lang}; path=/; max-age=31536000; SameSite=Lax`;
+  const preferred = normalize(readCookie('lang')) ?? storedLanguage() ?? serverLanguage() ?? 'en';
+  changeLanguage(preferred);
 }

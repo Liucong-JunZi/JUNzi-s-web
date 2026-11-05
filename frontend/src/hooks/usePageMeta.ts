@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 
 const SITE = 'JUNzi';
+const DEFAULT_DESCRIPTION = "Liu Cong's personal site: essays, selected projects, and a resume.";
 
 function setMeta(attr: 'name' | 'property', key: string, content: string) {
   let el = document.head.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);
@@ -28,10 +29,9 @@ export function usePageMeta({ title, description, canonical, type = 'website' }:
     setMeta('property', 'og:title', full);
     setMeta('property', 'og:type', type);
     setMeta('name', 'twitter:title', full);
-    if (description) {
-      setMeta('name', 'description', description);
-      setMeta('property', 'og:description', description);
-    }
+    const resolvedDescription = description || DEFAULT_DESCRIPTION;
+    setMeta('name', 'description', resolvedDescription);
+    setMeta('property', 'og:description', resolvedDescription);
     if (canonical) {
       let link = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
       if (!link) {

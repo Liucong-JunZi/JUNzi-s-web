@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { AdminRoute } from './components/ProtectedRoute';
 import { Home } from './views/Home';
@@ -21,6 +21,7 @@ import { AdminComments } from './views/admin/AdminComments';
 import { Toaster } from './components/ui/toaster';
 
 export function AppRoutes() {
+  const { pathname } = useLocation();
   return (
     <>
       <Routes>
@@ -28,9 +29,9 @@ export function AppRoutes() {
           {/* Public Routes */}
           <Route index element={<Home />} />
           <Route path="blog" element={<Blog />} />
-          <Route path="blog/:slug" element={<BlogPost />} />
+          <Route path="blog/:slug" element={<BlogPost key={pathname} />} />
           <Route path="portfolio" element={<Portfolio />} />
-          <Route path="portfolio/:id" element={<PortfolioDetail />} />
+          <Route path="portfolio/:id" element={<PortfolioDetail key={pathname} />} />
           <Route path="resume" element={<Resume />} />
           <Route path="friends" element={<FriendLinks />} />
           <Route path="login" element={<Login />} />

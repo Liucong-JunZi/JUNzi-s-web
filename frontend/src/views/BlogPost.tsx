@@ -19,10 +19,11 @@ import { formatDay } from '../lib/date';
 export function BlogPost() {
   const { t } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
-  const seededPost = ssrValue('post') as Post | undefined;
+  const candidate = ssrValue('post') as Post | undefined;
+  const seededPost = candidate?.slug === slug ? candidate : undefined;
   const [post, setPost] = useState<Post | null>(() => seededPost ?? null);
   const [comments, setComments] = useState<CommentType[]>([]);
-  const [loading, setLoading] = useState(() => !seededPost);
+  const [loading, setLoading] = useState(() => !seededPost && !ssrValue('notFound'));
   const [commentText, setCommentText] = useState('');
   const [commentPage, setCommentPage] = useState(1);
   const [commentTotal, setCommentTotal] = useState(0);
@@ -38,17 +39,18 @@ export function BlogPost() {
   });
 
   const fetchPost = useCallback(async () => {
-    setLoading(true);
+    if (!seededPost) setLoading(true);
     try {
       const data = await postsAPI.getBySlug(slug!);
       setPost(data);
       setLiked(data.liked || false);
     } catch (error) {
+      setPost(null);
       console.error('Failed to fetch post:', error);
     } finally {
       setLoading(false);
     }
-  }, [slug]);
+  }, [slug, seededPost]);
 
   const fetchComments = useCallback(async (page = 1) => {
     if (page === 1) {

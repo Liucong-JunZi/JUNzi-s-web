@@ -32,7 +32,7 @@ export function Portfolio() {
   }, []);
 
   const fetchProjects = async () => {
-    setLoading(true);
+    if (!seededProjects) setLoading(true);
     try {
       const response = await projectsAPI.getAll({ limit: 50 });
       setProjects(response.projects);

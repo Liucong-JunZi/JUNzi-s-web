@@ -209,6 +209,21 @@ The SSR template is snapshotted from the same client build
 (`dist-ssr/template.html`), so the hashed asset names it references always exist
 in the deployed frontend image.
 
+### Local SSR regression checks
+
+Build with `pnpm --dir frontend build`, then run
+`node e2e/scripts/ssr-regression.mjs`. This starts a local fixture API and the
+built SSR server; no production requests or database credentials are used.
+Set `CHROMIUM_EXECUTABLE` only when using an existing local Chromium binary.
+`pnpm --dir frontend ssr` starts the built server from `dist-ssr/`.
+
+Coverage includes query strings and trailing slashes, real 404 versus upstream
+429/503, malformed URL encoding, tag filtering, literal `$&` in article text,
+single description tags, legacy language preferences, default dark/English,
+hydration without a loading flash, and failed SPA navigation without old content.
+API collection runs concurrently; only the shared-i18n render is serialized.
+Nginx intercepts SSR 500/502/503/504 and serves the SPA fallback with no-store.
+
 ### Verification
 
 `e2e/playwright.ssr.config.ts` checks, against the deployed origin, that all
@@ -234,8 +249,11 @@ to 192 MiB; observed usage is roughly 37 MiB. Production runs it with
 - Text is rendered in one language per request; there are no `/zh` URLs or
   `hreflang` alternates.
 - No `Article` JSON-LD structured data yet.
-- Concurrent SSR renders are serialized, which is fine for this traffic level
-  but would need a worker pool or per-request i18n instances to scale.
+- React renders are serialized because i18n is shared. API fetches do not hold
+  the render queue. Higher traffic would need per-request i18n or a worker pool.
+- Frontend and SSR images still build separately: deploy matching assets and
+  templates together and verify hashed asset URLs. Do not assume independent
+  builds with different Node/pnpm/build environments yield identical hashes.
 
 ## WebDAV service
 

@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && node scripts/prepare-ssr.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
-    "ssr": "node ssr/server.mjs"
+    "ssr": "node dist-ssr/server.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

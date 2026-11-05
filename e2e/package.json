@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "test": "npx playwright test",
+    "test:ssr-local": "node scripts/ssr-regression.mjs",
     "test:smoke": "npx playwright test --grep @p0",
     "test:regression": "npx playwright test --grep \"@p0|@p1\"",
     "test:ui": "npx playwright test --ui",

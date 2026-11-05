@@ -23,9 +23,10 @@ function GithubIcon({ className }: { className?: string }) {
 export function PortfolioDetail() {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
-  const seededProject = ssrValue('project') as Project | undefined;
+  const candidate = ssrValue('project') as Project | undefined;
+  const seededProject = candidate?.id === Number(id) ? candidate : undefined;
   const [project, setProject] = useState<Project | null>(() => seededProject ?? null);
-  const [loading, setLoading] = useState(() => !seededProject);
+  const [loading, setLoading] = useState(() => !seededProject && !ssrValue('notFound'));
   usePageMeta({
     title: project?.title ?? t('portfolio.title'),
     description: project?.description || undefined,
@@ -34,16 +35,17 @@ export function PortfolioDetail() {
   });
 
   const fetchProject = useCallback(async () => {
-    setLoading(true);
+    if (!seededProject) setLoading(true);
     try {
       const data = await projectsAPI.getById(Number(id));
       setProject(data);
     } catch (error) {
+      setProject(null);
       console.error('Failed to fetch project:', error);
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, seededProject]);
 
   useEffect(() => {
     if (id) {

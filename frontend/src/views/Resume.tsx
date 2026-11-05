@@ -23,7 +23,7 @@ export function Resume() {
   }, []);
 
   const fetchResume = async () => {
-    setLoading(true);
+    if (!seededResume) setLoading(true);
     try {
       const data = await resumeAPI.getAll();
       setResumeItems(data);

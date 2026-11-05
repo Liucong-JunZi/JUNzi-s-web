@@ -26,10 +26,9 @@ async function api(path) {
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
   try {
     const res = await fetch(`${API_BASE}${path}`, { signal: controller.signal });
-    if (!res.ok) return undefined;
+    if (res.status === 404) return undefined;
+    if (!res.ok) throw new Error(`API returned ${res.status}`);
     return await res.json();
-  } catch {
-    return undefined;
   } finally {
     clearTimeout(timer);
   }
@@ -41,7 +40,7 @@ async function api(path) {
 const DEFAULT_LANGUAGE = 'en';
 
 function pickLanguage(req) {
-  const cookie = /(?:^|;\s*)lang=(en|zh)/.exec(req.headers.cookie || '');
+  const cookie = /(?:^|;\s*)lang=(en|zh)(?:;|$)/.exec(req.headers.cookie || '');
   return cookie ? cookie[1] : DEFAULT_LANGUAGE;
 }
 
@@ -51,9 +50,14 @@ const staticPages = {
   '/friends': { title: 'Friends | JUNzi', description: 'Sites I read and people I follow.' },
 };
 
-async function collect(url) {
-  if (url === '/blog' || url.startsWith('/blog?')) {
-    const data = await api('/posts?page=1&limit=10');
+async function collect(requestURL) {
+  const parsed = new URL(requestURL, SITE);
+  const url = parsed.pathname.replace(/\/+$/, '') || '/';
+  if (url === '/blog') {
+    const params = new URLSearchParams({ page: '1', limit: '10' });
+    const tag = parsed.searchParams.get('tag');
+    if (tag) params.set('tag', tag);
+    const data = await api(`/posts?${params}`);
     return { data: data ? { posts: { posts: data.posts ?? [], total: data.total ?? 0 } } : {}, meta: {
       title: 'Blog | JUNzi', description: 'Learning notes and technical write-ups.', canonical: `${SITE}/blog` } };
   }
@@ -116,11 +120,12 @@ function buildDocument(body, meta, lang, payload, notFound) {
   const data = JSON.stringify(payload).replace(/</g, '\\u003c');
   return template
     .replace(/<html lang="[^"]*"( class="[^"]*")?/, `<html lang="${lang}" class="dark"`)
-    .replace(/<title>.*?<\/title>/s, tags)
-    .replace('<div id="root"></div>', `<div id="root">${body}</div>`)
+    .replace(/<meta\s+name="description"[^>]*>/gi, '')
+    .replace(/<title>.*?<\/title>/s, () => tags)
+    .replace('<div id="root"></div>', () => `<div id="root">${body}</div>`)
     .replace(
       '</head>',
-      `  <script type="application/json" id="__SSR_LANG__">${JSON.stringify(lang)}</script>\n` +
+      () => `  <script type="application/json" id="__SSR_LANG__">${JSON.stringify(lang)}</script>\n` +
         `  <script type="application/json" id="__SSR_DATA__">${data}</script>\n  </head>`
     );
 }
@@ -139,18 +144,28 @@ const server = createServer((req, res) => {
     res.writeHead(405).end();
     return;
   }
-  enqueue(async () => {
+  (async () => {
     const lang = pickLanguage(req);
-    const { data, meta, notFound } = await collect(url);
-    const { html } = await render(url, lang, data ?? {});
-    const doc = buildDocument(html, meta, lang, data ?? {}, Boolean(notFound));
+    let collected;
+    try {
+      collected = await collect(url);
+    } catch (err) {
+      const status = err instanceof URIError ? 400 : 503;
+      res.writeHead(status, { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' });
+      res.end(req.method === 'HEAD' ? undefined : 'Page temporarily unavailable');
+      return;
+    }
+    const { data, meta, notFound } = collected;
+    const payload = { ...data, url, notFound: Boolean(notFound) };
+    const { html } = await enqueue(() => render(url, lang, payload));
+    const doc = buildDocument(html, meta, lang, payload, Boolean(notFound));
     res.writeHead(notFound ? 404 : 200, {
       'Content-Type': 'text/html; charset=utf-8',
       'Cache-Control': notFound ? 'no-store' : 'public, max-age=300',
       Vary: 'Cookie, Accept-Language',
     });
     res.end(req.method === 'HEAD' ? undefined : doc);
-  }).catch((err) => {
+  })().catch((err) => {
     console.error('SSR render failed', err);
     res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' }).end('render error');
   });
